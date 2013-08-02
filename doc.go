@@ -1,0 +1,106 @@
+/*
+ * Copyright (c) 2013 Kurt Jung (Gmail: kurt.w.jung)
+ *
+ * Permission to use, copy, modify, and distribute this software for any
+ * purpose with or without fee is hereby granted, provided that the above
+ * copyright notice and this permission notice appear in all copies.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+ * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+ * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+ * ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+ * WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+ * ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+ * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+ */
+
+/*
+Package gofpdf implements a PDF document generator.
+
+This package's code and documentation are closely derived from the FPDF library
+created by Olivier Plathey, and a number of font and image resources are copied
+directly from it. The FPDF website is http://www.fpdf.org/.
+
+Features
+
+• Choice of measurement unit, page format and margins
+
+• Page header and footer management
+
+• Automatic page break
+
+• Automatic line break and text justification
+
+• Image support (JPEG, PNG and GIF)
+
+• Colors
+
+• Links
+
+• TrueType, Type1 and encoding support
+
+• Page compression
+
+gofpdf has no dependencies other than the Go standard library. All tests pass
+on Linux, Mac and Windows platforms. Like FPDF version 1.7, from which gofpdf
+is derived, this package does not yet support UTF-8 source text.
+
+Quick Start
+
+The following Go code generates a simple PDF.
+
+	pdf := fpdf.New("P", "mm", "A4", "../font")
+	pdf.AddPage()
+	pdf.SetFont("Arial", "B", 16)
+	pdf.Cell(40, 10, "Hello, world")
+	pdf.Output(os.Stdout)
+
+See the tutorials in the fpdf_test.go file (shown as examples in this
+documentation) for more advanced PDF examples.
+
+Errors
+
+If an error occurs in an Fpdf method, an internal error field is set. After
+this occurs, Fpdf method calls typically return without performing any
+operations and the error state is retained. This error management scheme
+facilitates PDF generation since individual method calls do not need to be
+examined for failure; it is generally sufficient to wait until after Output()
+is called. For the same reason, if an error occurs in the calling application
+during PDF generation, it may be desirable for the application to transfer the
+error to the Fpdf instance by calling the SetError() method or the SetErrorf()
+method. At any time during the life cycle of the Fpdf instance, the error state
+can be determined with a call to Ok() or Err(). The error itself can be
+retrieved with a call to Error().
+
+Conversion Notes
+
+This package is a relatively straightforward translation from the original FPDF
+library written in PHP (despite the caveat in the introduction to Effective
+Go). The API names have been retained even though the Go idiom would suggest
+otherwise (for example, pdf.GetX() is used rather than simply pdf.X()). The
+similarity of the two libraries makes the original FPDF website a good source
+of information. It includes a forum and FAQ.
+
+However, some internal changes have been made. Page content is built up using
+buffers (of type bytes.Buffer) rather than repeated string concatenation.
+Errors are handled as explained above rather than panicking. Output is
+generated through an interface of type io.WriteCloser. A number of the original
+PHP methods behave differently based on the type of the arguments that are
+passed to them; in these cases additional methods have been exported to provide
+similar functionality. Font definition files are produced in JSON rather than
+PHP.
+
+Tutorials
+
+A side effect of running "go test" in the fpdf directory is the production of
+the tutorial PDFs. These can be found in the gofpdf/pdf directory after the
+tests complete.
+
+Roadmap
+
+• Handle UTF-8 source text
+
+• Improve test coverage as reported by gocov (https://github.com/axw/gocov‎)
+
+*/
+package gofpdf
