@@ -1,9 +1,9 @@
 package main
 
 import (
+	"code.google.com/p/gofpdf"
 	"flag"
 	"fmt"
-	"gofpdf"
 	"os"
 )
 
