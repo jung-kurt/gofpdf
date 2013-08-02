@@ -45,11 +45,19 @@ gofpdf has no dependencies other than the Go standard library. All tests pass
 on Linux, Mac and Windows platforms. Like FPDF version 1.7, from which gofpdf
 is derived, this package does not yet support UTF-8 source text.
 
+Run
+
+	go get code.google.com/p/gofpdf
+
+to install the package on your system. To receive updates, run
+
+	go get -u code.google.com/p/gofpdf
+
 Quick Start
 
 The following Go code generates a simple PDF.
 
-	pdf := fpdf.New("P", "mm", "A4", "../font")
+	pdf := gofpdf.New("P", "mm", "A4", "../font")
 	pdf.AddPage()
 	pdf.SetFont("Arial", "B", 16)
 	pdf.Cell(40, 10, "Hello, world")
@@ -92,9 +100,26 @@ PHP.
 
 Tutorials
 
-A side effect of running "go test" in the fpdf directory is the production of
-the tutorial PDFs. These can be found in the gofpdf/pdf directory after the
-tests complete.
+A side effect of running "go test" is the production of the tutorial PDFs.
+These can be found in the gofpdf/pdf directory after the tests complete.
+
+Nonstandard Fonts
+
+Nothing special is required to use the standard PDF fonts (courier, helvetica,
+times, zapfdingbats) in your documents other than calling SetFont().
+
+In order to use a different TrueType or Type1 font, you will need to generate a
+font definition file and, if the font will be embeded into PDFs, a compressed
+version of the font file. This is done by calling the MakeFont function or
+using the included makefont command line utility. To create the utility, cd
+into the makefont subdirectory and run "go build". This will produce a
+standalone executable named makefont. Select the appropriate encoding file from
+the font subdirectory and run the command as in the following example.
+
+	./makefont --embed --enc=../font/cp1252.map --dst=../font ../font/calligra.ttf
+
+In your PDF generation code, call AddFont() to load the font and, as with the
+standard fonts, SetFont() to begin using it. See tutorial 7 for an example.
 
 Roadmap
 
