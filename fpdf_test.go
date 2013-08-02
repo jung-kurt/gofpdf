@@ -508,12 +508,8 @@ func ExampleFpdf_tutorial06() {
 func ExampleFpdf_tutorial07() {
 	pdf := New("P", "mm", "A4", FONT_DIR)
 	pdf.AddFont("Calligrapher", "", "calligra.json")
-	// pdf.AddFont("Marcellus-Regular", "", "Marcellus-Regular.json")
-	// pdf.AddFont("URWPalladioL-Roma", "", "p052003l.json")
 	pdf.AddPage()
 	pdf.SetFont("Calligrapher", "", 35)
-	// pdf.SetFont("Marcellus-Regular", "", 35)
-	// pdf.SetFont("URWPalladioL-Roma", "", 35)
 	pdf.Cell(0, 10, "Enjoy new fonts with FPDF!")
 	pdf.Output(docWriter(pdf, 7))
 	// Output:
