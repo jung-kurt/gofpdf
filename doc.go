@@ -43,13 +43,16 @@ Features
 
 gofpdf has no dependencies other than the Go standard library. All tests pass
 on Linux, Mac and Windows platforms. Like FPDF version 1.7, from which gofpdf
-is derived, this package does not yet support UTF-8 source text.
+is derived, this package does not yet support UTF-8 source text. gofpdf is
+licensed under the MIT License.
 
-Run
+Installation
+
+To install the package on your system, run
 
 	go get code.google.com/p/gofpdf
 
-to install the package on your system. To receive updates, run
+Later, to receive updates, run
 
 	go get -u code.google.com/p/gofpdf
 
