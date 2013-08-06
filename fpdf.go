@@ -973,20 +973,24 @@ func (f *Fpdf) CellFormat(w, h float64, txtStr string, borderStr string, ln int,
 		s.printf("%.2f %.2f %.2f %.2f re %s ", f.x*k, (f.h-f.y)*k, w*k, -h*k, op)
 	}
 	if len(borderStr) > 0 && borderStr != "1" {
-		// dbg("border is '%s', no fill", borderStr)
+		// fmt.Printf("border is '%s', no fill\n", borderStr)
 		x := f.x
 		y := f.y
-		if strings.Index(borderStr, "L") >= 0 {
-			s.printf("%.2f %.2f m %.2f %.2f l S ", x*k, (f.h-y)*k, x*k, (f.h-(y+h))*k)
+		left := x * k
+		top := (f.h - y) * k
+		right := (x + w) * k
+		bottom := (f.h - (y + h)) * k
+		if strings.Contains(borderStr, "L") {
+			s.printf("%.2f %.2f m %.2f %.2f l S ", left, top, left, bottom)
 		}
-		if strings.Index(borderStr, "T") >= 0 {
-			s.printf("%.2f %.2f m %.2f %.2f l S ", x*k, (f.h-y)*k, (x+w)*k, (f.h-y)*k)
+		if strings.Contains(borderStr, "T") {
+			s.printf("%.2f %.2f m %.2f %.2f l S ", left, top, right, top)
 		}
-		if strings.Index(borderStr, "R") >= 0 {
-			s.printf("%.2f %.2f m %.2f %.2f l S ", (x+w)*k, (f.h-y)*k, (x+w)*k, (f.h-(y+h))*k)
+		if strings.Contains(borderStr, "R") {
+			s.printf("%.2f %.2f m %.2f %.2f l S ", right, top, right, bottom)
 		}
-		if strings.Index(borderStr, "B") >= 0 {
-			s.printf("%.2f %.2f m %.2f %.2f l S ", x*k, (f.h-(y+h))*k, (x+w)*k, (f.h-(y+h))*k)
+		if strings.Contains(borderStr, "B") {
+			s.printf("%.2f %.2f m %.2f %.2f l S ", left, bottom, right, bottom)
 		}
 	}
 	if len(txtStr) > 0 {
@@ -1089,7 +1093,7 @@ func (f *Fpdf) MultiCell(w, h float64, txtStr, borderStr, alignStr string, fill 
 		} else {
 			b2 = ""
 			if strings.Contains(borderStr, "L") {
-				b += "L"
+				b2 += "L"
 			}
 			if strings.Contains(borderStr, "R") {
 				b2 += "R"
