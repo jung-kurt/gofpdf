@@ -1270,7 +1270,7 @@ func (f *Fpdf) Write(h float64, txtStr string) {
 }
 
 // Like Write but uses printf-style formatting. See the documentation for
-// pckage fmt for mor details on fmtStr and args.
+// package fmt for more details on fmtStr and args.
 func (f *Fpdf) Writef(h float64, fmtStr string, args ...interface{}) {
 	f.write(h, sprintf(fmtStr, args...), 0, "")
 }
