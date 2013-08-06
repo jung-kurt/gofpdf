@@ -44,7 +44,7 @@ Features
 gofpdf has no dependencies other than the Go standard library. All tests pass
 on Linux, Mac and Windows platforms. Like FPDF version 1.7, from which gofpdf
 is derived, this package does not yet support UTF-8 source text. gofpdf is
-licensed under the MIT License.
+released under the MIT License.
 
 Installation
 
@@ -112,7 +112,7 @@ Nothing special is required to use the standard PDF fonts (courier, helvetica,
 times, zapfdingbats) in your documents other than calling SetFont().
 
 In order to use a different TrueType or Type1 font, you will need to generate a
-font definition file and, if the font will be embeded into PDFs, a compressed
+font definition file and, if the font will be embedded into PDFs, a compressed
 version of the font file. This is done by calling the MakeFont function or
 using the included makefont command line utility. To create the utility, cd
 into the makefont subdirectory and run "go build". This will produce a
