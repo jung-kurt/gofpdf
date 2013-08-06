@@ -1,3 +1,4 @@
 syntax: glob
 makefont/makefont
 pdf/*.pdf
+look

@@ -1179,7 +1179,7 @@ func (f *Fpdf) MultiCell(w, h float64, txtStr, borderStr, alignStr string, fill 
 		f.ws = 0
 		f.out("0 Tw")
 	}
-	if len(borderStr) > 0 && !strings.Contains(borderStr, "B") {
+	if len(borderStr) > 0 && strings.Contains(borderStr, "B") {
 		b += "B"
 	}
 	f.CellFormat(w, h, s[j:i], b, 2, alignStr, fill, 0, "")
