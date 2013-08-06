@@ -22,7 +22,6 @@ import (
 	"io/ioutil"
 	"os"
 	"strings"
-	"testing"
 )
 
 // Absolute path needed for gocov tool; relative OK for test
@@ -598,10 +597,8 @@ func ExampleFpdf_tutorial09() {
 }
 
 // Test the corner cases as reported by the gocov tool
-func TestFpdf(t *testing.T) {
-	var nw nullWriter
-	tmpDirStr := os.TempDir()
-	MakeFont(FONT_DIR+"/calliga.ttf", FONT_DIR+"/cp1252.map", tmpDirStr, nil, true)
+func ExampleFpdf_tutorial10() {
+	MakeFont(FONT_DIR+"/calligra.ttf", FONT_DIR+"/cp1252.map", FONT_DIR, nil, true)
 	pdf := New("", "", "", "")
 	pdf.SetFontLocation(FONT_DIR)
 	pdf.SetTitle("世界", true)
@@ -609,15 +606,11 @@ func TestFpdf(t *testing.T) {
 	pdf.SetSubject("世界", true)
 	pdf.SetCreator("世界", true)
 	pdf.SetKeywords("世界", true)
-	pdf.Output(&nw)
-	if len(pdf.String()) < 1 {
-		t.Fatalf("Trouble with pdf.String()")
-	}
-	err := pdf.Error()
-	if err != nil {
-		t.Fatal(err)
-	}
-	if pdf.Err() {
-		t.Fatal(pdf.Error())
-	}
+	pdf.AddFont("Calligrapher", "", "calligra.json")
+	pdf.AddPage()
+	pdf.SetFont("Calligrapher", "", 16)
+	pdf.Writef(5, "\x95 %s \x95", pdf)
+	pdf.Output(docWriter(pdf, 10))
+	// Output:
+	// Successfully generated pdf/tutorial10.pdf
 }

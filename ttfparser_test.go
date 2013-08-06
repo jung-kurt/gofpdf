@@ -22,7 +22,7 @@ import (
 )
 
 func ExampleTtfParse() {
-	ttf, err := TtfParse(GOFPDF_DIR + "/font/calligra.ttf")
+	ttf, err := TtfParse(FONT_DIR + "/calligra.ttf")
 	if err == nil {
 		fmt.Printf("Postscript name:  %s\n", ttf.PostScriptName)
 		fmt.Printf("unitsPerEm:       %8d\n", ttf.UnitsPerEm)

@@ -1040,8 +1040,14 @@ func (f *Fpdf) CellFormat(w, h float64, txtStr string, borderStr string, ln int,
 // A simpler version of CellFormat with no fill, border, links or special
 // alignment.
 func (f *Fpdf) Cell(w, h float64, txtStr string) {
-	// dbg("Cell. h is %.2f", h)
 	f.CellFormat(w, h, txtStr, "", 0, "L", false, 0, "")
+}
+
+// A simpler printf-style version of CellFormat with no fill, border, links or
+// special alignment. See documentation for the fmt package for details on
+// fmtStr and args.
+func (f *Fpdf) Cellf(w, h float64, fmtStr string, args ...interface{}) {
+	f.CellFormat(w, h, sprintf(fmtStr, args...), "", 0, "L", false, 0, "")
 }
 
 // This method allows printing text with line breaks. They can be automatic (as
@@ -1261,6 +1267,12 @@ func (f *Fpdf) write(h float64, txtStr string, link int, linkStr string) {
 // h indicates the line height in the unit of measure specified in New().
 func (f *Fpdf) Write(h float64, txtStr string) {
 	f.write(h, txtStr, 0, "")
+}
+
+// Like Write but uses printf-style formatting. See the documentation for
+// pckage fmt for mor details on fmtStr and args.
+func (f *Fpdf) Writef(h float64, fmtStr string, args ...interface{}) {
+	f.write(h, sprintf(fmtStr, args...), 0, "")
 }
 
 // Write text that when clicked launches an external URL. See Write() for
