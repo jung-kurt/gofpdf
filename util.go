@@ -123,7 +123,7 @@ func htmlTokenize(htmlStr string) (list []htmlSegmentType) {
 	tagRe, _ := regexp.Compile(`(?U)<.*>`)
 	attrRe, _ := regexp.Compile(`([^=]+)=["']?([^"']+)`)
 	capList := tagRe.FindAllStringIndex(htmlStr, -1)
-	if list != nil {
+	if capList != nil {
 		var seg htmlSegmentType
 		var parts []string
 		pos := 0
