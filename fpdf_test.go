@@ -90,7 +90,7 @@ func ExampleFpdf_tutorial01() {
 	pdf.AddPage()
 	pdf.SetFont("Arial", "B", 16)
 	pdf.Cell(40, 10, "Hello World!")
-	pdf.Output(docWriter(pdf, 1))
+	pdf.OutputAndClose(docWriter(pdf, 1))
 	// Output:
 	// Successfully generated pdf/tutorial01.pdf
 }
@@ -116,7 +116,7 @@ func ExampleFpdf_tutorial02() {
 	for j := 1; j <= 40; j++ {
 		pdf.CellFormat(0, 10, fmt.Sprintf("Printing line number %d", j), "", 1, "", false, 0, "")
 	}
-	pdf.Output(docWriter(pdf, 2))
+	pdf.OutputAndClose(docWriter(pdf, 2))
 	// Output:
 	// Successfully generated pdf/tutorial02.pdf
 }
@@ -186,7 +186,7 @@ func ExampleFpdf_tutorial03() {
 	}
 	printChapter(1, "A RUNAWAY REEF", TEXT_DIR+"/20k_c1.txt")
 	printChapter(2, "THE PROS AND CONS", TEXT_DIR+"/20k_c2.txt")
-	pdf.Output(docWriter(pdf, 3))
+	pdf.OutputAndClose(docWriter(pdf, 3))
 	// Output:
 	// Successfully generated pdf/tutorial03.pdf
 }
@@ -286,7 +286,7 @@ func ExampleFpdf_tutorial04() {
 	})
 	printChapter(1, "A RUNAWAY REEF", TEXT_DIR+"/20k_c1.txt")
 	printChapter(2, "THE PROS AND CONS", TEXT_DIR+"/20k_c2.txt")
-	pdf.Output(docWriter(pdf, 4))
+	pdf.OutputAndClose(docWriter(pdf, 4))
 	// Output:
 	// Successfully generated pdf/tutorial04.pdf
 }
@@ -405,7 +405,7 @@ func ExampleFpdf_tutorial05() {
 	improvedTable()
 	pdf.AddPage()
 	fancyTable()
-	pdf.Output(docWriter(pdf, 5))
+	pdf.OutputAndClose(docWriter(pdf, 5))
 	// Output:
 	// Successfully generated pdf/tutorial05.pdf
 }
@@ -499,7 +499,7 @@ func ExampleFpdf_tutorial06() {
 		`You can also insert links on text, such as ` +
 		`<a href="http://www.fpdf.org">www.fpdf.org</a>, or on an image: click on the logo.`
 	writeHtml(htmlStr)
-	pdf.Output(docWriter(pdf, 6))
+	pdf.OutputAndClose(docWriter(pdf, 6))
 	// Output:
 	// Successfully generated pdf/tutorial06.pdf
 }
@@ -510,7 +510,7 @@ func ExampleFpdf_tutorial07() {
 	pdf.AddPage()
 	pdf.SetFont("Calligrapher", "", 35)
 	pdf.Cell(0, 10, "Enjoy new fonts with FPDF!")
-	pdf.Output(docWriter(pdf, 7))
+	pdf.OutputAndClose(docWriter(pdf, 7))
 	// Output:
 	// Successfully generated pdf/tutorial07.pdf
 }
@@ -529,7 +529,7 @@ func ExampleFpdf_tutorial08() {
 	pdf.Text(50, 110, "logo-rgb.png")
 	pdf.Image(IMG_DIR+"/logo.jpg", 10, 130, 30, 0, false, "", 0, "")
 	pdf.Text(50, 140, "logo.jpg")
-	pdf.Output(docWriter(pdf, 8))
+	pdf.OutputAndClose(docWriter(pdf, 8))
 	// Output:
 	// Successfully generated pdf/tutorial08.pdf
 }
@@ -591,7 +591,7 @@ func ExampleFpdf_tutorial09() {
 		pdf.MultiCell(colWd, 5, loremStr, "", "", false)
 		pdf.Ln(-1)
 	}
-	pdf.Output(docWriter(pdf, 9))
+	pdf.OutputAndClose(docWriter(pdf, 9))
 	// Output:
 	// Successfully generated pdf/tutorial09.pdf
 }
@@ -610,7 +610,87 @@ func ExampleFpdf_tutorial10() {
 	pdf.AddPage()
 	pdf.SetFont("Calligrapher", "", 16)
 	pdf.Writef(5, "\x95 %s \x95", pdf)
-	pdf.Output(docWriter(pdf, 10))
+	pdf.OutputAndClose(docWriter(pdf, 10))
 	// Output:
 	// Successfully generated pdf/tutorial10.pdf
+}
+
+// Geometric figures
+func ExampleFpdf_tutorial11() {
+	const (
+		thin  = 0.2
+		thick = 3.0
+	)
+	pdf := New("", "", "", FONT_DIR)
+	pdf.SetFont("Helvetica", "", 12)
+	pdf.SetFillColor(200, 200, 220)
+	pdf.AddPage()
+
+	y := 15.0
+	pdf.Text(10, y, "Circles")
+	pdf.SetFillColor(200, 200, 220)
+	pdf.SetLineWidth(thin)
+	pdf.Circle(20, y+15, 10, "D")
+	pdf.Circle(45, y+15, 10, "F")
+	pdf.Circle(70, y+15, 10, "FD")
+	pdf.SetLineWidth(thick)
+	pdf.Circle(95, y+15, 10, "FD")
+	pdf.SetLineWidth(thin)
+
+	y += 40.0
+	pdf.Text(10, y, "Ellipses")
+	pdf.SetFillColor(220, 200, 200)
+	pdf.Ellipse(30, y+15, 20, 10, 0, "D")
+	pdf.Ellipse(75, y+15, 20, 10, 0, "F")
+	pdf.Ellipse(120, y+15, 20, 10, 0, "FD")
+	pdf.SetLineWidth(thick)
+	pdf.Ellipse(165, y+15, 20, 10, 0, "FD")
+	pdf.SetLineWidth(thin)
+
+	y += 40.0
+	pdf.Text(10, y, "Curves (quadratic)")
+	pdf.SetFillColor(220, 220, 200)
+	pdf.Curve(10, y+30, 15, y-20, 40, y+30, "D")
+	pdf.Curve(45, y+30, 50, y-20, 75, y+30, "F")
+	pdf.Curve(80, y+30, 85, y-20, 110, y+30, "FD")
+	pdf.SetLineWidth(thick)
+	pdf.Curve(115, y+30, 120, y-20, 145, y+30, "FD")
+	pdf.SetLineCapStyle("round")
+	pdf.Curve(150, y+30, 155, y-20, 180, y+30, "FD")
+	pdf.SetLineWidth(thin)
+	pdf.SetLineCapStyle("butt")
+
+	y += 40.0
+	pdf.Text(10, y, "Curves (cubic)")
+	pdf.SetFillColor(220, 200, 220)
+	pdf.CurveCubic(10, y+30, 15, y-20, 40, y+30, 10, y+30, "D")
+	pdf.CurveCubic(45, y+30, 50, y-20, 75, y+30, 45, y+30, "F")
+	pdf.CurveCubic(80, y+30, 85, y-20, 110, y+30, 80, y+30, "FD")
+	pdf.SetLineWidth(thick)
+	pdf.CurveCubic(115, y+30, 120, y-20, 145, y+30, 115, y+30, "FD")
+	pdf.SetLineCapStyle("round")
+	pdf.CurveCubic(150, y+30, 155, y-20, 180, y+30, 150, y+30, "FD")
+	pdf.SetLineWidth(thin)
+	pdf.SetLineCapStyle("butt")
+
+	y += 40.0
+	pdf.Text(10, y, "Arcs")
+	pdf.SetFillColor(200, 220, 220)
+	pdf.SetLineWidth(thick)
+	pdf.Arc(45, y+35, 20, 10, 0, 0, 180, "FD")
+	pdf.SetLineWidth(thin)
+	pdf.Arc(45, y+35, 25, 15, 0, 90, 270, "D")
+	pdf.SetLineWidth(thick)
+	pdf.Arc(45, y+35, 30, 20, 0, 0, 360, "D")
+	pdf.SetLineCapStyle("round")
+	pdf.Arc(135, y+35, 20, 10, 135, 0, 180, "FD")
+	pdf.SetLineWidth(thin)
+	pdf.Arc(135, y+35, 25, 15, 135, 90, 270, "D")
+	pdf.SetLineWidth(thick)
+	pdf.Arc(135, y+35, 30, 20, 135, 0, 360, "D")
+	pdf.SetLineWidth(thin)
+	pdf.SetLineCapStyle("butt")
+	pdf.OutputAndClose(docWriter(pdf, 11))
+	// Output:
+	// Successfully generated pdf/tutorial11.pdf
 }

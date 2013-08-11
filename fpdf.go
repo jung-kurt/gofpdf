@@ -31,6 +31,7 @@ import (
 	"image/png"
 	"io"
 	"io/ioutil"
+	"math"
 	"path"
 	"strings"
 	"time"
@@ -396,9 +397,9 @@ func (f *Fpdf) open() {
 }
 
 // Terminates the PDF document. It is not necessary to call this method
-// explicitly because Output() does it automatically. If the document contains
-// no page, AddPage() is called to prevent the generation of an invalid
-// document.
+// explicitly because Output() and OutputAndClose() do it automatically. If the
+// document contains no page, AddPage() is called to prevent the generation of
+// an invalid document.
 func (f *Fpdf) Close() {
 	if f.err != nil {
 		return
@@ -461,8 +462,9 @@ func (f *Fpdf) AddPageFormat(orientationStr string, size sizeType) {
 	}
 	// Start new page
 	f.beginpage(orientationStr, size)
-	// 	Set line cap style to square
-	f.out("2 J")
+	// 	Set line cap style to current value
+	// f.out("2 J")
+	f.outf("%d J", f.capStyle)
 	// Set line width
 	f.lineWidth = lw
 	f.outf("%.2f w", lw*f.k)
@@ -615,26 +617,164 @@ func (f *Fpdf) SetLineWidth(width float64) {
 	}
 }
 
-// Draws a line between (x1, y1) and (x2, y2).
+// Defines the line cap style. styleStr should be "butt", "round" or "square".
+// A square style projects from the end of the line. The method can be called
+// before the first page is created and the value is retained from page to
+// page.
+func (f *Fpdf) SetLineCapStyle(styleStr string) {
+	var capStyle int
+	switch styleStr {
+	case "round":
+		capStyle = 1
+	case "square":
+		capStyle = 2
+	default:
+		capStyle = 0
+	}
+	if capStyle != f.capStyle {
+		f.capStyle = capStyle
+		if f.page > 0 {
+			f.outf("%d J", f.capStyle)
+		}
+	}
+}
+
+// Draws a line between points (x1, y1) and (x2, y2).
 func (f *Fpdf) Line(x1, y1, x2, y2 float64) {
 	f.outf("%.2f %.2f m %.2f %.2f l S", x1*f.k, (f.h-y1)*f.k, x2*f.k, (f.h-y2)*f.k)
 }
 
-// Outputs a rectangle. It can be drawn (border only), filled (with no border)
-// or both. x and y specify the upper left corner of the rectangle. style can
-// be "F" for filled, "D" for outlined only, or "DF" or "FD" for outlined and
-// filled.
-func (f *Fpdf) Rect(x, y, w, h float64, style string) {
-	var op string
-	if style == "F" {
-		op = "f"
-	} else if style == "FD" || style == "DF" {
-		op = "B"
-	} else {
-		op = "S"
+func fillDrawOp(styleStr string) (opStr string) {
+	switch strings.ToUpper(styleStr) {
+	case "F":
+		opStr = "f"
+	case "FD", "DF":
+		opStr = "B"
+	default:
+		opStr = "S"
 	}
-	// dbg("(Rect) x %.2f f.k %.2f", x, f.k)
-	f.outf("%.2f %.2f %.2f %.2f re %s", x*f.k, (f.h-y)*f.k, w*f.k, -h*f.k, op)
+	return
+}
+
+// Outputs a rectangle. It can be drawn (border only), filled (with no border)
+// or both. x and y specify the upper left corner of the rectangle. styleStr
+// can be "F" for filled, "D" for outlined only, or "DF" or "FD" for outlined
+// and filled. An empty string will be replaced with "D".
+func (f *Fpdf) Rect(x, y, w, h float64, styleStr string) {
+	f.outf("%.2f %.2f %.2f %.2f re %s", x*f.k, (f.h-y)*f.k, w*f.k, -h*f.k, fillDrawOp(styleStr))
+}
+
+// Draw a circle centered on point (x, y) with radius r. styleStr can be "F"
+// for filled, "D" for outlined only, or "DF" or "FD" for outlined and filled.
+// An empty string will be replaced with "D".
+func (f *Fpdf) Circle(x, y, r float64, styleStr string) {
+	f.Ellipse(x, y, r, r, 0, styleStr)
+}
+
+// Draw an ellipse centered at point (x, y). rx and ry specify its horizontal
+// and vertical radii. degRotate specifies the counter-clockwise angle in
+// degrees that the ellipse will be rotated. styleStr can be "F" for filled,
+// "D" for outlined only, or "DF" or "FD" for outlined and filled. An empty
+// string will be replaced with "D".
+func (f *Fpdf) Ellipse(x, y, rx, ry, degRotate float64, styleStr string) {
+	f.Arc(x, y, rx, ry, degRotate, 0, 360, styleStr)
+}
+
+// Outputs current point
+func (f *Fpdf) point(x, y float64) {
+	f.outf("%.2f %.2f m", x*f.k, (f.h-y)*f.k)
+}
+
+// Outputs quadratic curve from current point
+func (f *Fpdf) curve(cx0, cy0, x1, y1, cx1, cy1 float64) {
+	f.outf("%.2f %.2f %.2f %.2f %.2f %.2f c", cx0*f.k, (f.h-cy0)*f.k, x1*f.k,
+		(f.h-y1)*f.k, cx1*f.k, (f.h-cy1)*f.k)
+}
+
+// Draws a single-segment quadratic Bézier curve. The curve starts at the
+// point (x0, y0) and ends at the point (x1, y1). The control point (cx, cy)
+// specifies the curvature. At the start point, the curve is tangent to the
+// straight line between the start point and the control point. At the end
+// point, the curve is tangent to the straight line between the end point and
+// the control point. styleStr can be "F" for filled, "D" for outlined only, or
+// "DF" or "FD" for outlined and filled. An empty string will be replaced with
+// "D".
+func (f *Fpdf) Curve(x0, y0, cx, cy, x1, y1 float64, styleStr string) {
+	f.point(x0, y0)
+	f.outf("%.2f %.2f %.2f %.2f v %s", cx*f.k, (f.h-cy)*f.k, x1*f.k, (f.h-y1)*f.k,
+		fillDrawOp(styleStr))
+}
+
+// Draws a single-segment cubic Bézier curve. The curve starts at the point
+// (x0, y0) and ends at the point (x1, y1). The control points (cx0, cy0) and
+// (cx1, cy1) specify the curvature. At the start point, the curve is tangent
+// to the straight line between the start point and the control point (cx0,
+// cy0). At the end point, the curve is tangent to the straight line between
+// the end point and the control point (cx1, cy1). styleStr can be "F" for
+// filled, "D" for outlined only, or "DF" or "FD" for outlined and filled. An
+// empty string will be replaced with "D".
+func (f *Fpdf) CurveCubic(x0, y0, cx0, cy0, cx1, cy1, x1, y1 float64, styleStr string) {
+	f.point(x0, y0)
+	f.outf("%.2f %.2f %.2f %.2f %.2f %.2f c %s", cx0*f.k, (f.h-cy0)*f.k,
+		x1*f.k, (f.h-y1)*f.k, cx1*f.k, (f.h-cy1)*f.k, fillDrawOp(styleStr))
+}
+
+// Draw an elliptical arc centered at point (x, y). rx and ry specify its
+// horizontal and vertical radii. degRotate specifies the angle that the arc
+// will be rotated. degStart and degEnd specify the starting and ending angle
+// of the arc. All angles are specified in degrees and measured
+// counter-clockwise from the 3 o'clock position. styleStr can be "F" for
+// filled, "D" for outlined only, or "DF" or "FD" for outlined and filled. An
+// empty string will be replaced with "D".
+func (f *Fpdf) Arc(x, y, rx, ry, degRotate, degStart, degEnd float64, styleStr string) {
+	x *= f.k
+	y = (f.h - y) * f.k
+	rx *= f.k
+	ry *= f.k
+	segments := int(degEnd-degStart) / 60
+	if segments < 2 {
+		segments = 2
+	}
+	angleStart := degStart * math.Pi / 180
+	angleEnd := degEnd * math.Pi / 180
+	angleTotal := angleEnd - angleStart
+	dt := angleTotal / float64(segments)
+	dtm := dt / 3
+	if degRotate != 0 {
+		a := -degRotate * math.Pi / 180
+		f.outf("q %.2f %.2f %.2f %.2f %.2f %.2f cm", math.Cos(a), -1*math.Sin(a),
+			math.Sin(a), math.Cos(a), x, y)
+		x = 0
+		y = 0
+	}
+	t := angleStart
+	a0 := x + rx*math.Cos(t)
+	b0 := y + ry*math.Sin(t)
+	c0 := -rx * math.Sin(t)
+	d0 := ry * math.Cos(t)
+	f.point(a0/f.k, f.h-(b0/f.k))
+	for j := 1; j <= segments; j++ {
+		// Draw this bit of the total curve
+		t = (float64(j) * dt) + angleStart
+		a1 := x + rx*math.Cos(t)
+		b1 := y + ry*math.Sin(t)
+		c1 := -rx * math.Sin(t)
+		d1 := ry * math.Cos(t)
+		f.curve((a0+(c0*dtm))/f.k,
+			f.h-((b0+(d0*dtm))/f.k),
+			(a1-(c1*dtm))/f.k,
+			f.h-((b1-(d1*dtm))/f.k),
+			a1/f.k,
+			f.h-(b1/f.k))
+		a0 = a1
+		b0 = b1
+		c0 = c1
+		d0 = d1
+	}
+	f.out(fillDrawOp(styleStr))
+	if degRotate != 0 {
+		f.out("Q")
+	}
 }
 
 // Imports a TrueType, OpenType or Type1 font and makes it available. It is
@@ -1442,9 +1582,18 @@ func (f *Fpdf) SetXY(x, y float64) {
 }
 
 // Send the PDF document to the writer specified by w. This method will close
-// w, even if an error is detected and no document is produced.
-func (f *Fpdf) Output(w io.WriteCloser) error {
-	defer w.Close()
+// both f and w, even if an error is detected and no document is produced.
+func (f *Fpdf) OutputAndClose(w io.WriteCloser) error {
+	f.Output(w)
+	w.Close()
+	return f.err
+}
+
+// Send the PDF document to the writer specified by w. No output will take
+// place if an error has occured in the document generation process. w remains
+// open after this function returns. After returning, f is in a closed state
+// and its methods should not be called.
+func (f *Fpdf) Output(w io.Writer) error {
 	if f.err != nil {
 		return f.err
 	}

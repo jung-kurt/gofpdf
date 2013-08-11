@@ -51,7 +51,7 @@ func TestLoadMap(t *testing.T) {
 		"168: 0x0E08 chochanthai",
 		"169: 0x0E09 chochingthai",
 	}
-	list, err := loadMap(GOFPDF_DIR + "/font/iso-8859-11.map")
+	list, err := loadMap(FONT_DIR + "/iso-8859-11.map")
 	if err == nil {
 		pos := 0
 		for j := 164; j < 170; j++ {

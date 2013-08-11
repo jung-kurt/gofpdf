@@ -19,7 +19,8 @@ Package gofpdf implements a PDF document generator.
 
 This package's code and documentation are closely derived from the FPDF library
 created by Olivier Plathey, and a number of font and image resources are copied
-directly from it. The FPDF website is http://www.fpdf.org/.
+directly from it. Drawing support is adapted from the FPDF geometric figures
+script by David Hernández Sanz. The FPDF website is http://www.fpdf.org/.
 
 Features
 
@@ -40,6 +41,8 @@ Features
 • TrueType, Type1 and encoding support
 
 • Page compression
+
+• Drawing support (lines, Bézier curves, arcs, ellipses)
 
 gofpdf has no dependencies other than the Go standard library. All tests pass
 on Linux, Mac and Windows platforms. Like FPDF version 1.7, from which gofpdf

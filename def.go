@@ -20,7 +20,9 @@ import (
 	"bytes"
 )
 
-const FPDF_VERSION = "1.7"
+const (
+	FPDF_VERSION = "1.7"
+)
 
 type sizeType struct {
 	wd, ht float64
@@ -118,6 +120,8 @@ type Fpdf struct {
 	aliasNbPagesStr  string                   // alias for total number of pages
 	pdfVersion       string                   // PDF version number
 	fontDirStr       string                   // location of font definition files
+	capStyle         int                      // line cap style: butt 0, round 1, square 2
+	joinStyle        int                      // line segment join style: miter 0, round 1, bevel 2
 	err              error                    // Set if error occurs during life cycle of instance
 }
 
