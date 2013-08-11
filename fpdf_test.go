@@ -85,6 +85,7 @@ func docWriter(pdf *Fpdf, idx int) *pdfWriter {
 	return pw
 }
 
+// Hello, world
 func ExampleFpdf_tutorial01() {
 	pdf := New("P", "mm", "A4", FONT_DIR)
 	pdf.AddPage()
@@ -95,6 +96,7 @@ func ExampleFpdf_tutorial01() {
 	// Successfully generated pdf/tutorial01.pdf
 }
 
+// Header, footer and page-breaking
 func ExampleFpdf_tutorial02() {
 	pdf := New("P", "mm", "A4", FONT_DIR)
 	pdf.SetHeaderFunc(func() {
@@ -121,6 +123,7 @@ func ExampleFpdf_tutorial02() {
 	// Successfully generated pdf/tutorial02.pdf
 }
 
+// Word-wrapping, line justification and page-breaking
 func ExampleFpdf_tutorial03() {
 	pdf := New("P", "mm", "A4", FONT_DIR)
 	titleStr := "20000 Leagues Under the Seas"
@@ -191,6 +194,7 @@ func ExampleFpdf_tutorial03() {
 	// Successfully generated pdf/tutorial03.pdf
 }
 
+// Multiple column layout
 func ExampleFpdf_tutorial04() {
 	var y0 float64
 	var crrntCol int
@@ -291,6 +295,7 @@ func ExampleFpdf_tutorial04() {
 	// Successfully generated pdf/tutorial04.pdf
 }
 
+// Various table styles
 func ExampleFpdf_tutorial05() {
 	pdf := New("P", "mm", "A4", FONT_DIR)
 	type countryType struct {
@@ -410,6 +415,7 @@ func ExampleFpdf_tutorial05() {
 	// Successfully generated pdf/tutorial05.pdf
 }
 
+// Internal and external links
 func ExampleFpdf_tutorial06() {
 	var boldLvl, italicLvl, underscoreLvl int
 	var hrefStr string
@@ -504,6 +510,7 @@ func ExampleFpdf_tutorial06() {
 	// Successfully generated pdf/tutorial06.pdf
 }
 
+// Non-standard font
 func ExampleFpdf_tutorial07() {
 	pdf := New("P", "mm", "A4", FONT_DIR)
 	pdf.AddFont("Calligrapher", "", "calligra.json")
@@ -515,6 +522,7 @@ func ExampleFpdf_tutorial07() {
 	// Successfully generated pdf/tutorial07.pdf
 }
 
+// Various image types
 func ExampleFpdf_tutorial08() {
 	pdf := New("P", "mm", "A4", FONT_DIR)
 	pdf.AddPage()
@@ -534,6 +542,7 @@ func ExampleFpdf_tutorial08() {
 	// Successfully generated pdf/tutorial08.pdf
 }
 
+// Landscape mode with logos
 func ExampleFpdf_tutorial09() {
 	var y0 float64
 	var crrntCol int
@@ -690,6 +699,7 @@ func ExampleFpdf_tutorial11() {
 	pdf.Arc(135, y+35, 30, 20, 135, 0, 360, "D")
 	pdf.SetLineWidth(thin)
 	pdf.SetLineCapStyle("butt")
+
 	pdf.OutputAndClose(docWriter(pdf, 11))
 	// Output:
 	// Successfully generated pdf/tutorial11.pdf

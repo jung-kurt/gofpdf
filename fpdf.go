@@ -639,7 +639,8 @@ func (f *Fpdf) SetLineCapStyle(styleStr string) {
 	}
 }
 
-// Draws a line between points (x1, y1) and (x2, y2).
+// Draws a line between points (x1, y1) and (x2, y2) using the current draw
+// color, line width and cap style.
 func (f *Fpdf) Line(x1, y1, x2, y2 float64) {
 	f.outf("%.2f %.2f m %.2f %.2f l S", x1*f.k, (f.h-y1)*f.k, x2*f.k, (f.h-y2)*f.k)
 }
@@ -656,26 +657,39 @@ func fillDrawOp(styleStr string) (opStr string) {
 	return
 }
 
-// Outputs a rectangle. It can be drawn (border only), filled (with no border)
-// or both. x and y specify the upper left corner of the rectangle. styleStr
-// can be "F" for filled, "D" for outlined only, or "DF" or "FD" for outlined
-// and filled. An empty string will be replaced with "D".
+// Outputs a rectangle of width w and height h with the upper left corner
+// positioned at point (x, y).
+//
+// It can be drawn (border only), filled (with no border) or both. styleStr can
+// be "F" for filled, "D" for outlined only, or "DF" or "FD" for outlined and
+// filled. An empty string will be replaced with "D". Drawing uses the current
+// draw color and line width. Filling uses the current fill color.
 func (f *Fpdf) Rect(x, y, w, h float64, styleStr string) {
 	f.outf("%.2f %.2f %.2f %.2f re %s", x*f.k, (f.h-y)*f.k, w*f.k, -h*f.k, fillDrawOp(styleStr))
 }
 
-// Draw a circle centered on point (x, y) with radius r. styleStr can be "F"
-// for filled, "D" for outlined only, or "DF" or "FD" for outlined and filled.
-// An empty string will be replaced with "D".
+// Draw a circle centered on point (x, y) with radius r.
+//
+// styleStr can be "F" for filled, "D" for outlined only, or "DF" or "FD" for
+// outlined and filled. An empty string will be replaced with "D". Drawing uses
+// the current draw color and line width. Filling uses the current fill color.
+//
+// See tutorial 11 for an example of this function.
 func (f *Fpdf) Circle(x, y, r float64, styleStr string) {
 	f.Ellipse(x, y, r, r, 0, styleStr)
 }
 
 // Draw an ellipse centered at point (x, y). rx and ry specify its horizontal
-// and vertical radii. degRotate specifies the counter-clockwise angle in
-// degrees that the ellipse will be rotated. styleStr can be "F" for filled,
-// "D" for outlined only, or "DF" or "FD" for outlined and filled. An empty
-// string will be replaced with "D".
+// and vertical radii.
+//
+// degRotate specifies the counter-clockwise angle in degrees that the ellipse
+// will be rotated.
+//
+// styleStr can be "F" for filled, "D" for outlined only, or "DF" or "FD" for
+// outlined and filled. An empty string will be replaced with "D". Drawing uses
+// the current draw color and line width. Filling uses the current fill color.
+//
+// See tutorial 11 for an example of this function.
 func (f *Fpdf) Ellipse(x, y, rx, ry, degRotate float64, styleStr string) {
 	f.Arc(x, y, rx, ry, degRotate, 0, 360, styleStr)
 }
@@ -696,9 +710,14 @@ func (f *Fpdf) curve(cx0, cy0, x1, y1, cx1, cy1 float64) {
 // specifies the curvature. At the start point, the curve is tangent to the
 // straight line between the start point and the control point. At the end
 // point, the curve is tangent to the straight line between the end point and
-// the control point. styleStr can be "F" for filled, "D" for outlined only, or
-// "DF" or "FD" for outlined and filled. An empty string will be replaced with
-// "D".
+// the control point.
+//
+// styleStr can be "F" for filled, "D" for outlined only, or "DF" or "FD" for
+// outlined and filled. An empty string will be replaced with "D". Drawing uses
+// the current draw color, line width, and cap style. Filling uses the current
+// fill color.
+//
+// See tutorial 11 for an example of this function.
 func (f *Fpdf) Curve(x0, y0, cx, cy, x1, y1 float64, styleStr string) {
 	f.point(x0, y0)
 	f.outf("%.2f %.2f %.2f %.2f v %s", cx*f.k, (f.h-cy)*f.k, x1*f.k, (f.h-y1)*f.k,
@@ -710,9 +729,14 @@ func (f *Fpdf) Curve(x0, y0, cx, cy, x1, y1 float64, styleStr string) {
 // (cx1, cy1) specify the curvature. At the start point, the curve is tangent
 // to the straight line between the start point and the control point (cx0,
 // cy0). At the end point, the curve is tangent to the straight line between
-// the end point and the control point (cx1, cy1). styleStr can be "F" for
-// filled, "D" for outlined only, or "DF" or "FD" for outlined and filled. An
-// empty string will be replaced with "D".
+// the end point and the control point (cx1, cy1).
+//
+// styleStr can be "F" for filled, "D" for outlined only, or "DF" or "FD" for
+// outlined and filled. An empty string will be replaced with "D". Drawing uses
+// the current draw color, line width, and cap style. Filling uses the current
+// fill color.
+//
+// See tutorial 11 for an example of this function.
 func (f *Fpdf) CurveCubic(x0, y0, cx0, cy0, cx1, cy1, x1, y1 float64, styleStr string) {
 	f.point(x0, y0)
 	f.outf("%.2f %.2f %.2f %.2f %.2f %.2f c %s", cx0*f.k, (f.h-cy0)*f.k,
@@ -720,12 +744,19 @@ func (f *Fpdf) CurveCubic(x0, y0, cx0, cy0, cx1, cy1, x1, y1 float64, styleStr s
 }
 
 // Draw an elliptical arc centered at point (x, y). rx and ry specify its
-// horizontal and vertical radii. degRotate specifies the angle that the arc
-// will be rotated. degStart and degEnd specify the starting and ending angle
-// of the arc. All angles are specified in degrees and measured
-// counter-clockwise from the 3 o'clock position. styleStr can be "F" for
-// filled, "D" for outlined only, or "DF" or "FD" for outlined and filled. An
-// empty string will be replaced with "D".
+// horizontal and vertical radii.
+//
+// degRotate specifies the angle that the arc will be rotated. degStart and
+// degEnd specify the starting and ending angle of the arc. All angles are
+// specified in degrees and measured counter-clockwise from the 3 o'clock
+// position.
+//
+// styleStr can be "F" for filled, "D" for outlined only, or "DF" or "FD" for
+// outlined and filled. An empty string will be replaced with "D". Drawing uses
+// the current draw color, line width, and cap style. Filling uses the current
+// fill color.
+//
+// See tutorial 11 for an example of this function.
 func (f *Fpdf) Arc(x, y, rx, ry, degRotate, degStart, degEnd float64, styleStr string) {
 	x *= f.k
 	y = (f.h - y) * f.k
@@ -797,6 +828,8 @@ func (f *Fpdf) Arc(x, y, rx, ry, degRotate, degStart, degEnd float64, styleStr s
 // fileStr specifies the base name with ".json" extension of the font
 // definition file to be added. The file will be loaded from the font directory
 // specified in the call to New() or SetFontLocation().
+//
+// See tutorial 7 for an example of this function.
 func (f *Fpdf) AddFont(familyStr, styleStr, fileStr string) {
 	if f.err != nil {
 		return
@@ -1029,7 +1062,8 @@ func (f *Fpdf) Text(x, y float64, txtStr string) {
 // mode selected by SetAutoPageBreak. The function provided should not be
 // called by the application.
 //
-// See tutorial 4 for an example of this function.
+// See tutorial 4 for an example of how this function can be used to manage
+// multiple columns.
 func (f *Fpdf) SetAcceptPageBreakFunc(fnc func() bool) {
 	f.acceptPageBreak = fnc
 }

@@ -98,11 +98,11 @@ of information. It includes a forum and FAQ.
 However, some internal changes have been made. Page content is built up using
 buffers (of type bytes.Buffer) rather than repeated string concatenation.
 Errors are handled as explained above rather than panicking. Output is
-generated through an interface of type io.WriteCloser. A number of the original
-PHP methods behave differently based on the type of the arguments that are
-passed to them; in these cases additional methods have been exported to provide
-similar functionality. Font definition files are produced in JSON rather than
-PHP.
+generated through an interface of type io.Writer or io.WriteCloser. A number of
+the original PHP methods behave differently based on the type of the arguments
+that are passed to them; in these cases additional methods have been exported
+to provide similar functionality. Font definition files are produced in JSON
+rather than PHP.
 
 Tutorials
 
