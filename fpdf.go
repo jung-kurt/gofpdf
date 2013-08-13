@@ -812,14 +812,20 @@ func (f *Fpdf) Arc(x, y, rx, ry, degRotate, degStart, degEnd float64, styleStr s
 }
 
 // Set the alpha blending channel. The blending effect applies to text,
-// drawings and images. alpha must be a value between 0.0 (fully transparent)
-// to 1.0 (fully opaque). Values outside of this range result in an error.
+// drawings and images.
+//
+// alpha must be a value between 0.0 (fully transparent) to 1.0 (fully opaque).
+// Values outside of this range result in an error.
+//
 // blendModeStr must be one of "Normal", "Multiply", "Screen", "Overlay",
 // "Darken", "Lighten", "ColorDodge", "ColorBurn","HardLight", "SoftLight",
 // "Difference", "Exclusion", "Hue", "Saturation", "Color", or "Luminosity". An
-// empty string is replaced with "Normal". To reset normal rendering after
-// applying a blending mode, call this method with alpha set to 1.0 and
-// blendModeStr set to "Normal".
+// empty string is replaced with "Normal".
+//
+// To reset normal rendering after applying a blending mode, call this method
+// with alpha set to 1.0 and blendModeStr set to "Normal".
+//
+// See tutorial 12 for an example of this function.
 func (f *Fpdf) SetAlpha(alpha float64, blendModeStr string) {
 	if f.err != nil {
 		return

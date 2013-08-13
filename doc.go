@@ -37,7 +37,7 @@ Features
 
 • Image support (JPEG, PNG and GIF)
 
-• Colors
+• Colors and alpha channel transparency
 
 • Links
 
@@ -129,6 +129,8 @@ the font subdirectory and run the command as in the following example.
 
 In your PDF generation code, call AddFont() to load the font and, as with the
 standard fonts, SetFont() to begin using it. See tutorial 7 for an example.
+Good sources of free, open-source fonts include http://www.google.com/fonts/
+and http://dejavu-fonts.org/.
 
 Roadmap
 
