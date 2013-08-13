@@ -704,3 +704,20 @@ func ExampleFpdf_tutorial11() {
 	// Output:
 	// Successfully generated pdf/tutorial11.pdf
 }
+
+// Transparency
+func ExampleFpdf_tutorial12() {
+	pdf := New("", "", "", FONT_DIR)
+	pdf.SetFont("Helvetica", "", 48)
+	pdf.SetLineWidth(4)
+	pdf.SetFillColor(180, 180, 180)
+	pdf.AddPage()
+	pdf.SetXY(55, 60)
+	pdf.CellFormat(100, 40, "Go", "1", 0, "C", true, 0, "")
+	pdf.SetAlpha(0.5, "Normal")
+	pdf.Image(IMG_DIR+"/golang-gopher.png", 30, 10, 150, 0, false, "", 0, "")
+	pdf.SetAlpha(1.0, "Normal")
+	pdf.OutputAndClose(docWriter(pdf, 12))
+	// Output:
+	// Successfully generated pdf/tutorial12.pdf
+}

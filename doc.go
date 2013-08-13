@@ -20,7 +20,10 @@ Package gofpdf implements a PDF document generator.
 This package's code and documentation are closely derived from the FPDF library
 created by Olivier Plathey, and a number of font and image resources are copied
 directly from it. Drawing support is adapted from the FPDF geometric figures
-script by David Hernández Sanz. The FPDF website is http://www.fpdf.org/.
+script by David Hernández Sanz. Transparency support is adapted from the FPDF
+transparency script by Martin Hall-May
+
+The FPDF website is http://www.fpdf.org/.
 
 Features
 

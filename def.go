@@ -24,6 +24,11 @@ const (
 	FPDF_VERSION = "1.7"
 )
 
+type blendModeType struct {
+	strokeStr, fillStr, modeStr string
+	objNum                      int
+}
+
 type sizeType struct {
 	wd, ht float64
 }
@@ -122,6 +127,8 @@ type Fpdf struct {
 	fontDirStr       string                   // location of font definition files
 	capStyle         int                      // line cap style: butt 0, round 1, square 2
 	joinStyle        int                      // line segment join style: miter 0, round 1, bevel 2
+	blendList        []blendModeType          // slice[idx] of alpha transparency modes, 1-based
+	blendMap         map[string]int           // map into blendList
 	err              error                    // Set if error occurs during life cycle of instance
 }
 

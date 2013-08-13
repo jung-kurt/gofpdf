@@ -175,6 +175,9 @@ func New(orientationStr, unitStr, sizeStr, fontDirStr string) (f *Fpdf) {
 	}
 	// Enable compression
 	f.SetCompression(true)
+	f.blendList = make([]blendModeType, 0, 8)
+	f.blendList = append(f.blendList, blendModeType{}) //blendMode[0] is unused (1-based)
+	f.blendMap = make(map[string]int)
 	// Set default PDF version number
 	f.pdfVersion = "1.3"
 	return
@@ -806,6 +809,46 @@ func (f *Fpdf) Arc(x, y, rx, ry, degRotate, degStart, degEnd float64, styleStr s
 	if degRotate != 0 {
 		f.out("Q")
 	}
+}
+
+// Set the alpha blending channel. The blending effect applies to text,
+// drawings and images. alpha must be a value between 0.0 (fully transparent)
+// to 1.0 (fully opaque). Values outside of this range result in an error.
+// blendModeStr must be one of "Normal", "Multiply", "Screen", "Overlay",
+// "Darken", "Lighten", "ColorDodge", "ColorBurn","HardLight", "SoftLight",
+// "Difference", "Exclusion", "Hue", "Saturation", "Color", or "Luminosity". An
+// empty string is replaced with "Normal". To reset normal rendering after
+// applying a blending mode, call this method with alpha set to 1.0 and
+// blendModeStr set to "Normal".
+func (f *Fpdf) SetAlpha(alpha float64, blendModeStr string) {
+	if f.err != nil {
+		return
+	}
+	var bl blendModeType
+	switch blendModeStr {
+	case "Normal", "Multiply", "Screen", "Overlay",
+		"Darken", "Lighten", "ColorDodge", "ColorBurn", "HardLight", "SoftLight",
+		"Difference", "Exclusion", "Hue", "Saturation", "Color", "Luminosity":
+		bl.modeStr = blendModeStr
+	case "":
+		bl.modeStr = "Normal"
+	default:
+		f.err = fmt.Errorf("Unrecognized blend mode \"%s\"", blendModeStr)
+		return
+	}
+	if alpha < 0.0 || alpha > 1.0 {
+		f.err = fmt.Errorf("Alpha value (0.0 - 1.0) is out of range: %.3f", alpha)
+		return
+	}
+	alphaStr := sprintf("%.3f", alpha)
+	keyStr := sprintf("%s %s", alphaStr, blendModeStr)
+	pos, ok := f.blendMap[keyStr]
+	if !ok {
+		pos = len(f.blendList) // at least 1
+		f.blendList = append(f.blendList, blendModeType{alphaStr, alphaStr, blendModeStr, 0})
+		f.blendMap[keyStr] = pos
+	}
+	f.outf("/GS%d gs", pos)
 }
 
 // Imports a TrueType, OpenType or Type1 font and makes it available. It is
@@ -1491,9 +1534,16 @@ func (f *Fpdf) Ln(h float64) {
 //
 // If x is negative, the current abscissa is used.
 //
+// If flow is true, the current y value is advanced after placing the image and
+// a page break may be made if necessary.
+//
 // tp specifies the image format. Possible values are (case insensitive):
 // "JPG", "JPEG", "PNG" and "GIF". If not specified, the type is inferred from
 // the file extension.
+//
+// If link refers to an internal page anchor (that is, it is non-zero; see
+// AddLink()), the image will be a clickable internal link. Otherwise, if
+// linkStr specifies a URL, the image will be a clickable external link.
 func (f *Fpdf) Image(fileStr string, x, y, w, h float64, flow bool, tp string, link int, linkStr string) {
 	if f.err != nil {
 		return
@@ -2381,12 +2431,31 @@ func (f *Fpdf) putresourcedict() {
 	f.out("/XObject <<")
 	f.putxobjectdict()
 	f.out(">>")
+	f.out("/ExtGState <<")
+	count := len(f.blendList)
+	for j := 1; j < count; j++ {
+		f.outf("/GS%d %d 0 R", j, f.blendList[j].objNum)
+	}
+	f.out(">>")
+}
+
+func (f *Fpdf) putBlendModes() {
+	count := len(f.blendList)
+	for j := 1; j < count; j++ {
+		bl := f.blendList[j]
+		f.newobj()
+		f.blendList[j].objNum = f.n
+		f.outf("<</Type /ExtGState /ca %s /CA %s /BM /%s>>",
+			bl.fillStr, bl.strokeStr, bl.modeStr)
+		f.out("endobj")
+	}
 }
 
 func (f *Fpdf) putresources() {
 	if f.err != nil {
 		return
 	}
+	f.putBlendModes()
 	f.putfonts()
 	if f.err != nil {
 		return
@@ -2446,6 +2515,9 @@ func (f *Fpdf) putcatalog() {
 }
 
 func (f *Fpdf) putheader() {
+	if len(f.blendMap) > 0 && f.pdfVersion < "1.4" {
+		f.pdfVersion = "1.4"
+	}
 	f.outf("%%PDF-%s", f.pdfVersion)
 }
 
