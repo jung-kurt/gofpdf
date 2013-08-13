@@ -176,8 +176,10 @@ func New(orientationStr, unitStr, sizeStr, fontDirStr string) (f *Fpdf) {
 	// Enable compression
 	f.SetCompression(true)
 	f.blendList = make([]blendModeType, 0, 8)
-	f.blendList = append(f.blendList, blendModeType{}) //blendMode[0] is unused (1-based)
+	f.blendList = append(f.blendList, blendModeType{}) // blendList[0] is unused (1-based)
 	f.blendMap = make(map[string]int)
+	f.gradientList = make([]gradientType, 0, 8)
+	f.gradientList = append(f.gradientList, gradientType{}) // gradientList[0] is unused
 	// Set default PDF version number
 	f.pdfVersion = "1.3"
 	return
@@ -553,10 +555,24 @@ type clrType struct {
 	r, g, b float64
 }
 
+func colorComp(v int) float64 {
+	if v < 0 {
+		v = 0
+	} else if v > 255 {
+		v = 255
+	}
+	return float64(v) / 255.0
+}
+
+func colorValueString(r, g, b int) string {
+	clr := colorValue(r, g, b)
+	return sprintf("%.3f %.3f %.3f", clr.r, clr.g, clr.b)
+}
+
 func colorValue(r, g, b int) (clr clrType) {
-	clr.r = float64(r) / 255.0
-	clr.g = float64(g) / 255.0
-	clr.b = float64(b) / 255.0
+	clr.r = colorComp(r)
+	clr.g = colorComp(g)
+	clr.b = colorComp(b)
 	return
 }
 
@@ -855,6 +871,73 @@ func (f *Fpdf) SetAlpha(alpha float64, blendModeStr string) {
 		f.blendMap[keyStr] = pos
 	}
 	f.outf("/GS%d gs", pos)
+}
+
+func (f *Fpdf) clipStart(x, y, w, h float64) {
+	// Save current graphic state and set clipping area
+	f.outf("q %.2f %.2f %.2f %.2f re W n", x*f.k, (f.h-y)*f.k, w*f.k, -h*f.k)
+	// Set up transformation matrix for gradient
+	f.outf("%.3f 0 0 %.3f %.3f %.3f cm", w*f.k, h*f.k, x*f.k, (f.h-(y+h))*f.k)
+}
+
+func (f *Fpdf) clipEnd() {
+	// Restore previous graphic state
+	f.out("Q")
+}
+
+func (f *Fpdf) gradient(tp int, r1, g1, b1 int, r2, g2, b2 int, x1, y1 float64, x2, y2 float64, r float64) {
+	pos := len(f.gradientList)
+	f.gradientList = append(f.gradientList, gradientType{tp, colorValueString(r1, g1, b1),
+		colorValueString(r2, g2, b2), x1, y1, x2, y2, r, 0})
+	f.outf("/Sh%d sh", pos)
+}
+
+// Draws a rectangular area with a blending of one color to another. The
+// rectangle is of width w and height h. Its upper left corner is positioned at
+// point (x, y).
+//
+// Each color is specified with three component values, one each for red, green
+// and blue. The values range from 0 to 255. The first color is specified by
+// (r1, g1, b1) and the second color by (r2, g2, b2).
+//
+// The blending is controlled with a gradient vector that uses normalized
+// coordinates in which the lower left corner is position (0, 0) and the upper
+// right corner is (1, 1). The vector's origin and destination are specified by
+// the points (x1, y1) and (x2, y2). In a linear gradient, blending occurs
+// perpendicularly to the vector. The vector does not necessarily need to be
+// anchored on the rectangle edge. Color 1 is used up to the origin of the
+// vector and color 2 is used beyond the vector's end point. Between the points
+// the colors are gradually blended.
+//
+// See tutorial 13 for an example of this function.
+func (f *Fpdf) LinearGradient(x, y, w, h float64, r1, g1, b1 int, r2, g2, b2 int, x1, y1, x2, y2 float64) {
+	f.clipStart(x, y, w, h)
+	f.gradient(2, r1, g1, b1, r2, g2, b2, x1, y1, x2, y2, 0)
+	f.clipEnd()
+}
+
+// Draws a rectangular area with a blending of one color to another. The
+// rectangle is of width w and height h. Its upper left corner is positioned at
+// point (x, y).
+//
+// Each color is specified with three component values, one each for red, green
+// and blue. The values range from 0 to 255. The first color is specified by
+// (r1, g1, b1) and the second color by (r2, g2, b2).
+//
+// The blending is controlled with a point and a circle, both specified with
+// normalized coordinates in which the lower left corner of the rendered
+// rectangle is position (0, 0) and the upper right corner is (1, 1). Color 1
+// begins at the origin point specified by (x1, y1). Color 2 begins at the
+// circle specified by the center point (x2, y2) and radius r. Colors are
+// gradually blended from the origin to the circle. The origin and the circle's
+// center do not necessarily have to coincide, but the origin must be within
+// the circle to avoid rendering problems.
+//
+// See tutorial 13 for an example of this function.
+func (f *Fpdf) RadialGradient(x, y, w, h float64, r1, g1, b1 int, r2, g2, b2 int, x1, y1, x2, y2, r float64) {
+	f.clipStart(x, y, w, h)
+	f.gradient(3, r1, g1, b1, r2, g2, b2, x1, y1, x2, y2, r)
+	f.clipEnd()
 }
 
 // Imports a TrueType, OpenType or Type1 font and makes it available. It is
@@ -2437,12 +2520,23 @@ func (f *Fpdf) putresourcedict() {
 	f.out("/XObject <<")
 	f.putxobjectdict()
 	f.out(">>")
-	f.out("/ExtGState <<")
 	count := len(f.blendList)
-	for j := 1; j < count; j++ {
-		f.outf("/GS%d %d 0 R", j, f.blendList[j].objNum)
+	if count > 0 {
+		f.out("/ExtGState <<")
+		for j := 1; j < count; j++ {
+			f.outf("/GS%d %d 0 R", j, f.blendList[j].objNum)
+		}
+		f.out(">>")
 	}
-	f.out(">>")
+	count = len(f.gradientList)
+	if count > 0 {
+		f.out("/Shading <<")
+		for j := 1; j < count; j++ {
+			f.outf("/Sh%d %d 0 R", j, f.gradientList[j].objNum)
+		}
+		f.out(">>")
+	}
+
 }
 
 func (f *Fpdf) putBlendModes() {
@@ -2457,11 +2551,37 @@ func (f *Fpdf) putBlendModes() {
 	}
 }
 
+func (f *Fpdf) putGradients() {
+	count := len(f.gradientList)
+	for j := 1; j < count; j++ {
+		var f1 int
+		gr := f.gradientList[j]
+		if gr.tp == 2 || gr.tp == 3 {
+			f.newobj()
+			f.outf("<</FunctionType 2 /Domain [0.0 1.0] /C0 [%s] /C1 [%s] /N 1>>", gr.clr1Str, gr.clr2Str)
+			f.out("endobj")
+			f1 = f.n
+		}
+		f.newobj()
+		f.outf("<</ShadingType %d /ColorSpace /DeviceRGB", gr.tp)
+		if gr.tp == 2 {
+			f.outf("/Coords [%.3f %.3f %.3f %.3f] /Function %d 0 R /Extend [true true]>>",
+				gr.x1, gr.y1, gr.x2, gr.y2, f1)
+		} else if gr.tp == 3 {
+			f.outf("/Coords [%.3f %.3f 0 %.3f %.3f %.3f] /Function %d 0 R /Extend [true true]>>",
+				gr.x1, gr.y1, gr.x2, gr.y2, gr.r, f1)
+		}
+		f.out("endobj")
+		f.gradientList[j].objNum = f.n
+	}
+}
+
 func (f *Fpdf) putresources() {
 	if f.err != nil {
 		return
 	}
 	f.putBlendModes()
+	f.putGradients()
 	f.putfonts()
 	if f.err != nil {
 		return

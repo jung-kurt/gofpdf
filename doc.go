@@ -21,7 +21,8 @@ This package's code and documentation are closely derived from the FPDF library
 created by Olivier Plathey, and a number of font and image resources are copied
 directly from it. Drawing support is adapted from the FPDF geometric figures
 script by David Hernández Sanz. Transparency support is adapted from the FPDF
-transparency script by Martin Hall-May
+transparency script by Martin Hall-May. Support for gradients is adapted from
+the FPDF gradients script by Andreas Würmser.
 
 The FPDF website is http://www.fpdf.org/.
 
@@ -37,9 +38,9 @@ Features
 
 • Image support (JPEG, PNG and GIF)
 
-• Colors and alpha channel transparency
+• Colors, gradients and alpha channel transparency
 
-• Links
+• Internal and external links
 
 • TrueType, Type1 and encoding support
 
@@ -50,7 +51,7 @@ Features
 gofpdf has no dependencies other than the Go standard library. All tests pass
 on Linux, Mac and Windows platforms. Like FPDF version 1.7, from which gofpdf
 is derived, this package does not yet support UTF-8 source text. gofpdf is
-released under the MIT License.
+copyrighted by Kurt Jung and is released under the MIT License.
 
 Installation
 

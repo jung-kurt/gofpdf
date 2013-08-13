@@ -29,6 +29,13 @@ type blendModeType struct {
 	objNum                      int
 }
 
+type gradientType struct {
+	tp                int // 2: linear, 3: radial
+	clr1Str, clr2Str  string
+	x1, y1, x2, y2, r float64
+	objNum            int
+}
+
 type sizeType struct {
 	wd, ht float64
 }
@@ -129,6 +136,7 @@ type Fpdf struct {
 	joinStyle        int                      // line segment join style: miter 0, round 1, bevel 2
 	blendList        []blendModeType          // slice[idx] of alpha transparency modes, 1-based
 	blendMap         map[string]int           // map into blendList
+	gradientList     []gradientType           // slice[idx] of gradient records
 	err              error                    // Set if error occurs during life cycle of instance
 }
 
