@@ -841,7 +841,7 @@ func (f *Fpdf) Arc(x, y, rx, ry, degRotate, degStart, degEnd float64, styleStr s
 // To reset normal rendering after applying a blending mode, call this method
 // with alpha set to 1.0 and blendModeStr set to "Normal".
 //
-// See tutorial 12 for an example of this function.
+// See tutorial 12 for an example of this function, including samples of each blending mode.
 func (f *Fpdf) SetAlpha(alpha float64, blendModeStr string) {
 	if f.err != nil {
 		return
