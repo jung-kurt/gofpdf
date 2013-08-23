@@ -21,8 +21,8 @@ This package's code and documentation are closely derived from the FPDF library
 created by Olivier Plathey, and a number of font and image resources are copied
 directly from it. Drawing support is adapted from the FPDF geometric figures
 script by David Hernández Sanz. Transparency support is adapted from the FPDF
-transparency script by Martin Hall-May. Support for gradients is adapted from
-the FPDF gradients script by Andreas Würmser.
+transparency script by Martin Hall-May. Support for gradients and clipping is
+adapted from FPDF scripts by Andreas Würmser.
 
 The FPDF website is http://www.fpdf.org/.
 
@@ -46,7 +46,7 @@ Features
 
 • Page compression
 
-• Drawing support (lines, Bézier curves, arcs, ellipses)
+• Drawing support (lines, Bézier curves, arcs, ellipses) and clipping
 
 gofpdf has no dependencies other than the Go standard library. All tests pass
 on Linux, Mac and Windows platforms. Like FPDF version 1.7, from which gofpdf

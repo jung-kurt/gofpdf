@@ -406,6 +406,11 @@ func (f *Fpdf) open() {
 // document contains no page, AddPage() is called to prevent the generation of
 // an invalid document.
 func (f *Fpdf) Close() {
+	if f.err == nil {
+		if f.clipActive {
+			f.err = fmt.Errorf("Clip procedure must be explicitly ended")
+		}
+	}
 	if f.err != nil {
 		return
 	}
@@ -682,7 +687,8 @@ func fillDrawOp(styleStr string) (opStr string) {
 // It can be drawn (border only), filled (with no border) or both. styleStr can
 // be "F" for filled, "D" for outlined only, or "DF" or "FD" for outlined and
 // filled. An empty string will be replaced with "D". Drawing uses the current
-// draw color and line width. Filling uses the current fill color.
+// draw color and line width centered on the rectangle's perimeter. Filling
+// uses the current fill color.
 func (f *Fpdf) Rect(x, y, w, h float64, styleStr string) {
 	f.outf("%.2f %.2f %.2f %.2f re %s", x*f.k, (f.h-y)*f.k, w*f.k, -h*f.k, fillDrawOp(styleStr))
 }
@@ -691,7 +697,8 @@ func (f *Fpdf) Rect(x, y, w, h float64, styleStr string) {
 //
 // styleStr can be "F" for filled, "D" for outlined only, or "DF" or "FD" for
 // outlined and filled. An empty string will be replaced with "D". Drawing uses
-// the current draw color and line width. Filling uses the current fill color.
+// the current draw color and line width centered on the circle's perimeter.
+// Filling uses the current fill color.
 //
 // See tutorial 11 for an example of this function.
 func (f *Fpdf) Circle(x, y, r float64, styleStr string) {
@@ -706,7 +713,8 @@ func (f *Fpdf) Circle(x, y, r float64, styleStr string) {
 //
 // styleStr can be "F" for filled, "D" for outlined only, or "DF" or "FD" for
 // outlined and filled. An empty string will be replaced with "D". Drawing uses
-// the current draw color and line width. Filling uses the current fill color.
+// the current draw color and line width centered on the ellipse's perimeter.
+// Filling uses the current fill color.
 //
 // See tutorial 11 for an example of this function.
 func (f *Fpdf) Ellipse(x, y, rx, ry, degRotate float64, styleStr string) {
@@ -733,8 +741,8 @@ func (f *Fpdf) curve(cx0, cy0, x1, y1, cx1, cy1 float64) {
 //
 // styleStr can be "F" for filled, "D" for outlined only, or "DF" or "FD" for
 // outlined and filled. An empty string will be replaced with "D". Drawing uses
-// the current draw color, line width, and cap style. Filling uses the current
-// fill color.
+// the current draw color, line width, and cap style centered on the curve's
+// path. Filling uses the current fill color.
 //
 // See tutorial 11 for an example of this function.
 func (f *Fpdf) Curve(x0, y0, cx, cy, x1, y1 float64, styleStr string) {
@@ -752,8 +760,8 @@ func (f *Fpdf) Curve(x0, y0, cx, cy, x1, y1 float64, styleStr string) {
 //
 // styleStr can be "F" for filled, "D" for outlined only, or "DF" or "FD" for
 // outlined and filled. An empty string will be replaced with "D". Drawing uses
-// the current draw color, line width, and cap style. Filling uses the current
-// fill color.
+// the current draw color, line width, and cap style centered on the curve's
+// path. Filling uses the current fill color.
 //
 // See tutorial 11 for an example of this function.
 func (f *Fpdf) CurveCubic(x0, y0, cx0, cy0, cx1, cy1, x1, y1 float64, styleStr string) {
@@ -772,8 +780,8 @@ func (f *Fpdf) CurveCubic(x0, y0, cx0, cy0, cx1, cy1, x1, y1 float64, styleStr s
 //
 // styleStr can be "F" for filled, "D" for outlined only, or "DF" or "FD" for
 // outlined and filled. An empty string will be replaced with "D". Drawing uses
-// the current draw color, line width, and cap style. Filling uses the current
-// fill color.
+// the current draw color, line width, and cap style centered on the arc's
+// path. Filling uses the current fill color.
 //
 // See tutorial 11 for an example of this function.
 func (f *Fpdf) Arc(x, y, rx, ry, degRotate, degStart, degEnd float64, styleStr string) {
@@ -873,14 +881,14 @@ func (f *Fpdf) SetAlpha(alpha float64, blendModeStr string) {
 	f.outf("/GS%d gs", pos)
 }
 
-func (f *Fpdf) clipStart(x, y, w, h float64) {
+func (f *Fpdf) gradientClipStart(x, y, w, h float64) {
 	// Save current graphic state and set clipping area
 	f.outf("q %.2f %.2f %.2f %.2f re W n", x*f.k, (f.h-y)*f.k, w*f.k, -h*f.k)
 	// Set up transformation matrix for gradient
 	f.outf("%.3f 0 0 %.3f %.3f %.3f cm", w*f.k, h*f.k, x*f.k, (f.h-(y+h))*f.k)
 }
 
-func (f *Fpdf) clipEnd() {
+func (f *Fpdf) gradientClipEnd() {
 	// Restore previous graphic state
 	f.out("Q")
 }
@@ -911,9 +919,9 @@ func (f *Fpdf) gradient(tp int, r1, g1, b1 int, r2, g2, b2 int, x1, y1 float64, 
 //
 // See tutorial 13 for an example of this function.
 func (f *Fpdf) LinearGradient(x, y, w, h float64, r1, g1, b1 int, r2, g2, b2 int, x1, y1, x2, y2 float64) {
-	f.clipStart(x, y, w, h)
+	f.gradientClipStart(x, y, w, h)
 	f.gradient(2, r1, g1, b1, r2, g2, b2, x1, y1, x2, y2, 0)
-	f.clipEnd()
+	f.gradientClipEnd()
 }
 
 // Draws a rectangular area with a blending of one color to another. The
@@ -935,9 +943,176 @@ func (f *Fpdf) LinearGradient(x, y, w, h float64, r1, g1, b1 int, r2, g2, b2 int
 //
 // See tutorial 13 for an example of this function.
 func (f *Fpdf) RadialGradient(x, y, w, h float64, r1, g1, b1 int, r2, g2, b2 int, x1, y1, x2, y2, r float64) {
-	f.clipStart(x, y, w, h)
+	f.gradientClipStart(x, y, w, h)
 	f.gradient(3, r1, g1, b1, r2, g2, b2, x1, y1, x2, y2, r)
-	f.clipEnd()
+	f.gradientClipEnd()
+}
+
+func (f *Fpdf) setClipActive() bool {
+	if f.err == nil {
+		if f.clipActive {
+			f.err = fmt.Errorf("Clipping operation already active")
+		} else {
+			f.clipActive = true
+		}
+	}
+	return f.err == nil
+}
+
+// Begins a rectangular clipping operation. The rectangle is of width w and
+// height h. Its upper left corner is positioned at point (x, y). outline is
+// true to draw a border with the current draw color and line width centered on
+// the rectangle's perimeter. After calling this method, all rendering
+// operations (for example, Image(), LinearGradient(), etc) will be clipped by
+// the specified rectangle. Call ClipEnd() to restore unclipped operations.
+
+func (f *Fpdf) ClipRect(x, y, w, h float64, outline bool) {
+	if !f.setClipActive() {
+		return
+	}
+	f.outf("q %.2f %.2f %.2f %.2f re W %s", x*f.k, (f.h-y)*f.k, w*f.k, -h*f.k, StrIf(outline, "S", "n"))
+}
+
+// Begins a clipping operation in which rendering is confined to the character
+// string specified by txtStr. The origin (x, y) is on the left of the first
+// character at the baseline. The current font is used. outline is true to draw
+// a border with the current draw color and line width centered on the
+// perimeters of the text characters. After calling this method, all rendering
+// operations (for example, Image(), LinearGradient(), etc) will be clipped.
+// Call ClipEnd() to restore unclipped operations.
+
+func (f *Fpdf) ClipText(x, y float64, txtStr string, outline bool) {
+	if !f.setClipActive() {
+		return
+	}
+	f.outf("q BT %.2f %.2f Td %d Tr (%s) Tj ET", x*f.k, (f.h-y)*f.k, IntIf(outline, 5, 7), f.escape(txtStr))
+}
+
+func (f *Fpdf) clipArc(x1, y1, x2, y2, x3, y3 float64) {
+	h := f.h
+	f.outf("%.2f %.2f %.2f %.2f %.2f %.2f c ", x1*f.k, (h-y1)*f.k,
+		x2*f.k, (h-y2)*f.k, x3*f.k, (h-y3)*f.k)
+}
+
+// Begins a rectangular clipping operation. The rectangle is of width w and
+// height h. Its upper left corner is positioned at point (x, y). The rounded
+// corners of the rectangle are specified by radius r. outline is true to draw
+// a border with the current draw color and line width centered on the
+// rectangle's perimeter. After calling this method, all rendering operations
+// (for example, Image(), LinearGradient(), etc) will be clipped by the
+// specified rectangle. Call ClipEnd() to restore unclipped operations.
+
+func (f *Fpdf) ClipRoundedRect(x, y, w, h, r float64, outline bool) {
+	if !f.setClipActive() {
+		return
+	}
+	k := f.k
+	hp := f.h
+	myArc := (4.0 / 3.0) * (math.Sqrt2 - 1.0)
+	f.outf("q %.2f %.2f m", (x+r)*k, (hp-y)*k)
+	xc := x + w - r
+	yc := y + r
+	f.outf("%.2f %.2f l", xc*k, (hp-y)*k)
+	f.clipArc(xc+r*myArc, yc-r, xc+r, yc-r*myArc, xc+r, yc)
+	xc = x + w - r
+	yc = y + h - r
+	f.outf("%.2f %.2f l", (x+w)*k, (hp-yc)*k)
+	f.clipArc(xc+r, yc+r*myArc, xc+r*myArc, yc+r, xc, yc+r)
+	xc = x + r
+	yc = y + h - r
+	f.outf("%.2f %.2f l", xc*k, (hp-(y+h))*k)
+	f.clipArc(xc-r*myArc, yc+r, xc-r, yc+r*myArc, xc-r, yc)
+	xc = x + r
+	yc = y + r
+	f.outf("%.2f %.2f l", x*k, (hp-yc)*k)
+	f.clipArc(xc-r, yc-r*myArc, xc-r*myArc, yc-r, xc, yc-r)
+	f.outf(" W %s", StrIf(outline, "S", "n"))
+}
+
+// Begins an elliptical clipping operation. The ellipse is centered at (x, y).
+// Its horizontal and vertical radii are specified by rx and ry. outline is
+// true to draw a border with the current draw color and line width centered on
+// the ellipse's perimeter. After calling this method, all rendering operations
+// (for example, Image(), LinearGradient(), etc) will be clipped by the
+// specified ellipse. Call ClipEnd() to restore unclipped operations.
+
+func (f *Fpdf) ClipEllipse(x, y, rx, ry float64, outline bool) {
+	if !f.setClipActive() {
+		return
+	}
+	lx := (4.0 / 3.0) * rx * (math.Sqrt2 - 1)
+	ly := (4.0 / 3.0) * ry * (math.Sqrt2 - 1)
+	k := f.k
+	h := f.h
+	f.outf("q %.2f %.2f m %.2f %.2f %.2f %.2f %.2f %.2f c",
+		(x+rx)*k, (h-y)*k,
+		(x+rx)*k, (h-(y-ly))*k,
+		(x+lx)*k, (h-(y-ry))*k,
+		x*k, (h-(y-ry))*k)
+	f.outf("%.2f %.2f %.2f %.2f %.2f %.2f c",
+		(x-lx)*k, (h-(y-ry))*k,
+		(x-rx)*k, (h-(y-ly))*k,
+		(x-rx)*k, (h-y)*k)
+	f.outf("%.2f %.2f %.2f %.2f %.2f %.2f c",
+		(x-rx)*k, (h-(y+ly))*k,
+		(x-lx)*k, (h-(y+ry))*k,
+		x*k, (h-(y+ry))*k)
+	f.outf("%.2f %.2f %.2f %.2f %.2f %.2f c W %s",
+		(x+lx)*k, (h-(y+ry))*k,
+		(x+rx)*k, (h-(y+ly))*k,
+		(x+rx)*k, (h-y)*k,
+		StrIf(outline, "S", "n"))
+}
+
+// Begins a circular clipping operation. The circle is centered at (x, y) and
+// has radius r. outline is true to draw a border with the current draw color
+// and line width centered on the circle's perimeter. After calling this
+// method, all rendering operations (for example, Image(), LinearGradient(),
+// etc) will be clipped by the specified circle. Call ClipEnd() to restore
+// unclipped operations.
+
+func (f *Fpdf) ClipCircle(x, y, r float64, outline bool) {
+	f.ClipEllipse(x, y, r, r, outline)
+}
+
+// Begins a clipping operation within a polygon. The figure is defined by a
+// series of vertices specified by points. The x and y fields of the points use
+// the units established in New(). The last point in the slice will be
+// implicitly joined to the first to close the polygon. outline is true to draw
+// a border with the current draw color and line width centered on the
+// polygon's perimeter. After calling this method, all rendering operations
+// (for example, Image(), LinearGradient(), etc) will be clipped by the
+// specified polygon. Call ClipEnd() to restore unclipped operations.
+
+func (f *Fpdf) ClipPolygon(points []pointType, outline bool) {
+	if !f.setClipActive() {
+		return
+	}
+	var s fmtBuffer
+	h := f.h
+	k := f.k
+	s.printf("q ")
+	for j, pt := range points {
+		s.printf("%.2f %.2f %s ", pt.x*k, (h-pt.y)*k, StrIf(j == 0, "m", "l"))
+	}
+	s.printf("h W %s", StrIf(outline, "S", "n"))
+	f.out(s.String())
+}
+
+// Ends a clipping operation that was started with a call to ClipRect(),
+// ClipRoundedRect(), ClipText(), ClipEllipse(), ClipCircle() or ClipPolygon().
+// Only one clipping operation can be active at a time, and the document cannot
+// be successfully output while a clipping operation is active.
+
+func (f *Fpdf) ClipEnd() {
+	if f.err == nil {
+		if f.clipActive {
+			f.clipActive = false
+			f.out("Q")
+		} else {
+			f.err = fmt.Errorf("Error attempting to end clip operation")
+		}
+	}
 }
 
 // Imports a TrueType, OpenType or Type1 font and makes it available. It is
@@ -1170,10 +1345,10 @@ func (f *Fpdf) LinkString(x, y, w, h float64, linkStr string) {
 	f.newLink(x, y, w, h, 0, linkStr)
 }
 
-// Prints a character string. The origin is on the left of the first character,
-// on the baseline. This method allows to place a string precisely on the page,
-// but it is usually easier to use Cell(), MultiCell() or Write() which are the
-// standard methods to print text.
+// Prints a character string. The origin (x, y) is on the left of the first
+// character at the baseline. This method allows to place a string precisely on
+// the page, but it is usually easier to use Cell(), MultiCell() or Write()
+// which are the standard methods to print text.
 func (f *Fpdf) Text(x, y float64, txtStr string) {
 	s := sprintf("BT %.2f %.2f Td (%s) Tj ET", x*f.k, (f.h-y)*f.k, f.escape(txtStr))
 	if f.underline && txtStr != "" {

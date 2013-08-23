@@ -40,6 +40,10 @@ type sizeType struct {
 	wd, ht float64
 }
 
+type pointType struct {
+	x, y float64
+}
+
 type imageInfoType struct {
 	data  []byte
 	smask []byte
@@ -137,6 +141,7 @@ type Fpdf struct {
 	blendList        []blendModeType          // slice[idx] of alpha transparency modes, 1-based
 	blendMap         map[string]int           // map into blendList
 	gradientList     []gradientType           // slice[idx] of gradient records
+	clipActive       bool                     // clippping operation is underway
 	err              error                    // Set if error occurs during life cycle of instance
 }
 

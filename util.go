@@ -202,3 +202,21 @@ func utf8toutf16(s string) string {
 	}
 	return string(res)
 }
+
+// Return a if cnd is true, otherwise b
+func IntIf(cnd bool, a, b int) int {
+	if cnd {
+		return a
+	} else {
+		return b
+	}
+}
+
+// Return aStr if cnd is true, otherwise bStr
+func StrIf(cnd bool, aStr, bStr string) string {
+	if cnd {
+		return aStr
+	} else {
+		return bStr
+	}
+}

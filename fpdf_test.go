@@ -85,6 +85,15 @@ func docWriter(pdf *Fpdf, idx int) *pdfWriter {
 	return pw
 }
 
+func lorem() string {
+	return "Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod " +
+		"tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis " +
+		"nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis " +
+		"aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat " +
+		"nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui " +
+		"officia deserunt mollit anim id est laborum."
+}
+
 // Hello, world
 func ExampleFpdf_tutorial01() {
 	pdf := New("P", "mm", "A4", FONT_DIR)
@@ -546,12 +555,7 @@ func ExampleFpdf_tutorial08() {
 func ExampleFpdf_tutorial09() {
 	var y0 float64
 	var crrntCol int
-	loremStr := "Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod " +
-		"tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis " +
-		"nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis " +
-		"aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat " +
-		"nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui " +
-		"officia deserunt mollit anim id est laborum."
+	loremStr := lorem()
 	pdf := New("L", "mm", "A4", FONT_DIR)
 	const (
 		pageWd = 297.0 // A4 210.0 x 297.0
@@ -771,4 +775,57 @@ func ExampleFpdf_tutorial13() {
 	pdf.OutputAndClose(docWriter(pdf, 13))
 	// Output:
 	// Successfully generated pdf/tutorial13.pdf
+}
+
+// Clipping
+func ExampleFpdf_tutorial14() {
+	pdf := New("", "", "", FONT_DIR)
+	y := 10.0
+	pdf.AddPage()
+
+	pdf.SetFont("Helvetica", "", 24)
+	pdf.SetXY(0, y)
+	pdf.ClipText(10, y+12, "Clipping operations", false)
+	pdf.LinearGradient(0, y, 100, y+20, 0, 0, 0, 220, 220, 220, 0, 0, 1, 1)
+	pdf.ClipEnd()
+
+	y += 12
+	pdf.SetFont("Helvetica", "B", 120)
+	pdf.SetDrawColor(64, 80, 80)
+	pdf.SetLineWidth(.5)
+	pdf.ClipText(10, y+40, pdf.String(), true)
+	pdf.RadialGradient(10, y, 200, 50, 220, 220, 250, 80, 80, 220, 0.25, 0.5, 0.25, 0.5, 1)
+	pdf.ClipEnd()
+
+	y += 55
+	pdf.ClipRect(10, y, 160, 20, true)
+	pdf.SetFillColor(64, 128, 128)
+	pdf.Circle(40, y+10, 15, "F")
+	pdf.SetFillColor(128, 64, 64)
+	pdf.Ellipse(90, y+10, 30, 40, 45, "F")
+	pdf.ClipEnd()
+
+	y += 28
+	pdf.ClipEllipse(26, y+10, 16, 10, true)
+	pdf.Image(IMG_DIR+"/logo.jpg", 10, y, 32, 0, false, "JPG", 0, "")
+	pdf.ClipEnd()
+
+	pdf.ClipCircle(60, y+10, 10, true)
+	pdf.RadialGradient(50, y, 20, 20, 220, 220, 250, 80, 80, 220, 0.3, 0.7, 0.3, 0.7, 0.5)
+	pdf.ClipEnd()
+
+	pdf.ClipPolygon([]pointType{{80, y + 20}, {90, y}, {100, y + 20}}, true)
+	pdf.LinearGradient(80, y, 20, 20, 240, 240, 250, 80, 80, 220, 0.5, 1, 0.5, 0)
+	pdf.ClipEnd()
+
+	y += 30
+	pdf.ClipRoundedRect(10, y, 120, 20, 5, true)
+	pdf.SetXY(5, y-5)
+	pdf.SetFont("Times", "", 12)
+	pdf.MultiCell(130, 5, lorem(), "", "", false)
+	pdf.ClipEnd()
+
+	pdf.OutputAndClose(docWriter(pdf, 14))
+	// Output:
+	// Successfully generated pdf/tutorial14.pdf
 }
