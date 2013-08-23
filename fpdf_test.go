@@ -811,7 +811,7 @@ func ExampleFpdf_tutorial14() {
 	pdf.ClipEnd()
 
 	pdf.ClipCircle(60, y+10, 10, true)
-	pdf.RadialGradient(50, y, 20, 20, 220, 220, 250, 80, 80, 220, 0.3, 0.7, 0.3, 0.7, 0.5)
+	pdf.RadialGradient(50, y, 20, 20, 220, 220, 250, 40, 40, 60, 0.3, 0.7, 0.3, 0.7, 0.5)
 	pdf.ClipEnd()
 
 	pdf.ClipPolygon([]pointType{{80, y + 20}, {90, y}, {100, y + 20}}, true)
