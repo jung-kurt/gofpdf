@@ -777,7 +777,7 @@ func ExampleFpdf_tutorial13() {
 	// Successfully generated pdf/tutorial13.pdf
 }
 
-// Clipping
+// Clipping examples
 func ExampleFpdf_tutorial14() {
 	pdf := New("", "", "", FONT_DIR)
 	y := 10.0
@@ -785,8 +785,8 @@ func ExampleFpdf_tutorial14() {
 
 	pdf.SetFont("Helvetica", "", 24)
 	pdf.SetXY(0, y)
-	pdf.ClipText(10, y+12, "Clipping operations", false)
-	pdf.LinearGradient(0, y, 100, y+20, 0, 0, 0, 220, 220, 220, 0, 0, 1, 1)
+	pdf.ClipText(10, y+12, "Clipping examples", false)
+	pdf.RadialGradient(10, y, 100, 20, 128, 128, 160, 32, 32, 48, 0.25, 0.5, 0.25, 0.5, 0.2)
 	pdf.ClipEnd()
 
 	y += 12
@@ -819,7 +819,10 @@ func ExampleFpdf_tutorial14() {
 	pdf.ClipEnd()
 
 	y += 30
+	pdf.SetLineWidth(.1)
+	pdf.SetDrawColor(180, 180, 180)
 	pdf.ClipRoundedRect(10, y, 120, 20, 5, true)
+	pdf.RadialGradient(10, y, 120, 20, 255, 255, 255, 240, 240, 220, 0.25, 0.75, 0.25, 0.75, 0.5)
 	pdf.SetXY(5, y-5)
 	pdf.SetFont("Times", "", 12)
 	pdf.MultiCell(130, 5, lorem(), "", "", false)

@@ -20,6 +20,8 @@ import (
 	"bytes"
 	"compress/zlib"
 	"fmt"
+	"github.com/davecgh/go-spew/spew"
+	// "io/ioutil"
 	"math"
 	"os"
 	"regexp"
@@ -204,7 +206,7 @@ func utf8toutf16(s string) string {
 }
 
 // Return a if cnd is true, otherwise b
-func IntIf(cnd bool, a, b int) int {
+func intIf(cnd bool, a, b int) int {
 	if cnd {
 		return a
 	} else {
@@ -213,10 +215,21 @@ func IntIf(cnd bool, a, b int) int {
 }
 
 // Return aStr if cnd is true, otherwise bStr
-func StrIf(cnd bool, aStr, bStr string) string {
+func strIf(cnd bool, aStr, bStr string) string {
 	if cnd {
 		return aStr
 	} else {
 		return bStr
 	}
+}
+
+// Dump the internals of the specified values
+func dump(fileStr string, a ...interface{}) {
+	fl, err := os.OpenFile(fileStr, os.O_CREATE|os.O_APPEND|os.O_WRONLY, 0600)
+	if err == nil {
+		fmt.Fprintf(fl, "----------------\n")
+		spew.Fdump(fl, a...)
+		fl.Close()
+	}
+	// ioutil.WriteFile(fileStr, []byte(spew.Sdump(a)), os.ModeAppend)
 }

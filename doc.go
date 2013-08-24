@@ -46,7 +46,9 @@ Features
 
 • Page compression
 
-• Drawing support (lines, Bézier curves, arcs, ellipses) and clipping
+• Drawing support (lines, Bézier curves, arcs, ellipses)
+
+• Clipping
 
 gofpdf has no dependencies other than the Go standard library. All tests pass
 on Linux, Mac and Windows platforms. Like FPDF version 1.7, from which gofpdf
