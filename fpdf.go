@@ -173,21 +173,10 @@ func fpdfNew(orientationStr, unitStr, sizeStr, fontDirStr string, size SizeType)
 	return
 }
 
-// InitType is used with NewCustom() to customize an Fpdf instance.
-// OrientationStr, UnitStr, SizeStr and FontDirStr correspond to the arguments
-// accepted by New(). If the Wd and Ht fields of Size are each greater than
-// zero, Size will be used to set the default page size rather than SizeStr.
-type InitType struct {
-	OrientationStr string
-	UnitStr        string
-	SizeStr        string
-	Size           SizeType
-	FontDirStr     string
-}
-
 // NewCustom returns a pointer to a new Fpdf instance. Its methods are
 // subsequently called to produce a single PDF document. NewCustom() is an
-// alternative to New() that provides additional customization.
+// alternative to New() that provides additional customization. This function
+// is demonstrated in tutorial 15.
 func NewCustom(init *InitType) (f *Fpdf) {
 	return fpdfNew(init.OrientationStr, init.UnitStr, init.SizeStr, init.FontDirStr, init.Size)
 }
@@ -416,7 +405,7 @@ func (f *Fpdf) SetCreator(creatorStr string, isUTF8 bool) {
 }
 
 // Defines an alias for the total number of pages. It will be substituted as
-// the document is closed.
+// the document is closed. This method is demonstrated in tutorial 2.
 func (f *Fpdf) AliasNbPages(aliasStr string) {
 	if aliasStr == "" {
 		aliasStr = "{nb}"
@@ -467,7 +456,8 @@ func (f *Fpdf) Close() {
 // Returns the width and height of the specified page in the units established
 // in New(). These return values are followed by the unit of measure itself. If
 // pageNum is zero or otherwise out of bounds, it returns the default page
-// size, that is, the size of the page that would be added by AddPage().
+// size, that is, the size of the page that would be added by AddPage(). This
+// function is demonstrated in tutorial 15.
 func (f *Fpdf) PageSize(pageNum int) (wd, ht float64, unitStr string) {
 	sz, ok := f.pageSizes[pageNum]
 	if ok {
@@ -484,6 +474,8 @@ func (f *Fpdf) PageSize(pageNum int) (wd, ht float64, unitStr string) {
 // See New() for a description of orientationStr.
 //
 // size specifies the size of the new page in the units established in New().
+//
+// This function is demonstrated in tutorial 15.
 func (f *Fpdf) AddPageFormat(orientationStr string, size SizeType) {
 	if f.err != nil {
 		return

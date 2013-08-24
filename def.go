@@ -20,6 +20,7 @@ import (
 	"bytes"
 )
 
+// Version of FPDF from which this package is derived
 const (
 	FPDF_VERSION = "1.7"
 )
@@ -76,6 +77,18 @@ type linkType struct {
 type intLinkType struct {
 	page int
 	y    float64
+}
+
+// InitType is used with NewCustom() to customize an Fpdf instance.
+// OrientationStr, UnitStr, SizeStr and FontDirStr correspond to the arguments
+// accepted by New(). If the Wd and Ht fields of Size are each greater than
+// zero, Size will be used to set the default page size rather than SizeStr.
+type InitType struct {
+	OrientationStr string
+	UnitStr        string
+	SizeStr        string
+	Size           SizeType
+	FontDirStr     string
 }
 
 type Fpdf struct {
