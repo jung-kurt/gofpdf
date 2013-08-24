@@ -36,12 +36,15 @@ type gradientType struct {
 	objNum            int
 }
 
-type sizeType struct {
-	wd, ht float64
+// Wd and Ht specify the horizontal and vertical extents of a document page.
+type SizeType struct {
+	Wd, Ht float64
 }
 
-type pointType struct {
-	x, y float64
+// X and Y specify the horizontal and vertical coordinates of a point,
+// typically used in drawing.
+type PointType struct {
+	X, Y float64
 }
 
 type imageInfoType struct {
@@ -86,10 +89,11 @@ type Fpdf struct {
 	k                float64                  // scale factor (number of points in user unit)
 	defOrientation   string                   // default orientation
 	curOrientation   string                   // current orientation
-	stdpageSizes     map[string]sizeType      // standard page sizes
-	defPageSize      sizeType                 // default page size
-	curPageSize      sizeType                 // current page size
-	pageSizes        map[int]sizeType         // used for pages with non default sizes or orientations
+	stdPageSizes     map[string]SizeType      // standard page sizes
+	defPageSize      SizeType                 // default page size
+	curPageSize      SizeType                 // current page size
+	pageSizes        map[int]SizeType         // used for pages with non default sizes or orientations
+	unitStr          string                   // unit of measure for all rendered objects except fonts
 	wPt, hPt         float64                  // dimensions of current page in points
 	w, h             float64                  // dimensions of current page in user unit
 	lMargin          float64                  // left margin
@@ -141,7 +145,7 @@ type Fpdf struct {
 	blendList        []blendModeType          // slice[idx] of alpha transparency modes, 1-based
 	blendMap         map[string]int           // map into blendList
 	gradientList     []gradientType           // slice[idx] of gradient records
-	clipActive       bool                     // clippping operation is underway
+	clipNest         int                      // Number of active clipping contexts
 	err              error                    // Set if error occurs during life cycle of instance
 }
 

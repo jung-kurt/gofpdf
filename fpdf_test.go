@@ -798,11 +798,15 @@ func ExampleFpdf_tutorial14() {
 	pdf.ClipEnd()
 
 	y += 55
-	pdf.ClipRect(10, y, 160, 20, true)
-	pdf.SetFillColor(64, 128, 128)
-	pdf.Circle(40, y+10, 15, "F")
-	pdf.SetFillColor(128, 64, 64)
-	pdf.Ellipse(90, y+10, 30, 40, 45, "F")
+	pdf.ClipRect(10, y, 105, 20, true)
+	pdf.SetFillColor(255, 255, 255)
+	pdf.Rect(10, y, 105, 20, "F")
+	pdf.ClipCircle(40, y+10, 15, false)
+	pdf.RadialGradient(25, y, 30, 30, 220, 250, 220, 40, 60, 40, 0.3, 0.85, 0.3, 0.85, 0.5)
+	pdf.ClipEnd()
+	pdf.ClipEllipse(80, y+10, 20, 15, false)
+	pdf.RadialGradient(60, y, 40, 30, 250, 220, 220, 60, 40, 40, 0.3, 0.85, 0.3, 0.85, 0.5)
+	pdf.ClipEnd()
 	pdf.ClipEnd()
 
 	y += 28
@@ -814,8 +818,8 @@ func ExampleFpdf_tutorial14() {
 	pdf.RadialGradient(50, y, 20, 20, 220, 220, 250, 40, 40, 60, 0.3, 0.7, 0.3, 0.7, 0.5)
 	pdf.ClipEnd()
 
-	pdf.ClipPolygon([]pointType{{80, y + 20}, {90, y}, {100, y + 20}}, true)
-	pdf.LinearGradient(80, y, 20, 20, 240, 240, 250, 80, 80, 220, 0.5, 1, 0.5, 0)
+	pdf.ClipPolygon([]PointType{{80, y + 20}, {90, y}, {100, y + 20}}, true)
+	pdf.LinearGradient(80, y, 20, 20, 250, 220, 250, 60, 40, 60, 0.5, 1, 0.5, 0.5)
 	pdf.ClipEnd()
 
 	y += 30
@@ -831,4 +835,31 @@ func ExampleFpdf_tutorial14() {
 	pdf.OutputAndClose(docWriter(pdf, 14))
 	// Output:
 	// Successfully generated pdf/tutorial14.pdf
+}
+
+// Page size example
+func ExampleFpdf_tutorial15() {
+	pdf := NewCustom(&InitType{UnitStr: "in", Size: SizeType{6, 6}, FontDirStr: FONT_DIR})
+	pdf.SetMargins(0.5, 1, 0.5)
+	pdf.SetFont("Times", "", 14)
+	pdf.AddPageFormat("L", SizeType{3, 12})
+	pdf.SetXY(0.5, 1.5)
+	pdf.CellFormat(11, 0.2, "12 in x 3 in", "", 0, "C", false, 0, "")
+	pdf.AddPage() // Default size established in NewCustom()
+	pdf.SetXY(0.5, 3)
+	pdf.CellFormat(5, 0.2, "6 in x 6 in", "", 0, "C", false, 0, "")
+	pdf.AddPageFormat("P", SizeType{3, 12})
+	pdf.SetXY(0.5, 6)
+	pdf.CellFormat(2, 0.2, "3 in x 12 in", "", 0, "C", false, 0, "")
+	for j := 0; j <= 3; j++ {
+		wd, ht, u := pdf.PageSize(j)
+		fmt.Printf("%d: %6.2f %s, %6.2f %s\n", j, wd, u, ht, u)
+	}
+	pdf.OutputAndClose(docWriter(pdf, 15))
+	// Output:
+	// 0:   6.00 in,   6.00 in
+	// 1:  12.00 in,   3.00 in
+	// 2:   6.00 in,   6.00 in
+	// 3:   3.00 in,  12.00 in
+	// Successfully generated pdf/tutorial15.pdf
 }

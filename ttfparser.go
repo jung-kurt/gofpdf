@@ -30,6 +30,7 @@ import (
 	"strings"
 )
 
+// This structure contains metrics of a TrueType font.
 type TtfType struct {
 	Embeddable             bool
 	UnitsPerEm             uint16

@@ -45,24 +45,7 @@ func (b *fmtBuffer) printf(fmtStr string, args ...interface{}) {
 	b.Buffer.WriteString(fmt.Sprintf(fmtStr, args...))
 }
 
-// New returns a pointer to a new Fpdf instance. Its methods are subsequently
-// called to produce a single PDF document.
-//
-// orientationStr specifies the default page orientation. For portrait mode,
-// specify "P" or "Portrait". For landscape mode, specify "L" or "Landscape".
-// An empty string will be replaced with "P".
-//
-// unitStr specifies the unit of length used in size parameters for elements
-// other than fonts, which are always measured in points. Specify "pt" for
-// point, "mm" for millimeter, "cm" for centimeter, or "in" for inch. An empty
-// string will be replaced with "mm".
-//
-// sizeStr specifies the page size. Acceptable values are "A3", "A4", "A5",
-// "Letter", or "Legal". An empty string will be replaced with "A4".
-//
-// fontDirStr specifies the file system location in which font resources will
-// be found. An empty string is replaced with ".".
-func New(orientationStr, unitStr, sizeStr, fontDirStr string) (f *Fpdf) {
+func fpdfNew(orientationStr, unitStr, sizeStr, fontDirStr string, size SizeType) (f *Fpdf) {
 	f = new(Fpdf)
 	if orientationStr == "" {
 		orientationStr = "P"
@@ -80,7 +63,7 @@ func New(orientationStr, unitStr, sizeStr, fontDirStr string) (f *Fpdf) {
 	f.n = 2
 	f.pages = make([]*bytes.Buffer, 0, 8)
 	f.pages = append(f.pages, bytes.NewBufferString("")) // pages[0] is unused (1-based)
-	f.pageSizes = make(map[int]sizeType)
+	f.pageSizes = make(map[int]SizeType)
 	f.state = 0
 	f.fonts = make(map[string]fontDefType)
 	f.fontFiles = make(map[string]fontFileType)
@@ -125,16 +108,21 @@ func New(orientationStr, unitStr, sizeStr, fontDirStr string) (f *Fpdf) {
 		f.err = fmt.Errorf("Incorrect unit %s", unitStr)
 		return
 	}
+	f.unitStr = unitStr
 	// Page sizes
-	f.stdpageSizes = make(map[string]sizeType)
-	f.stdpageSizes["a3"] = sizeType{841.89, 1190.55}
-	f.stdpageSizes["a4"] = sizeType{595.28, 841.89}
-	f.stdpageSizes["a5"] = sizeType{420.94, 595.28}
-	f.stdpageSizes["letter"] = sizeType{612, 792}
-	f.stdpageSizes["legal"] = sizeType{612, 1008}
-	f.defPageSize = f.getpagesizestr(sizeStr)
-	if f.err != nil {
-		return
+	f.stdPageSizes = make(map[string]SizeType)
+	f.stdPageSizes["a3"] = SizeType{841.89, 1190.55}
+	f.stdPageSizes["a4"] = SizeType{595.28, 841.89}
+	f.stdPageSizes["a5"] = SizeType{420.94, 595.28}
+	f.stdPageSizes["letter"] = SizeType{612, 792}
+	f.stdPageSizes["legal"] = SizeType{612, 1008}
+	if size.Wd > 0 && size.Ht > 0 {
+		f.defPageSize = size
+	} else {
+		f.defPageSize = f.getpagesizestr(sizeStr)
+		if f.err != nil {
+			return
+		}
 	}
 	f.curPageSize = f.defPageSize
 	// Page orientation
@@ -142,13 +130,13 @@ func New(orientationStr, unitStr, sizeStr, fontDirStr string) (f *Fpdf) {
 	switch orientationStr {
 	case "p", "portrait":
 		f.defOrientation = "P"
-		f.w = f.defPageSize.wd
-		f.h = f.defPageSize.ht
+		f.w = f.defPageSize.Wd
+		f.h = f.defPageSize.Ht
 		// dbg("Assign h: %8.2f", f.h)
 	case "l", "landscape":
 		f.defOrientation = "L"
-		f.w = f.defPageSize.ht
-		f.h = f.defPageSize.wd
+		f.w = f.defPageSize.Ht
+		f.h = f.defPageSize.Wd
 	default:
 		f.err = fmt.Errorf("Incorrect orientation: %s", orientationStr)
 		return
@@ -183,6 +171,46 @@ func New(orientationStr, unitStr, sizeStr, fontDirStr string) (f *Fpdf) {
 	// Set default PDF version number
 	f.pdfVersion = "1.3"
 	return
+}
+
+// InitType is used with NewCustom() to customize an Fpdf instance.
+// OrientationStr, UnitStr, SizeStr and FontDirStr correspond to the arguments
+// accepted by New(). If the Wd and Ht fields of Size are each greater than
+// zero, Size will be used to set the default page size rather than SizeStr.
+type InitType struct {
+	OrientationStr string
+	UnitStr        string
+	SizeStr        string
+	Size           SizeType
+	FontDirStr     string
+}
+
+// NewCustom returns a pointer to a new Fpdf instance. Its methods are
+// subsequently called to produce a single PDF document. NewCustom() is an
+// alternative to New() that provides additional customization.
+func NewCustom(init *InitType) (f *Fpdf) {
+	return fpdfNew(init.OrientationStr, init.UnitStr, init.SizeStr, init.FontDirStr, init.Size)
+}
+
+// New returns a pointer to a new Fpdf instance. Its methods are subsequently
+// called to produce a single PDF document.
+//
+// orientationStr specifies the default page orientation. For portrait mode,
+// specify "P" or "Portrait". For landscape mode, specify "L" or "Landscape".
+// An empty string will be replaced with "P".
+//
+// unitStr specifies the unit of length used in size parameters for elements
+// other than fonts, which are always measured in points. Specify "pt" for
+// point, "mm" for millimeter, "cm" for centimeter, or "in" for inch. An empty
+// string will be replaced with "mm".
+//
+// sizeStr specifies the page size. Acceptable values are "A3", "A4", "A5",
+// "Letter", or "Legal". An empty string will be replaced with "A4".
+//
+// fontDirStr specifies the file system location in which font resources will
+// be found. An empty string is replaced with ".".
+func New(orientationStr, unitStr, sizeStr, fontDirStr string) (f *Fpdf) {
+	return fpdfNew(orientationStr, unitStr, sizeStr, fontDirStr, SizeType{0, 0})
 }
 
 // Returns true if no processing errors have occurred.
@@ -407,7 +435,7 @@ func (f *Fpdf) open() {
 // an invalid document.
 func (f *Fpdf) Close() {
 	if f.err == nil {
-		if f.clipActive {
+		if f.clipNest > 0 {
 			f.err = fmt.Errorf("Clip procedure must be explicitly ended")
 		}
 	}
@@ -436,13 +464,27 @@ func (f *Fpdf) Close() {
 	return
 }
 
+// Returns the width and height of the specified page in the units established
+// in New(). These return values are followed by the unit of measure itself. If
+// pageNum is zero or otherwise out of bounds, it returns the default page
+// size, that is, the size of the page that would be added by AddPage().
+func (f *Fpdf) PageSize(pageNum int) (wd, ht float64, unitStr string) {
+	sz, ok := f.pageSizes[pageNum]
+	if ok {
+		sz.Wd, sz.Ht = sz.Wd/f.k, sz.Ht/f.k
+	} else {
+		sz = f.defPageSize // user units
+	}
+	return sz.Wd, sz.Ht, f.unitStr
+}
+
 // Adds a new page with non-default orientation or size. See AddPage() for more
 // details.
 //
 // See New() for a description of orientationStr.
 //
 // size specifies the size of the new page in the units established in New().
-func (f *Fpdf) AddPageFormat(orientationStr string, size sizeType) {
+func (f *Fpdf) AddPageFormat(orientationStr string, size SizeType) {
 	if f.err != nil {
 		return
 	}
@@ -948,17 +990,6 @@ func (f *Fpdf) RadialGradient(x, y, w, h float64, r1, g1, b1 int, r2, g2, b2 int
 	f.gradientClipEnd()
 }
 
-func (f *Fpdf) setClipActive() bool {
-	if f.err == nil {
-		if f.clipActive {
-			f.err = fmt.Errorf("Clipping operation already active")
-		} else {
-			f.clipActive = true
-		}
-	}
-	return f.err == nil
-}
-
 // Begins a rectangular clipping operation. The rectangle is of width w and
 // height h. Its upper left corner is positioned at point (x, y). outline is
 // true to draw a border with the current draw color and line width centered on
@@ -969,9 +1000,7 @@ func (f *Fpdf) setClipActive() bool {
 //
 // See tutorial 14 for an example of this function.
 func (f *Fpdf) ClipRect(x, y, w, h float64, outline bool) {
-	if !f.setClipActive() {
-		return
-	}
+	f.clipNest++
 	f.outf("q %.2f %.2f %.2f %.2f re W %s", x*f.k, (f.h-y)*f.k, w*f.k, -h*f.k, strIf(outline, "S", "n"))
 }
 
@@ -986,9 +1015,7 @@ func (f *Fpdf) ClipRect(x, y, w, h float64, outline bool) {
 //
 // See tutorial 14 for an example of this function.
 func (f *Fpdf) ClipText(x, y float64, txtStr string, outline bool) {
-	if !f.setClipActive() {
-		return
-	}
+	f.clipNest++
 	f.outf("q BT %.2f %.2f Td %d Tr (%s) Tj ET", x*f.k, (f.h-y)*f.k, intIf(outline, 5, 7), f.escape(txtStr))
 }
 
@@ -1009,9 +1036,7 @@ func (f *Fpdf) clipArc(x1, y1, x2, y2, x3, y3 float64) {
 //
 // See tutorial 14 for an example of this function.
 func (f *Fpdf) ClipRoundedRect(x, y, w, h, r float64, outline bool) {
-	if !f.setClipActive() {
-		return
-	}
+	f.clipNest++
 	k := f.k
 	hp := f.h
 	myArc := (4.0 / 3.0) * (math.Sqrt2 - 1.0)
@@ -1045,9 +1070,7 @@ func (f *Fpdf) ClipRoundedRect(x, y, w, h, r float64, outline bool) {
 //
 // See tutorial 14 for an example of this function.
 func (f *Fpdf) ClipEllipse(x, y, rx, ry float64, outline bool) {
-	if !f.setClipActive() {
-		return
-	}
+	f.clipNest++
 	lx := (4.0 / 3.0) * rx * (math.Sqrt2 - 1)
 	ly := (4.0 / 3.0) * ry * (math.Sqrt2 - 1)
 	k := f.k
@@ -1095,16 +1118,14 @@ func (f *Fpdf) ClipCircle(x, y, r float64, outline bool) {
 // ClipEnd() to restore unclipped operations.
 //
 // See tutorial 14 for an example of this function.
-func (f *Fpdf) ClipPolygon(points []pointType, outline bool) {
-	if !f.setClipActive() {
-		return
-	}
+func (f *Fpdf) ClipPolygon(points []PointType, outline bool) {
+	f.clipNest++
 	var s fmtBuffer
 	h := f.h
 	k := f.k
 	s.printf("q ")
 	for j, pt := range points {
-		s.printf("%.2f %.2f %s ", pt.x*k, (h-pt.y)*k, strIf(j == 0, "m", "l"))
+		s.printf("%.2f %.2f %s ", pt.X*k, (h-pt.Y)*k, strIf(j == 0, "m", "l"))
 	}
 	s.printf("h W %s", strIf(outline, "S", "n"))
 	f.out(s.String())
@@ -1112,14 +1133,14 @@ func (f *Fpdf) ClipPolygon(points []pointType, outline bool) {
 
 // Ends a clipping operation that was started with a call to ClipRect(),
 // ClipRoundedRect(), ClipText(), ClipEllipse(), ClipCircle() or ClipPolygon().
-// Only one clipping operation can be active at a time, and the document cannot
-// be successfully output while a clipping operation is active.
+// Clipping operations can be nested. The document cannot be successfully
+// output while a clipping operation is active.
 //
 // See tutorial 14 for an example of this function.
 func (f *Fpdf) ClipEnd() {
 	if f.err == nil {
-		if f.clipActive {
-			f.clipActive = false
+		if f.clipNest > 0 {
+			f.clipNest--
 			f.out("Q")
 		} else {
 			f.err = fmt.Errorf("Error attempting to end clip operation")
@@ -1965,45 +1986,40 @@ func (f *Fpdf) Output(w io.Writer) error {
 	if err != nil {
 		f.err = err
 	}
-	dump("pdf.txt", f.stdpageSizes,
+	dump("pdf.txt", f.stdPageSizes,
 		f.defPageSize,
 		f.curPageSize,
 		f.pageSizes)
 	return f.err
 }
 
-func (f *Fpdf) getpagesizestr(sizeStr string) (size sizeType) {
+func (f *Fpdf) getpagesizestr(sizeStr string) (size SizeType) {
 	if f.err != nil {
 		return
 	}
 	sizeStr = strings.ToLower(sizeStr)
 	// dbg("Size [%s]", sizeStr)
-	if sizeStr == "" {
-		// dbg("not found %s", sizeStr)
-		size = f.defPageSize
-	} else {
-		var ok bool
-		size, ok = f.stdpageSizes[sizeStr]
-		if ok {
-			// dbg("found %s", sizeStr)
-			size.wd /= f.k
-			size.ht /= f.k
+	var ok bool
+	size, ok = f.stdPageSizes[sizeStr]
+	if ok {
+		// dbg("found %s", sizeStr)
+		size.Wd /= f.k
+		size.Ht /= f.k
 
-		} else {
-			f.err = fmt.Errorf("Unknown page size %s", sizeStr)
-		}
+	} else {
+		f.err = fmt.Errorf("Unknown page size %s", sizeStr)
 	}
 	return
 }
 
-func (f *Fpdf) _getpagesize(size sizeType) sizeType {
-	if size.wd > size.ht {
-		size.wd, size.ht = size.ht, size.wd
+func (f *Fpdf) _getpagesize(size SizeType) SizeType {
+	if size.Wd > size.Ht {
+		size.Wd, size.Ht = size.Ht, size.Wd
 	}
 	return size
 }
 
-func (f *Fpdf) beginpage(orientationStr string, size sizeType) {
+func (f *Fpdf) beginpage(orientationStr string, size SizeType) {
 	if f.err != nil {
 		return
 	}
@@ -2020,14 +2036,14 @@ func (f *Fpdf) beginpage(orientationStr string, size sizeType) {
 	} else {
 		orientationStr = strings.ToUpper(orientationStr[0:1])
 	}
-	if orientationStr != f.curOrientation || size.wd != f.curPageSize.wd || size.ht != f.curPageSize.ht {
+	if orientationStr != f.curOrientation || size.Wd != f.curPageSize.Wd || size.Ht != f.curPageSize.Ht {
 		// New size or orientation
 		if orientationStr == "P" {
-			f.w = size.wd
-			f.h = size.ht
+			f.w = size.Wd
+			f.h = size.Ht
 		} else {
-			f.w = size.ht
-			f.h = size.wd
+			f.w = size.Ht
+			f.h = size.Wd
 		}
 		f.wPt = f.w * f.k
 		f.hPt = f.h * f.k
@@ -2035,8 +2051,8 @@ func (f *Fpdf) beginpage(orientationStr string, size sizeType) {
 		f.curOrientation = orientationStr
 		f.curPageSize = size
 	}
-	if orientationStr != f.defOrientation || size.wd != f.defPageSize.wd || size.ht != f.defPageSize.ht {
-		f.pageSizes[f.page] = sizeType{f.wPt, f.hPt}
+	if orientationStr != f.defOrientation || size.Wd != f.defPageSize.Wd || size.Ht != f.defPageSize.Ht {
+		f.pageSizes[f.page] = SizeType{f.wPt, f.hPt}
 	}
 	return
 }
@@ -2411,7 +2427,7 @@ func (f *Fpdf) outf(fmtStr string, args ...interface{}) {
 
 func (f *Fpdf) putpages() {
 	var wPt, hPt float64
-	var pageSize sizeType
+	var pageSize SizeType
 	// var linkList []linkType
 	var ok bool
 	nb := f.page
@@ -2428,11 +2444,11 @@ func (f *Fpdf) putpages() {
 		}
 	}
 	if f.defOrientation == "P" {
-		wPt = f.defPageSize.wd * f.k
-		hPt = f.defPageSize.ht * f.k
+		wPt = f.defPageSize.Wd * f.k
+		hPt = f.defPageSize.Ht * f.k
 	} else {
-		wPt = f.defPageSize.ht * f.k
-		hPt = f.defPageSize.wd * f.k
+		wPt = f.defPageSize.Ht * f.k
+		hPt = f.defPageSize.Wd * f.k
 	}
 	for n := 1; n <= nb; n++ {
 		// Page
@@ -2441,7 +2457,7 @@ func (f *Fpdf) putpages() {
 		f.out("/Parent 1 0 R")
 		pageSize, ok = f.pageSizes[n]
 		if ok {
-			f.outf("/MediaBox [0 0 %.2f %.2f]", pageSize.wd, pageSize.ht)
+			f.outf("/MediaBox [0 0 %.2f %.2f]", pageSize.Wd, pageSize.Ht)
 		}
 		f.out("/Resources 2 0 R")
 		// Links
@@ -2455,11 +2471,11 @@ func (f *Fpdf) putpages() {
 					annots.printf("/A <</S /URI /URI %s>>>>", f.textstring(pl.linkStr))
 				} else {
 					l := f.links[pl.link]
-					var sz sizeType
+					var sz SizeType
 					var h float64
 					sz, ok = f.pageSizes[l.page]
 					if ok {
-						h = sz.ht
+						h = sz.Ht
 					} else {
 						h = hPt
 					}
