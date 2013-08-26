@@ -1978,10 +1978,6 @@ func (f *Fpdf) Output(w io.Writer) error {
 	if err != nil {
 		f.err = err
 	}
-	dump("pdf.txt", f.stdPageSizes,
-		f.defPageSize,
-		f.curPageSize,
-		f.pageSizes)
 	return f.err
 }
 
