@@ -70,8 +70,8 @@ type fontFileType struct {
 
 type linkType struct {
 	x, y, wd, ht float64
-	link         int    // Auto-generated link ID or...
-	linkStr      string // ...application-provided link string
+	link         int    // Auto-generated internal link ID or...
+	linkStr      string // ...application-provided external link string
 }
 
 type intLinkType struct {
@@ -82,7 +82,8 @@ type intLinkType struct {
 // InitType is used with NewCustom() to customize an Fpdf instance.
 // OrientationStr, UnitStr, SizeStr and FontDirStr correspond to the arguments
 // accepted by New(). If the Wd and Ht fields of Size are each greater than
-// zero, Size will be used to set the default page size rather than SizeStr.
+// zero, Size will be used to set the default page size rather than SizeStr. Wd
+// and Ht are specified in the units of measure indicated by UnitStr.
 type InitType struct {
 	OrientationStr string
 	UnitStr        string
