@@ -23,8 +23,6 @@ import (
 	// "github.com/davecgh/go-spew/spew"
 	"math"
 	"os"
-	"regexp"
-	"strings"
 )
 
 func round(f float64) int {
@@ -93,81 +91,6 @@ func sliceUncompress(data []byte) (outData []byte, err error) {
 		_, err = outBuf.ReadFrom(r)
 		if err == nil {
 			outData = outBuf.Bytes()
-		}
-	}
-	return
-}
-
-// Convert 'ABCDEFG' to, for example, 'A,BCD,EFG'
-func strDelimit(str string, sepstr string, sepcount int) string {
-	pos := len(str) - sepcount
-	for pos > 0 {
-		str = str[:pos] + sepstr + str[pos:]
-		pos = pos - sepcount
-	}
-	return str
-}
-
-type htmlSegmentType struct {
-	cat  byte              // 'O' open tag, 'C' close tag, 'T' text
-	str  string            // Literal text unchanged, tags are lower case
-	attr map[string]string // Attribute keys are lower case
-}
-
-// Returns a list of HTML tags and literal elements. This is done with regular
-// expressions, so the result is only marginally better than useless.
-// Adapted from http://www.fpdf.org/
-func htmlTokenize(htmlStr string) (list []htmlSegmentType) {
-	list = make([]htmlSegmentType, 0, 16)
-	htmlStr = strings.Replace(htmlStr, "\n", " ", -1)
-	htmlStr = strings.Replace(htmlStr, "\r", "", -1)
-	tagRe, _ := regexp.Compile(`(?U)<.*>`)
-	attrRe, _ := regexp.Compile(`([^=]+)=["']?([^"']+)`)
-	capList := tagRe.FindAllStringIndex(htmlStr, -1)
-	if capList != nil {
-		var seg htmlSegmentType
-		var parts []string
-		pos := 0
-		for _, cap := range capList {
-			if pos < cap[0] {
-				seg.cat = 'T'
-				seg.str = htmlStr[pos:cap[0]]
-				seg.attr = nil
-				list = append(list, seg)
-			}
-			if htmlStr[cap[0]+1] == '/' {
-				seg.cat = 'C'
-				seg.str = strings.ToLower(htmlStr[cap[0]+2 : cap[1]-1])
-				seg.attr = nil
-				list = append(list, seg)
-			} else {
-				// Extract attributes
-				parts = strings.Split(htmlStr[cap[0]+1:cap[1]-1], " ")
-				if len(parts) > 0 {
-					for j, part := range parts {
-						if j == 0 {
-							seg.cat = 'O'
-							seg.str = strings.ToLower(parts[0])
-							seg.attr = make(map[string]string)
-						} else {
-							attrList := attrRe.FindAllStringSubmatch(part, -1)
-							if attrList != nil {
-								for _, attr := range attrList {
-									seg.attr[strings.ToLower(attr[1])] = attr[2]
-								}
-							}
-						}
-					}
-					list = append(list, seg)
-				}
-			}
-			pos = cap[1]
-		}
-		if len(htmlStr) > pos {
-			seg.cat = 'T'
-			seg.str = htmlStr[pos:]
-			seg.attr = nil
-			list = append(list, seg)
 		}
 	}
 	return

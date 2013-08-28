@@ -14,13 +14,15 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-package gofpdf
+package gofpdf_test
 
 import (
 	"bufio"
+	"code.google.com/p/gofpdf"
 	"fmt"
 	"io/ioutil"
 	"os"
+	"regexp"
 	"strings"
 )
 
@@ -45,7 +47,7 @@ func (nw *nullWriter) Close() (err error) {
 }
 
 type pdfWriter struct {
-	pdf *Fpdf
+	pdf *gofpdf.Fpdf
 	fl  *os.File
 	idx int
 }
@@ -70,7 +72,7 @@ func (pw *pdfWriter) Close() (err error) {
 	return
 }
 
-func docWriter(pdf *Fpdf, idx int) *pdfWriter {
+func docWriter(pdf *gofpdf.Fpdf, idx int) *pdfWriter {
 	pw := new(pdfWriter)
 	pw.pdf = pdf
 	pw.idx = idx
@@ -85,6 +87,81 @@ func docWriter(pdf *Fpdf, idx int) *pdfWriter {
 	return pw
 }
 
+// Convert 'ABCDEFG' to, for example, 'A,BCD,EFG'
+func strDelimit(str string, sepstr string, sepcount int) string {
+	pos := len(str) - sepcount
+	for pos > 0 {
+		str = str[:pos] + sepstr + str[pos:]
+		pos = pos - sepcount
+	}
+	return str
+}
+
+type htmlSegmentType struct {
+	cat  byte              // 'O' open tag, 'C' close tag, 'T' text
+	str  string            // Literal text unchanged, tags are lower case
+	attr map[string]string // Attribute keys are lower case
+}
+
+// Returns a list of HTML tags and literal elements. This is done with regular
+// expressions, so the result is only marginally better than useless.
+// Adapted from http://www.fpdf.org/
+func htmlTokenize(htmlStr string) (list []htmlSegmentType) {
+	list = make([]htmlSegmentType, 0, 16)
+	htmlStr = strings.Replace(htmlStr, "\n", " ", -1)
+	htmlStr = strings.Replace(htmlStr, "\r", "", -1)
+	tagRe, _ := regexp.Compile(`(?U)<.*>`)
+	attrRe, _ := regexp.Compile(`([^=]+)=["']?([^"']+)`)
+	capList := tagRe.FindAllStringIndex(htmlStr, -1)
+	if capList != nil {
+		var seg htmlSegmentType
+		var parts []string
+		pos := 0
+		for _, cap := range capList {
+			if pos < cap[0] {
+				seg.cat = 'T'
+				seg.str = htmlStr[pos:cap[0]]
+				seg.attr = nil
+				list = append(list, seg)
+			}
+			if htmlStr[cap[0]+1] == '/' {
+				seg.cat = 'C'
+				seg.str = strings.ToLower(htmlStr[cap[0]+2 : cap[1]-1])
+				seg.attr = nil
+				list = append(list, seg)
+			} else {
+				// Extract attributes
+				parts = strings.Split(htmlStr[cap[0]+1:cap[1]-1], " ")
+				if len(parts) > 0 {
+					for j, part := range parts {
+						if j == 0 {
+							seg.cat = 'O'
+							seg.str = strings.ToLower(parts[0])
+							seg.attr = make(map[string]string)
+						} else {
+							attrList := attrRe.FindAllStringSubmatch(part, -1)
+							if attrList != nil {
+								for _, attr := range attrList {
+									seg.attr[strings.ToLower(attr[1])] = attr[2]
+								}
+							}
+						}
+					}
+					list = append(list, seg)
+				}
+			}
+			pos = cap[1]
+		}
+		if len(htmlStr) > pos {
+			seg.cat = 'T'
+			seg.str = htmlStr[pos:]
+			seg.attr = nil
+			list = append(list, seg)
+		}
+	}
+	return
+}
+
 func lorem() string {
 	return "Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod " +
 		"tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis " +
@@ -96,7 +173,7 @@ func lorem() string {
 
 // Hello, world
 func ExampleFpdf_tutorial01() {
-	pdf := New("P", "mm", "A4", FONT_DIR)
+	pdf := gofpdf.New("P", "mm", "A4", FONT_DIR)
 	pdf.AddPage()
 	pdf.SetFont("Arial", "B", 16)
 	pdf.Cell(40, 10, "Hello World!")
@@ -107,7 +184,7 @@ func ExampleFpdf_tutorial01() {
 
 // Header, footer and page-breaking
 func ExampleFpdf_tutorial02() {
-	pdf := New("P", "mm", "A4", FONT_DIR)
+	pdf := gofpdf.New("P", "mm", "A4", FONT_DIR)
 	pdf.SetHeaderFunc(func() {
 		pdf.Image(IMG_DIR+"/logo.png", 10, 6, 30, 0, false, "", 0, "")
 		pdf.SetY(5)
@@ -134,7 +211,7 @@ func ExampleFpdf_tutorial02() {
 
 // Word-wrapping, line justification and page-breaking
 func ExampleFpdf_tutorial03() {
-	pdf := New("P", "mm", "A4", FONT_DIR)
+	pdf := gofpdf.New("P", "mm", "A4", FONT_DIR)
 	titleStr := "20000 Leagues Under the Seas"
 	pdf.SetTitle(titleStr, false)
 	pdf.SetAuthor("Jules Verne", false)
@@ -207,7 +284,7 @@ func ExampleFpdf_tutorial03() {
 func ExampleFpdf_tutorial04() {
 	var y0 float64
 	var crrntCol int
-	pdf := New("P", "mm", "A4", FONT_DIR)
+	pdf := gofpdf.New("P", "mm", "A4", FONT_DIR)
 	titleStr := "20000 Leagues Under the Seas"
 	pdf.SetTitle(titleStr, false)
 	pdf.SetAuthor("Jules Verne", false)
@@ -306,7 +383,7 @@ func ExampleFpdf_tutorial04() {
 
 // Various table styles
 func ExampleFpdf_tutorial05() {
-	pdf := New("P", "mm", "A4", FONT_DIR)
+	pdf := gofpdf.New("P", "mm", "A4", FONT_DIR)
 	type countryType struct {
 		nameStr, capitalStr, areaStr, popStr string
 	}
@@ -428,7 +505,7 @@ func ExampleFpdf_tutorial05() {
 func ExampleFpdf_tutorial06() {
 	var boldLvl, italicLvl, underscoreLvl int
 	var hrefStr string
-	pdf := New("P", "mm", "A4", FONT_DIR)
+	pdf := gofpdf.New("P", "mm", "A4", FONT_DIR)
 	setStyle := func(boldAdj, italicAdj, underscoreAdj int) {
 		styleStr := ""
 		boldLvl += boldAdj
@@ -521,7 +598,7 @@ func ExampleFpdf_tutorial06() {
 
 // Non-standard font
 func ExampleFpdf_tutorial07() {
-	pdf := New("P", "mm", "A4", FONT_DIR)
+	pdf := gofpdf.New("P", "mm", "A4", FONT_DIR)
 	pdf.AddFont("Calligrapher", "", "calligra.json")
 	pdf.AddPage()
 	pdf.SetFont("Calligrapher", "", 35)
@@ -533,7 +610,7 @@ func ExampleFpdf_tutorial07() {
 
 // Various image types
 func ExampleFpdf_tutorial08() {
-	pdf := New("P", "mm", "A4", FONT_DIR)
+	pdf := gofpdf.New("P", "mm", "A4", FONT_DIR)
 	pdf.AddPage()
 	pdf.SetFont("Arial", "", 11)
 	pdf.Image(IMG_DIR+"/logo.png", 10, 10, 30, 0, false, "", 0, "")
@@ -556,7 +633,7 @@ func ExampleFpdf_tutorial09() {
 	var y0 float64
 	var crrntCol int
 	loremStr := lorem()
-	pdf := New("L", "mm", "A4", FONT_DIR)
+	pdf := gofpdf.New("L", "mm", "A4", FONT_DIR)
 	const (
 		pageWd = 297.0 // A4 210.0 x 297.0
 		margin = 10.0
@@ -611,8 +688,8 @@ func ExampleFpdf_tutorial09() {
 
 // Test the corner cases as reported by the gocov tool
 func ExampleFpdf_tutorial10() {
-	MakeFont(FONT_DIR+"/calligra.ttf", FONT_DIR+"/cp1252.map", FONT_DIR, nil, true)
-	pdf := New("", "", "", "")
+	gofpdf.MakeFont(FONT_DIR+"/calligra.ttf", FONT_DIR+"/cp1252.map", FONT_DIR, nil, true)
+	pdf := gofpdf.New("", "", "", "")
 	pdf.SetFontLocation(FONT_DIR)
 	pdf.SetTitle("世界", true)
 	pdf.SetAuthor("世界", true)
@@ -634,7 +711,7 @@ func ExampleFpdf_tutorial11() {
 		thin  = 0.2
 		thick = 3.0
 	)
-	pdf := New("", "", "", FONT_DIR)
+	pdf := gofpdf.New("", "", "", FONT_DIR)
 	pdf.SetFont("Helvetica", "", 12)
 	pdf.SetFillColor(200, 200, 220)
 	pdf.AddPage()
@@ -722,7 +799,7 @@ func ExampleFpdf_tutorial12() {
 	modeList := []string{"Normal", "Multiply", "Screen", "Overlay",
 		"Darken", "Lighten", "ColorDodge", "ColorBurn", "HardLight", "SoftLight",
 		"Difference", "Exclusion", "Hue", "Saturation", "Color", "Luminosity"}
-	pdf := New("", "", "", FONT_DIR)
+	pdf := gofpdf.New("", "", "", FONT_DIR)
 	pdf.SetLineWidth(2)
 	pdf.SetAutoPageBreak(false, 0)
 	pdf.AddPage()
@@ -760,7 +837,7 @@ func ExampleFpdf_tutorial12() {
 
 // Gradients
 func ExampleFpdf_tutorial13() {
-	pdf := New("", "", "", FONT_DIR)
+	pdf := gofpdf.New("", "", "", FONT_DIR)
 	pdf.SetFont("Helvetica", "", 12)
 	pdf.AddPage()
 	pdf.LinearGradient(0, 0, 210, 100, 250, 250, 255, 220, 220, 225, 0, 0, 0, .5)
@@ -779,7 +856,7 @@ func ExampleFpdf_tutorial13() {
 
 // Clipping examples
 func ExampleFpdf_tutorial14() {
-	pdf := New("", "", "", FONT_DIR)
+	pdf := gofpdf.New("", "", "", FONT_DIR)
 	y := 10.0
 	pdf.AddPage()
 
@@ -818,7 +895,7 @@ func ExampleFpdf_tutorial14() {
 	pdf.RadialGradient(50, y, 20, 20, 220, 220, 250, 40, 40, 60, 0.3, 0.7, 0.3, 0.7, 0.5)
 	pdf.ClipEnd()
 
-	pdf.ClipPolygon([]PointType{{80, y + 20}, {90, y}, {100, y + 20}}, true)
+	pdf.ClipPolygon([]gofpdf.PointType{{80, y + 20}, {90, y}, {100, y + 20}}, true)
 	pdf.LinearGradient(80, y, 20, 20, 250, 220, 250, 60, 40, 60, 0.5, 1, 0.5, 0.5)
 	pdf.ClipEnd()
 
@@ -839,16 +916,20 @@ func ExampleFpdf_tutorial14() {
 
 // Page size example
 func ExampleFpdf_tutorial15() {
-	pdf := NewCustom(&InitType{UnitStr: "in", Size: SizeType{6, 6}, FontDirStr: FONT_DIR})
+	pdf := gofpdf.NewCustom(&gofpdf.InitType{
+		UnitStr:    "in",
+		Size:       gofpdf.SizeType{6, 6},
+		FontDirStr: FONT_DIR,
+	})
 	pdf.SetMargins(0.5, 1, 0.5)
 	pdf.SetFont("Times", "", 14)
-	pdf.AddPageFormat("L", SizeType{3, 12})
+	pdf.AddPageFormat("L", gofpdf.SizeType{3, 12})
 	pdf.SetXY(0.5, 1.5)
 	pdf.CellFormat(11, 0.2, "12 in x 3 in", "", 0, "C", false, 0, "")
 	pdf.AddPage() // Default size established in NewCustom()
 	pdf.SetXY(0.5, 3)
 	pdf.CellFormat(5, 0.2, "6 in x 6 in", "", 0, "C", false, 0, "")
-	pdf.AddPageFormat("P", SizeType{3, 12})
+	pdf.AddPageFormat("P", gofpdf.SizeType{3, 12})
 	pdf.SetXY(0.5, 6)
 	pdf.CellFormat(2, 0.2, "3 in x 12 in", "", 0, "C", false, 0, "")
 	for j := 0; j <= 3; j++ {
