@@ -658,9 +658,20 @@ func (f *Fpdf) SetTextColor(r, g, b int) {
 
 // Returns the length of a string in user units. A font must be selected.
 func (f *Fpdf) GetStringWidth(s string) float64 {
+	if f.err != nil {
+		return 0
+	}
 	w := 0
+	count := rune(len(f.currentFont.Cw))
 	for _, ch := range s {
-		w += f.currentFont.Cw[ch]
+		if ch < count {
+			w += f.currentFont.Cw[ch]
+		} else {
+			if f.err == nil {
+				f.err = fmt.Errorf("Unicode strings not supported")
+			}
+			return 0
+		}
 	}
 	return float64(w) * f.fontSize / 1000
 }

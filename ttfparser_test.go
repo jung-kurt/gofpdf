@@ -19,8 +19,7 @@ package gofpdf_test
 import (
 	"code.google.com/p/gofpdf"
 	"fmt"
-
-//	"testing"
+	// "testing"
 )
 
 func ExampleTtfParse() {
@@ -67,3 +66,20 @@ func ExampleTtfParse() {
 // 		}
 // 	}
 // }
+
+func ExampleFpdf_GetStringWidth() {
+	pdf := gofpdf.New("", "", "", FONT_DIR)
+	pdf.SetFont("Helvetica", "", 12)
+	pdf.AddPage()
+	for _, s := range []string{"Hello", "世界"} {
+		fmt.Printf("Width of \"%s\" is %.2f\n", s, pdf.GetStringWidth(s))
+		if pdf.Err() {
+			fmt.Println(pdf.Error())
+		}
+	}
+	pdf.Close()
+	// Output:
+	// Width of "Hello" is 9.64
+	// Width of "世界" is 0.00
+	// Unicode strings not supported
+}
