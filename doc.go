@@ -22,7 +22,8 @@ created by Olivier Plathey, and a number of font and image resources are copied
 directly from it. Drawing support is adapted from the FPDF geometric figures
 script by David Hernández Sanz. Transparency support is adapted from the FPDF
 transparency script by Martin Hall-May. Support for gradients and clipping is
-adapted from FPDF scripts by Andreas Würmser.
+adapted from FPDF scripts by Andreas Würmser. Support for outline bookmarks is
+adapted from Olivier Plathey by Manuel Cornes.
 
 The FPDF website is http://www.fpdf.org/.
 

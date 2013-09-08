@@ -79,6 +79,14 @@ type intLinkType struct {
 	y    float64
 }
 
+// outlineType is used for a sidebar outline of bookmarks
+type outlineType struct {
+	text                                   string
+	level, parent, first, last, next, prev int
+	y                                      float64
+	p                                      int
+}
+
 // InitType is used with NewCustom() to customize an Fpdf instance.
 // OrientationStr, UnitStr, SizeStr and FontDirStr correspond to the arguments
 // accepted by New(). If the Wd and Ht fields of Size are each greater than
@@ -92,6 +100,7 @@ type InitType struct {
 	FontDirStr     string
 }
 
+// Principal structure for creating a single PDF document
 type Fpdf struct {
 	page             int                      // current page number
 	n                int                      // current object number
@@ -137,6 +146,8 @@ type Fpdf struct {
 	images           map[string]imageInfoType // array of used images
 	pageLinks        [][]linkType             // pageLinks[page][link], both 1-based
 	links            []intLinkType            // array of internal links
+	outlines         []outlineType            // array of outlines
+	outlineRoot      int                      // root of outlines
 	autoPageBreak    bool                     // automatic page breaking
 	acceptPageBreak  func() bool              // returns true to accept page break
 	pageBreakTrigger float64                  // threshold used to trigger page breaks

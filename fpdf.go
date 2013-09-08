@@ -1381,6 +1381,20 @@ func (f *Fpdf) LinkString(x, y, w, h float64, linkStr string) {
 	f.newLink(x, y, w, h, 0, linkStr)
 }
 
+// Sets a bookmark that will be displayed in a sidebar outline. txtStr is the
+// title of the bookmark. level specifies the level of the bookmark in the
+// outline; 0 is the top level, 1 is just below, and so on. y specifies the
+// vertical position of the bookmark destination in the current page; -1
+// indicates the current position.
+//
+// See tutorial 16 for an bookmark example.
+func (f *Fpdf) Bookmark(txtStr string, level int, y float64) {
+	if y == -1 {
+		y = f.y
+	}
+	f.outlines = append(f.outlines, outlineType{text: txtStr, level: level, y: y, p: f.PageNo(), prev: -1, last: -1, next: -1, first: -1})
+}
+
 // Prints a character string. The origin (x, y) is on the left of the first
 // character at the baseline. This method allows to place a string precisely on
 // the page, but it is usually easier to use Cell(), MultiCell() or Write()
@@ -2844,6 +2858,11 @@ func (f *Fpdf) putcatalog() {
 	case "two":
 		f.out("/PageLayout /TwoColumnLeft")
 	}
+	// Bookmarks
+	if len(f.outlines) > 0 {
+		f.outf("/Outlines %d 0 R", f.outlineRoot)
+		f.out("/PageMode /UseOutlines")
+	}
 }
 
 func (f *Fpdf) putheader() {
@@ -2859,6 +2878,59 @@ func (f *Fpdf) puttrailer() {
 	f.outf("/Info %d 0 R", f.n-1)
 }
 
+func (f *Fpdf) putbookmarks() {
+	nb := len(f.outlines)
+	if nb > 0 {
+		lru := make(map[int]int)
+		level := 0
+		for i, o := range f.outlines {
+			if o.level > 0 {
+				parent := lru[o.level-1]
+				f.outlines[i].parent = parent
+				f.outlines[parent].last = i
+				if o.level > level {
+					f.outlines[parent].first = i
+				}
+			} else {
+				f.outlines[i].parent = nb
+			}
+			if o.level <= level && i > 0 {
+				prev := lru[o.level]
+				f.outlines[prev].next = i
+				f.outlines[i].prev = prev
+			}
+			lru[o.level] = i
+			level = o.level
+		}
+		n := f.n + 1
+		for _, o := range f.outlines {
+			f.newobj()
+			f.outf("<</Title %s", f.textstring(o.text))
+			f.outf("/Parent %d 0 R", n+o.parent)
+			if o.prev != -1 {
+				f.outf("/Prev %d 0 R", n+o.prev)
+			}
+			if o.next != -1 {
+				f.outf("/Next %d 0 R", n+o.next)
+			}
+			if o.first != -1 {
+				f.outf("/First %d 0 R", n+o.first)
+			}
+			if o.last != -1 {
+				f.outf("/Last %d 0 R", n+o.last)
+			}
+			f.outf("/Dest [%d 0 R /XYZ 0 %.2f null]", 1+2*o.p, (f.h-o.y)*f.k)
+			f.out("/Count 0>>")
+			f.out("endobj")
+		}
+		f.newobj()
+		f.outlineRoot = f.n
+		f.outf("<</Type /Outlines /First %d 0 R", n)
+		f.outf("/Last %d 0 R>>", n+lru[0])
+		f.out("endobj")
+	}
+}
+
 func (f *Fpdf) enddoc() {
 	if f.err != nil {
 		return
@@ -2869,6 +2941,8 @@ func (f *Fpdf) enddoc() {
 	if f.err != nil {
 		return
 	}
+	// Bookmarks
+	f.putbookmarks()
 	// 	Info
 	f.newobj()
 	f.out("<<")

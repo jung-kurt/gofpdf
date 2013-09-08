@@ -944,3 +944,23 @@ func ExampleFpdf_tutorial15() {
 	// 3:   3.00 in,  12.00 in
 	// Successfully generated pdf/tutorial15.pdf
 }
+
+// Bookmark test
+func ExampleFpdf_tutorial16() {
+	pdf := gofpdf.New("P", "mm", "A4", FONT_DIR)
+	pdf.AddPage()
+	pdf.SetFont("Arial", "", 15)
+	pdf.Bookmark("Page 1", 0, 0)
+	pdf.Bookmark("Paragraph 1", 1, -1)
+	pdf.Cell(0, 6, "Paragraph 1")
+	pdf.Ln(50)
+	pdf.Bookmark("Paragraph 2", 1, -1)
+	pdf.Cell(0, 6, "Paragraph 2")
+	pdf.AddPage()
+	pdf.Bookmark("Page 2", 0, 0)
+	pdf.Bookmark("Paragraph 3", 1, -1)
+	pdf.Cell(0, 6, "Paragraph 3")
+	pdf.OutputAndClose(docWriter(pdf, 16))
+	// Output:
+	// Successfully generated pdf/tutorial16.pdf
+}
