@@ -41,6 +41,8 @@ Features
 
 • Colors, gradients and alpha channel transparency
 
+• Outline bookmarks
+
 • Internal and external links
 
 • TrueType, Type1 and encoding support
