@@ -27,7 +27,9 @@ import (
 	"encoding/json"
 	"fmt"
 	"image"
+	"image/color"
 	"image/gif"
+	"image/jpeg"
 	"image/png"
 	"io"
 	"io/ioutil"
@@ -2135,7 +2137,7 @@ func be16(buf []byte) int {
 }
 
 // Extract info from a JPEG file
-// Thank you, Michael Petrov: http://www.64lines.com/jpeg-width-height
+// Thank you, Bruno Michel, for providing this code.
 func (f *Fpdf) parsejpg(fileStr string) (info imageInfoType) {
 	var err error
 	info.data, err = ioutil.ReadFile(fileStr)
@@ -2143,44 +2145,24 @@ func (f *Fpdf) parsejpg(fileStr string) (info imageInfoType) {
 		f.err = err
 		return
 	}
-	if bufEqual(info.data[0:], "\xff\xd8\xff\xe0") && bufEqual(info.data[6:], "JFIF\x00") {
-		dataLen := len(info.data)
-		pos := 4
-		blockLen := be16(info.data[4:])
-		loop := true
-		for pos+blockLen < dataLen && loop {
-			pos += blockLen
-			if info.data[pos] != 0xff {
-				f.err = fmt.Errorf("Unexpected JPEG segment header: %s\n", fileStr)
-				return
-			}
-			if info.data[pos+1] == 0xc0 {
-				// Start-of-frame segment
-				info.h = float64(be16(info.data[pos+5:]))
-				info.w = float64(be16(info.data[pos+7:]))
-				info.bpc = int(info.data[pos+4])
-				compNum := info.data[pos+9]
-				switch compNum {
-				case 3:
-					info.cs = "DeviceRGB"
-				case 4:
-					info.cs = "DeviceCMYK"
-				case 1:
-					info.cs = "DeviceGray"
-				default:
-					f.err = fmt.Errorf("JPEG buffer has unsupported color space (%d)", compNum)
-					return
-				}
-				loop = false
-			} else {
-				pos += 2
-				blockLen = be16(info.data[pos:])
-			}
-		}
-	} else {
-		f.err = fmt.Errorf("Improper JPEG header: %s\n", fileStr)
+	config, err := jpeg.DecodeConfig(bytes.NewReader(info.data))
+	if err != nil {
+		f.err = err
+		return
 	}
+	info.w = float64(config.Width)
+	info.h = float64(config.Height)
 	info.f = "DCTDecode"
+	info.bpc = 8
+	switch config.ColorModel {
+	case color.GrayModel:
+		info.cs = "DeviceGray"
+	case color.YCbCrModel:
+		info.cs = "DeviceRGB"
+	default:
+		f.err = fmt.Errorf("JPEG buffer has unsupported color space (%v)", config.ColorModel)
+		return
+	}
 	return
 }
 
