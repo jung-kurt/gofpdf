@@ -1216,8 +1216,8 @@ func (f *Fpdf) AddFont(familyStr, styleStr, fileStr string) {
 			}
 		}
 		if n < 0 {
-			n = len(f.diffs) + 1
-			f.diffs[n] = info.Diff
+			f.diffs = append(f.diffs, info.Diff)
+			n = len(f.diffs)
 		}
 		info.DiffN = n
 	}
