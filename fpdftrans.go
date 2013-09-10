@@ -10,7 +10,7 @@ import (
 
 // The matrix used for generalized transformations of text, drawings and images.
 type TransformMatrix struct {
-	a, b, c, d, e, f float64
+	A, B, C, D, E, F float64
 }
 
 // Set up a transformation context for subsequent text, drawings and images.
@@ -57,7 +57,8 @@ func (f *Fpdf) TransformScale(scaleWd, scaleHt, x, y float64) {
 	x *= f.k
 	scaleWd /= 100
 	scaleHt /= 100
-	f.Transform(TransformMatrix{scaleWd, 0, 0, scaleHt, x * (1 - scaleWd), y * (1 - scaleHt)})
+	f.Transform(TransformMatrix{scaleWd, 0, 0,
+		scaleHt, x * (1 - scaleWd), y * (1 - scaleHt)})
 }
 
 // Horizontally mirror the following text, drawings and images. x is the axis
@@ -112,12 +113,12 @@ func (f *Fpdf) TransformRotate(angle, x, y float64) {
 	x *= f.k
 	angle = angle * math.Pi / 180
 	var tm TransformMatrix
-	tm.a = math.Cos(angle)
-	tm.b = math.Sin(angle)
-	tm.c = -tm.b
-	tm.d = tm.a
-	tm.e = x + tm.b*y - tm.a*x
-	tm.f = y - tm.a*y - tm.b*x
+	tm.A = math.Cos(angle)
+	tm.B = math.Sin(angle)
+	tm.C = -tm.B
+	tm.D = tm.A
+	tm.E = x + tm.B*y - tm.A*x
+	tm.F = y - tm.A*y - tm.B*x
 	f.Transform(tm)
 }
 
@@ -147,12 +148,12 @@ func (f *Fpdf) TransformSkew(angleX, angleY, x, y float64) {
 	x *= f.k
 	y = (f.h - y) * f.k
 	var tm TransformMatrix
-	tm.a = 1
-	tm.b = math.Tan(angleY * math.Pi / 180)
-	tm.c = math.Tan(angleX * math.Pi / 180)
-	tm.d = 1
-	tm.e = -tm.c * y
-	tm.f = -tm.b * x
+	tm.A = 1
+	tm.B = math.Tan(angleY * math.Pi / 180)
+	tm.C = math.Tan(angleX * math.Pi / 180)
+	tm.D = 1
+	tm.E = -tm.C * y
+	tm.F = -tm.B * x
 	f.Transform(tm)
 }
 
@@ -161,7 +162,8 @@ func (f *Fpdf) TransformSkew(angleX, angleY, x, y float64) {
 // TransformRotate() and TransformMirrorVertical() instead.
 func (f *Fpdf) Transform(tm TransformMatrix) {
 	if f.transformNest > 0 {
-		f.outf("%.3f %.3f %.3f %.3f %.3f %.3f cm", tm.a, tm.b, tm.c, tm.d, tm.e, tm.f)
+		f.outf("%.3f %.3f %.3f %.3f %.3f %.3f cm",
+			tm.A, tm.B, tm.C, tm.D, tm.E, tm.F)
 	} else if f.err == nil {
 		f.err = fmt.Errorf("Transformation context is not active")
 	}
