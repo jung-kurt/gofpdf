@@ -130,7 +130,7 @@ func (f *Fpdf) TransformSkewX(angleX, x, y float64) {
 
 // Vertically skew the following text, drawings and images keeping the point
 // (x, y) stationary. angleY ranges from -90 degrees (skew to the bottom) to 90
-// degrees (skew to the right).
+// degrees (skew to the top).
 func (f *Fpdf) TransformSkewY(angleY, x, y float64) {
 	f.TransformSkew(0, angleY, x, y)
 }
@@ -138,7 +138,7 @@ func (f *Fpdf) TransformSkewY(angleY, x, y float64) {
 // Generally skew the following text, drawings and images keeping the point (x,
 // y) stationary. angleX ranges from -90 degrees (skew to the left) to 90
 // degrees (skew to the right). angleY ranges from -90 degrees (skew to the
-// bottom) to 90 degrees (skew to the right).
+// bottom) to 90 degrees (skew to the top).
 func (f *Fpdf) TransformSkew(angleX, angleY, x, y float64) {
 	if angleX <= -90 || angleX >= 90 || angleY <= -90 || angleY >= 90 {
 		f.err = fmt.Errorf("Skew values must be between -90° and 90°")
