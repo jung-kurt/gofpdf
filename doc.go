@@ -23,7 +23,9 @@ directly from it. Drawing support is adapted from the FPDF geometric figures
 script by David Hernández Sanz. Transparency support is adapted from the FPDF
 transparency script by Martin Hall-May. Support for gradients and clipping is
 adapted from FPDF scripts by Andreas Würmser. Support for outline bookmarks is
-adapted from Olivier Plathey by Manuel Cornes.
+adapted from Olivier Plathey by Manuel Cornes. Support for transformations is
+adapted from the FPDF transformation script by Moritz Wagner and Andreas
+Würmser.
 
 The FPDF website is http://www.fpdf.org/.
 
@@ -50,6 +52,8 @@ Features
 • Page compression
 
 • Drawing support (lines, Bézier curves, arcs, ellipses)
+
+• Transformation support (rotation, scaling, skewing, translation, mirroring)
 
 • Clipping
 

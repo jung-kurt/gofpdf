@@ -428,6 +428,8 @@ func (f *Fpdf) Close() {
 	if f.err == nil {
 		if f.clipNest > 0 {
 			f.err = fmt.Errorf("Clip procedure must be explicitly ended")
+		} else if f.transformNest > 0 {
+			f.err = fmt.Errorf("Transformation procedure must be explicitly ended")
 		}
 	}
 	if f.err != nil {
@@ -1148,7 +1150,7 @@ func (f *Fpdf) ClipEnd() {
 			f.clipNest--
 			f.out("Q")
 		} else {
-			f.err = fmt.Errorf("Error attempting to end clip operation")
+			f.err = fmt.Errorf("Error attempting to end clip operation out of sequence")
 		}
 	}
 }

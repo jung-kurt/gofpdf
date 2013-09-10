@@ -171,6 +171,7 @@ type Fpdf struct {
 	blendMap         map[string]int           // map into blendList
 	gradientList     []gradientType           // slice[idx] of gradient records
 	clipNest         int                      // Number of active clipping contexts
+	transformNest    int                      // Number of active transformation contexts
 	err              error                    // Set if error occurs during life cycle of instance
 }
 
