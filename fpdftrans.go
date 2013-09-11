@@ -102,7 +102,7 @@ func (f *Fpdf) TransformTranslateY(ty float64) {
 // Move the following text, drawings and images horizontally and vertically by
 // the amounts specified by tx and ty.
 func (f *Fpdf) TransformTranslate(tx, ty float64) {
-	f.Transform(TransformMatrix{1, 0, 0, 1, tx - f.k, -ty * f.k})
+	f.Transform(TransformMatrix{1, 0, 0, 1, tx * f.k, -ty * f.k})
 }
 
 // Rotate the following text, drawings and images around the center point (x,
