@@ -777,7 +777,7 @@ func (f *Fpdf) point(x, y float64) {
 
 // Outputs quadratic curve from current point
 func (f *Fpdf) curve(cx0, cy0, x1, y1, cx1, cy1 float64) {
-	f.outf("%.2f %.2f %.2f %.2f %.2f %.2f c", cx0*f.k, (f.h-cy0)*f.k, x1*f.k,
+	f.outf("%.5f %.5f %.5f %.5f %.5f %.5f c", cx0*f.k, (f.h-cy0)*f.k, x1*f.k,
 		(f.h-y1)*f.k, cx1*f.k, (f.h-cy1)*f.k)
 }
 
@@ -796,7 +796,7 @@ func (f *Fpdf) curve(cx0, cy0, x1, y1, cx1, cy1 float64) {
 // See tutorial 11 for an example of this function.
 func (f *Fpdf) Curve(x0, y0, cx, cy, x1, y1 float64, styleStr string) {
 	f.point(x0, y0)
-	f.outf("%.2f %.2f %.2f %.2f v %s", cx*f.k, (f.h-cy)*f.k, x1*f.k, (f.h-y1)*f.k,
+	f.outf("%.5f %.5f %.5f %.5f v %s", cx*f.k, (f.h-cy)*f.k, x1*f.k, (f.h-y1)*f.k,
 		fillDrawOp(styleStr))
 }
 
@@ -815,7 +815,7 @@ func (f *Fpdf) Curve(x0, y0, cx, cy, x1, y1 float64, styleStr string) {
 // See tutorial 11 for an example of this function.
 func (f *Fpdf) CurveCubic(x0, y0, cx0, cy0, cx1, cy1, x1, y1 float64, styleStr string) {
 	f.point(x0, y0)
-	f.outf("%.2f %.2f %.2f %.2f %.2f %.2f c %s", cx0*f.k, (f.h-cy0)*f.k,
+	f.outf("%.5f %.5f %.5f %.5f %.5f %.5f c %s", cx0*f.k, (f.h-cy0)*f.k,
 		x1*f.k, (f.h-y1)*f.k, cx1*f.k, (f.h-cy1)*f.k, fillDrawOp(styleStr))
 }
 
@@ -849,7 +849,7 @@ func (f *Fpdf) Arc(x, y, rx, ry, degRotate, degStart, degEnd float64, styleStr s
 	dtm := dt / 3
 	if degRotate != 0 {
 		a := -degRotate * math.Pi / 180
-		f.outf("q %.2f %.2f %.2f %.2f %.2f %.2f cm", math.Cos(a), -1*math.Sin(a),
+		f.outf("q %.5f %.5f %.5f %.5f %.5f %.5f cm", math.Cos(a), -1*math.Sin(a),
 			math.Sin(a), math.Cos(a), x, y)
 		x = 0
 		y = 0
@@ -934,7 +934,7 @@ func (f *Fpdf) gradientClipStart(x, y, w, h float64) {
 	// Save current graphic state and set clipping area
 	f.outf("q %.2f %.2f %.2f %.2f re W n", x*f.k, (f.h-y)*f.k, w*f.k, -h*f.k)
 	// Set up transformation matrix for gradient
-	f.outf("%.3f 0 0 %.3f %.3f %.3f cm", w*f.k, h*f.k, x*f.k, (f.h-(y+h))*f.k)
+	f.outf("%.5f 0 0 %.5f %.5f %.5f cm", w*f.k, h*f.k, x*f.k, (f.h-(y+h))*f.k)
 }
 
 func (f *Fpdf) gradientClipEnd() {
@@ -1023,12 +1023,12 @@ func (f *Fpdf) ClipRect(x, y, w, h float64, outline bool) {
 // See tutorial 14 for an example of this function.
 func (f *Fpdf) ClipText(x, y float64, txtStr string, outline bool) {
 	f.clipNest++
-	f.outf("q BT %.2f %.2f Td %d Tr (%s) Tj ET", x*f.k, (f.h-y)*f.k, intIf(outline, 5, 7), f.escape(txtStr))
+	f.outf("q BT %.5f %.5f Td %d Tr (%s) Tj ET", x*f.k, (f.h-y)*f.k, intIf(outline, 5, 7), f.escape(txtStr))
 }
 
 func (f *Fpdf) clipArc(x1, y1, x2, y2, x3, y3 float64) {
 	h := f.h
-	f.outf("%.2f %.2f %.2f %.2f %.2f %.2f c ", x1*f.k, (h-y1)*f.k,
+	f.outf("%.5f %.5f %.5f %.5f %.5f %.5f c ", x1*f.k, (h-y1)*f.k,
 		x2*f.k, (h-y2)*f.k, x3*f.k, (h-y3)*f.k)
 }
 
@@ -1047,22 +1047,22 @@ func (f *Fpdf) ClipRoundedRect(x, y, w, h, r float64, outline bool) {
 	k := f.k
 	hp := f.h
 	myArc := (4.0 / 3.0) * (math.Sqrt2 - 1.0)
-	f.outf("q %.2f %.2f m", (x+r)*k, (hp-y)*k)
+	f.outf("q %.5f %.5f m", (x+r)*k, (hp-y)*k)
 	xc := x + w - r
 	yc := y + r
-	f.outf("%.2f %.2f l", xc*k, (hp-y)*k)
+	f.outf("%.5f %.5f l", xc*k, (hp-y)*k)
 	f.clipArc(xc+r*myArc, yc-r, xc+r, yc-r*myArc, xc+r, yc)
 	xc = x + w - r
 	yc = y + h - r
-	f.outf("%.2f %.2f l", (x+w)*k, (hp-yc)*k)
+	f.outf("%.5f %.5f l", (x+w)*k, (hp-yc)*k)
 	f.clipArc(xc+r, yc+r*myArc, xc+r*myArc, yc+r, xc, yc+r)
 	xc = x + r
 	yc = y + h - r
-	f.outf("%.2f %.2f l", xc*k, (hp-(y+h))*k)
+	f.outf("%.5f %.5f l", xc*k, (hp-(y+h))*k)
 	f.clipArc(xc-r*myArc, yc+r, xc-r, yc+r*myArc, xc-r, yc)
 	xc = x + r
 	yc = y + r
-	f.outf("%.2f %.2f l", x*k, (hp-yc)*k)
+	f.outf("%.5f %.5f l", x*k, (hp-yc)*k)
 	f.clipArc(xc-r, yc-r*myArc, xc-r*myArc, yc-r, xc, yc-r)
 	f.outf(" W %s", strIf(outline, "S", "n"))
 }
@@ -1082,20 +1082,20 @@ func (f *Fpdf) ClipEllipse(x, y, rx, ry float64, outline bool) {
 	ly := (4.0 / 3.0) * ry * (math.Sqrt2 - 1)
 	k := f.k
 	h := f.h
-	f.outf("q %.2f %.2f m %.2f %.2f %.2f %.2f %.2f %.2f c",
+	f.outf("q %.5f %.5f m %.5f %.5f %.5f %.5f %.5f %.5f c",
 		(x+rx)*k, (h-y)*k,
 		(x+rx)*k, (h-(y-ly))*k,
 		(x+lx)*k, (h-(y-ry))*k,
 		x*k, (h-(y-ry))*k)
-	f.outf("%.2f %.2f %.2f %.2f %.2f %.2f c",
+	f.outf("%.5f %.5f %.5f %.5f %.5f %.5f c",
 		(x-lx)*k, (h-(y-ry))*k,
 		(x-rx)*k, (h-(y-ly))*k,
 		(x-rx)*k, (h-y)*k)
-	f.outf("%.2f %.2f %.2f %.2f %.2f %.2f c",
+	f.outf("%.5f %.5f %.5f %.5f %.5f %.5f c",
 		(x-rx)*k, (h-(y+ly))*k,
 		(x-lx)*k, (h-(y+ry))*k,
 		x*k, (h-(y+ry))*k)
-	f.outf("%.2f %.2f %.2f %.2f %.2f %.2f c W %s",
+	f.outf("%.5f %.5f %.5f %.5f %.5f %.5f c W %s",
 		(x+lx)*k, (h-(y+ry))*k,
 		(x+rx)*k, (h-(y+ly))*k,
 		(x+rx)*k, (h-y)*k,
@@ -1132,7 +1132,7 @@ func (f *Fpdf) ClipPolygon(points []PointType, outline bool) {
 	k := f.k
 	s.printf("q ")
 	for j, pt := range points {
-		s.printf("%.2f %.2f %s ", pt.X*k, (h-pt.Y)*k, strIf(j == 0, "m", "l"))
+		s.printf("%.5f %.5f %s ", pt.X*k, (h-pt.Y)*k, strIf(j == 0, "m", "l"))
 	}
 	s.printf("h W %s", strIf(outline, "S", "n"))
 	f.out(s.String())
@@ -1936,7 +1936,7 @@ func (f *Fpdf) Image(fileStr string, x, y, w, h float64, flow bool, tp string, l
 	}
 	// dbg("h %.2f", h)
 	// q 85.04 0 0 NaN 28.35 NaN cm /I2 Do Q
-	f.outf("q %.2f 0 0 %.2f %.2f %.2f cm /I%d Do Q", w*f.k, h*f.k, x*f.k, (f.h-(y+h))*f.k, info.i)
+	f.outf("q %.5f 0 0 %.5f %.5f %.5f cm /I%d Do Q", w*f.k, h*f.k, x*f.k, (f.h-(y+h))*f.k, info.i)
 	if link > 0 || len(linkStr) > 0 {
 		f.newLink(x, y, w, h, link, linkStr)
 	}
@@ -2769,10 +2769,10 @@ func (f *Fpdf) putGradients() {
 		f.newobj()
 		f.outf("<</ShadingType %d /ColorSpace /DeviceRGB", gr.tp)
 		if gr.tp == 2 {
-			f.outf("/Coords [%.3f %.3f %.3f %.3f] /Function %d 0 R /Extend [true true]>>",
+			f.outf("/Coords [%.5f %.5f %.5f %.5f] /Function %d 0 R /Extend [true true]>>",
 				gr.x1, gr.y1, gr.x2, gr.y2, f1)
 		} else if gr.tp == 3 {
-			f.outf("/Coords [%.3f %.3f 0 %.3f %.3f %.3f] /Function %d 0 R /Extend [true true]>>",
+			f.outf("/Coords [%.5f %.5f 0 %.5f %.5f %.5f] /Function %d 0 R /Extend [true true]>>",
 				gr.x1, gr.y1, gr.x2, gr.y2, gr.r, f1)
 		}
 		f.out("endobj")

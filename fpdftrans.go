@@ -20,7 +20,7 @@ type TransformMatrix struct {
 // finally a call to TransformEnd(). All transformation contexts must be
 // properly ended prior to outputting the document.
 //
-// See tutorial 17 for a transformation examples.
+// See tutorial 17 for transformation examples.
 func (f *Fpdf) TransformBegin() {
 	f.transformNest++
 	f.out("q")
@@ -162,7 +162,7 @@ func (f *Fpdf) TransformSkew(angleX, angleY, x, y float64) {
 // TransformRotate() and TransformMirrorVertical() instead.
 func (f *Fpdf) Transform(tm TransformMatrix) {
 	if f.transformNest > 0 {
-		f.outf("%.3f %.3f %.3f %.3f %.3f %.3f cm",
+		f.outf("%.5f %.5f %.5f %.5f %.5f %.5f cm",
 			tm.A, tm.B, tm.C, tm.D, tm.E, tm.F)
 	} else if f.err == nil {
 		f.err = fmt.Errorf("Transformation context is not active")
