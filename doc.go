@@ -35,11 +35,9 @@ Features
 
 • Page header and footer management
 
-• Automatic page break
+• Automatic page breaks, line breaks, and text justification
 
-• Automatic line break and text justification
-
-• Image support (JPEG, PNG and GIF)
+• Inclusion of JPEG, PNG and GIF images
 
 • Colors, gradients and alpha channel transparency
 
@@ -51,9 +49,9 @@ Features
 
 • Page compression
 
-• Drawing support (lines, Bézier curves, arcs, ellipses)
+• Lines, Bézier curves, arcs, and ellipses
 
-• Transformation support (rotation, scaling, skewing, translation, mirroring)
+• Rotation, scaling, skewing, translation, and mirroring
 
 • Clipping
 
