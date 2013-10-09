@@ -1204,7 +1204,7 @@ func (f *Fpdf) AddFont(familyStr, styleStr, fileStr string) {
 	if f.err != nil {
 		return
 	}
-	info.I = len(f.fonts) + 1
+	info.I = len(f.fonts)
 	// dbg("font [%s], I [%d]", fileStr, info.I)
 	if len(info.Diff) > 0 {
 		// Search existing encodings
