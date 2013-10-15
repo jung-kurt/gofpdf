@@ -17,6 +17,7 @@
 package gofpdf_test
 
 import (
+	"bytes"
 	"code.google.com/p/gofpdf"
 	"fmt"
 	// "testing"
@@ -43,43 +44,30 @@ func ExampleTtfParse() {
 	// Ymax:                  899
 }
 
-// func TestLoadMap(t *testing.T) {
-// 	expectList := []string{
-// 		"164: 0x0E04 khokhwaithai",
-// 		"165: 0x0E05 khokhonthai",
-// 		"166: 0x0E06 khorakhangthai",
-// 		"167: 0x0E07 ngonguthai",
-// 		"168: 0x0E08 chochanthai",
-// 		"169: 0x0E09 chochingthai",
-// 	}
-// 	list, err := loadMap(FONT_DIR + "/iso-8859-11.map")
-// 	if err == nil {
-// 		pos := 0
-// 		for j := 164; j < 170; j++ {
-// 			enc := list[j]
-// 			str := fmt.Sprintf("%3d: 0x%04X %s", j, enc.uv, enc.name)
-// 			// fmt.Printf("Expect [%s], Got [%s]\n", expectList[pos], str)
-// 			if expectList[pos] != str {
-// 				t.Fatalf("Unexpected output from loadMap")
-// 			}
-// 			pos++
-// 		}
-// 	}
-// }
+func hexStr(s string) string {
+	var b bytes.Buffer
+	b.WriteString("\"")
+	for _, ch := range []byte(s) {
+		b.WriteString(fmt.Sprintf("\\x%02x", ch))
+	}
+	b.WriteString("\":")
+	return b.String()
+}
 
 func ExampleFpdf_GetStringWidth() {
 	pdf := gofpdf.New("", "", "", FONT_DIR)
 	pdf.SetFont("Helvetica", "", 12)
 	pdf.AddPage()
-	for _, s := range []string{"Hello", "世界"} {
-		fmt.Printf("Width of \"%s\" is %.2f\n", s, pdf.GetStringWidth(s))
+	for _, s := range []string{"Hello", "世界", "\xe7a va?"} {
+		fmt.Printf("%-32s width %5.2f, bytes %2d, runes %2d\n",
+			hexStr(s), pdf.GetStringWidth(s), len(s), len([]rune(s)))
 		if pdf.Err() {
 			fmt.Println(pdf.Error())
 		}
 	}
 	pdf.Close()
 	// Output:
-	// Width of "Hello" is 9.64
-	// Width of "世界" is 0.00
-	// Unicode strings not supported
+	// "\x48\x65\x6c\x6c\x6f":          width  9.64, bytes  5, runes  5
+	// "\xe4\xb8\x96\xe7\x95\x8c":      width 13.95, bytes  6, runes  2
+	// "\xe7\x61\x20\x76\x61\x3f":      width 12.47, bytes  6, runes  6
 }

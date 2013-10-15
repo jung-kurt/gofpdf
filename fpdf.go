@@ -666,16 +666,11 @@ func (f *Fpdf) GetStringWidth(s string) float64 {
 		return 0
 	}
 	w := 0
-	count := rune(len(f.currentFont.Cw))
-	for _, ch := range s {
-		if ch < count {
-			w += f.currentFont.Cw[ch]
-		} else {
-			if f.err == nil {
-				f.err = fmt.Errorf("Unicode strings not supported")
-			}
-			return 0
+	for _, ch := range []byte(s) {
+		if ch == 0 {
+			break
 		}
+		w += f.currentFont.Cw[ch]
 	}
 	return float64(w) * f.fontSize / 1000
 }
