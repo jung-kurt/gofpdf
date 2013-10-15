@@ -25,7 +25,7 @@ transparency script by Martin Hall-May. Support for gradients and clipping is
 adapted from FPDF scripts by Andreas Würmser. Support for outline bookmarks is
 adapted from Olivier Plathey by Manuel Cornes. Support for transformations is
 adapted from the FPDF transformation script by Moritz Wagner and Andreas
-Würmser.
+Würmser. Bruno Michel has provided valuable assistance with the code.
 
 The FPDF website is http://www.fpdf.org/.
 
