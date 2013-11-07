@@ -70,7 +70,7 @@ func fpdfNew(orientationStr, unitStr, sizeStr, fontDirStr string, size SizeType)
 	f.fonts = make(map[string]fontDefType)
 	f.fontFiles = make(map[string]fontFileType)
 	f.diffs = make([]string, 0, 8)
-	f.images = make(map[string]imageInfoType)
+	f.images = make(map[string]*ImageInfoType)
 	f.pageLinks = make([][]linkType, 0, 8)
 	f.pageLinks = append(f.pageLinks, make([]linkType, 0, 0)) // pageLinks[0] is unused (1-based)
 	f.links = make([]intLinkType, 0, 8)
@@ -1861,39 +1861,11 @@ func (f *Fpdf) Image(fileStr string, x, y, w, h float64, flow bool, tp string, l
 	if f.err != nil {
 		return
 	}
-	var info imageInfoType
-	var ok bool
-	info, ok = f.images[fileStr]
-	if !ok {
-		// First use of this image, get info
-		if tp == "" {
-			pos := strings.LastIndex(fileStr, ".")
-			if pos < 0 {
-				f.err = fmt.Errorf("Image file has no extension and no type was specified: %s", fileStr)
-				return
-			}
-			tp = fileStr[pos+1:]
-		}
-		tp = strings.ToLower(tp)
-		if tp == "jpeg" {
-			tp = "jpg"
-		}
-		switch tp {
-		case "jpg":
-			info = f.parsejpg(fileStr)
-		case "png":
-			info = f.parsepng(fileStr)
-		case "gif":
-			info = f.parsegif(fileStr)
-		default:
-			f.err = fmt.Errorf("Unsupported image type: %s", tp)
-		}
-		if f.err != nil {
-			return
-		}
-		info.i = len(f.images) + 1
-		f.images[fileStr] = info
+	info := f.RegisterImage(fileStr, tp)
+	if f.err != nil {
+		return
 	}
+
 	// Automatic width and height calculation if needed
 	if w == 0 && h == 0 {
 		// Put image at 96 dpi
@@ -1936,6 +1908,46 @@ func (f *Fpdf) Image(fileStr string, x, y, w, h float64, flow bool, tp string, l
 		f.newLink(x, y, w, h, link, linkStr)
 	}
 	return
+}
+
+// Registers an image, adding it to the PDF file but not adding it to the page. Use
+// Image() with the same filename to add the image to the page. Note that Image()
+// calls this function, so this function is only necessary if you need information
+// about the image. See Image() for restrictions on the image and the "tp" parameters.
+func (f *Fpdf) RegisterImage(fileStr, tp string) (info *ImageInfoType) {
+	info, ok := f.images[fileStr]
+	if !ok {
+		// First use of this image, get info
+		if tp == "" {
+			pos := strings.LastIndex(fileStr, ".")
+			if pos < 0 {
+				f.err = fmt.Errorf("Image file has no extension and no type was specified: %s", fileStr)
+				return
+			}
+			tp = fileStr[pos+1:]
+		}
+		tp = strings.ToLower(tp)
+		if tp == "jpeg" {
+			tp = "jpg"
+		}
+		switch tp {
+		case "jpg":
+			info = f.parsejpg(fileStr)
+		case "png":
+			info = f.parsepng(fileStr)
+		case "gif":
+			info = f.parsegif(fileStr)
+		default:
+			f.err = fmt.Errorf("Unsupported image type: %s", tp)
+		}
+		if f.err != nil {
+			return
+		}
+		info.i = len(f.images) + 1
+		f.images[fileStr] = info
+	}
+
+	return info
 }
 
 // Returns the abscissa of the current position.
@@ -2135,7 +2147,9 @@ func be16(buf []byte) int {
 
 // Extract info from a JPEG file
 // Thank you, Bruno Michel, for providing this code.
-func (f *Fpdf) parsejpg(fileStr string) (info imageInfoType) {
+func (f *Fpdf) parsejpg(fileStr string) (info *ImageInfoType) {
+	info = &ImageInfoType{}
+
 	var err error
 	info.data, err = ioutil.ReadFile(fileStr)
 	if err != nil {
@@ -2164,7 +2178,7 @@ func (f *Fpdf) parsejpg(fileStr string) (info imageInfoType) {
 }
 
 // Extract info from a PNG file
-func (f *Fpdf) parsepng(fileStr string) (info imageInfoType) {
+func (f *Fpdf) parsepng(fileStr string) (info *ImageInfoType) {
 	buf, err := bufferFromFile(fileStr)
 	if err != nil {
 		f.err = err
@@ -2189,7 +2203,9 @@ func (f *Fpdf) readByte(buf *bytes.Buffer) (val byte) {
 	return
 }
 
-func (f *Fpdf) parsepngstream(buf *bytes.Buffer) (info imageInfoType) {
+func (f *Fpdf) parsepngstream(buf *bytes.Buffer) (info *ImageInfoType) {
+	info = &ImageInfoType{}
+
 	// 	Check signature
 	if string(buf.Next(8)) != "\x89PNG\x0d\x0a\x1a\x0a" {
 		f.err = fmt.Errorf("Not a PNG buffer")
@@ -2350,7 +2366,7 @@ func (f *Fpdf) parsepngstream(buf *bytes.Buffer) (info imageInfoType) {
 }
 
 // Extract info from a GIF file (via PNG conversion)
-func (f *Fpdf) parsegif(fileStr string) (info imageInfoType) {
+func (f *Fpdf) parsegif(fileStr string) (info *ImageInfoType) {
 	data, err := ioutil.ReadFile(fileStr)
 	if err != nil {
 		f.err = err
@@ -2631,14 +2647,14 @@ func (f *Fpdf) putfonts() {
 
 func (f *Fpdf) putimages() {
 	for fileStr, img := range f.images {
-		f.putimage(&img)
+		f.putimage(img)
 		img.data = img.data[0:0]
 		img.smask = img.smask[0:0]
 		f.images[fileStr] = img
 	}
 }
 
-func (f *Fpdf) putimage(info *imageInfoType) {
+func (f *Fpdf) putimage(info *ImageInfoType) {
 	f.newobj()
 	info.n = f.n
 	f.out("<</Type /XObject")
@@ -2675,7 +2691,7 @@ func (f *Fpdf) putimage(info *imageInfoType) {
 	f.out("endobj")
 	// 	Soft mask
 	if len(info.smask) > 0 {
-		smask := imageInfoType{
+		smask := &ImageInfoType{
 			w:    info.w,
 			h:    info.h,
 			cs:   "DeviceGray",
@@ -2684,7 +2700,7 @@ func (f *Fpdf) putimage(info *imageInfoType) {
 			dp:   sprintf("/Predictor 15 /Colors 1 /BitsPerComponent 8 /Columns %d", int(info.w)),
 			data: info.smask,
 		}
-		f.putimage(&smask)
+		f.putimage(smask)
 	}
 	// 	Palette
 	if info.cs == "Indexed" {

@@ -48,7 +48,7 @@ type PointType struct {
 	X, Y float64
 }
 
-type imageInfoType struct {
+type ImageInfoType struct {
 	data  []byte
 	smask []byte
 	i     int
@@ -61,6 +61,16 @@ type imageInfoType struct {
 	f     string
 	dp    string
 	trns  []int
+}
+
+// The width of the image in the units of the Fpdf object.
+func (info *ImageInfoType) Width(f *Fpdf) float64 {
+	return info.w/f.k
+}
+
+// The height of the image in the units of the Fpdf object.
+func (info *ImageInfoType) Height(f *Fpdf) float64 {
+	return info.h/f.k
 }
 
 type fontFileType struct {
@@ -143,7 +153,7 @@ type Fpdf struct {
 	textColor        string                   // commands for text color
 	colorFlag        bool                     // indicates whether fill and text colors are different
 	ws               float64                  // word spacing
-	images           map[string]imageInfoType // array of used images
+	images           map[string]*ImageInfoType// array of used images
 	pageLinks        [][]linkType             // pageLinks[page][link], both 1-based
 	links            []intLinkType            // array of internal links
 	outlines         []outlineType            // array of outlines
