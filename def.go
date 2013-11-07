@@ -65,12 +65,12 @@ type ImageInfoType struct {
 
 // The width of the image in the units of the Fpdf object.
 func (info *ImageInfoType) Width(f *Fpdf) float64 {
-	return info.w/f.k
+	return info.w / f.k
 }
 
 // The height of the image in the units of the Fpdf object.
 func (info *ImageInfoType) Height(f *Fpdf) float64 {
-	return info.h/f.k
+	return info.h / f.k
 }
 
 type fontFileType struct {
@@ -112,77 +112,77 @@ type InitType struct {
 
 // Principal structure for creating a single PDF document
 type Fpdf struct {
-	page             int                      // current page number
-	n                int                      // current object number
-	offsets          []int                    // array of object offsets
-	buffer           fmtBuffer                // buffer holding in-memory PDF
-	pages            []*bytes.Buffer          // slice[page] of page content; 1-based
-	state            int                      // current document state
-	compress         bool                     // compression flag
-	k                float64                  // scale factor (number of points in user unit)
-	defOrientation   string                   // default orientation
-	curOrientation   string                   // current orientation
-	stdPageSizes     map[string]SizeType      // standard page sizes
-	defPageSize      SizeType                 // default page size
-	curPageSize      SizeType                 // current page size
-	pageSizes        map[int]SizeType         // used for pages with non default sizes or orientations
-	unitStr          string                   // unit of measure for all rendered objects except fonts
-	wPt, hPt         float64                  // dimensions of current page in points
-	w, h             float64                  // dimensions of current page in user unit
-	lMargin          float64                  // left margin
-	tMargin          float64                  // top margin
-	rMargin          float64                  // right margin
-	bMargin          float64                  // page break margin
-	cMargin          float64                  // cell margin
-	x, y             float64                  // current position in user unit
-	lasth            float64                  // height of last printed cell
-	lineWidth        float64                  // line width in user unit
-	fontpath         string                   // path containing fonts
-	coreFonts        map[string]bool          // array of core font names
-	fonts            map[string]fontDefType   // array of used fonts
-	fontFiles        map[string]fontFileType  // array of font files
-	diffs            []string                 // array of encoding differences
-	fontFamily       string                   // current font family
-	fontStyle        string                   // current font style
-	underline        bool                     // underlining flag
-	currentFont      fontDefType              // current font info
-	fontSizePt       float64                  // current font size in points
-	fontSize         float64                  // current font size in user unit
-	drawColor        string                   // commands for drawing color
-	fillColor        string                   // commands for filling color
-	textColor        string                   // commands for text color
-	colorFlag        bool                     // indicates whether fill and text colors are different
-	ws               float64                  // word spacing
-	images           map[string]*ImageInfoType// array of used images
-	pageLinks        [][]linkType             // pageLinks[page][link], both 1-based
-	links            []intLinkType            // array of internal links
-	outlines         []outlineType            // array of outlines
-	outlineRoot      int                      // root of outlines
-	autoPageBreak    bool                     // automatic page breaking
-	acceptPageBreak  func() bool              // returns true to accept page break
-	pageBreakTrigger float64                  // threshold used to trigger page breaks
-	inHeader         bool                     // flag set when processing header
-	headerFnc        func()                   // function provided by app and called to write header
-	inFooter         bool                     // flag set when processing footer
-	footerFnc        func()                   // function provided by app and called to write footer
-	zoomMode         string                   // zoom display mode
-	layoutMode       string                   // layout display mode
-	title            string                   // title
-	subject          string                   // subject
-	author           string                   // author
-	keywords         string                   // keywords
-	creator          string                   // creator
-	aliasNbPagesStr  string                   // alias for total number of pages
-	pdfVersion       string                   // PDF version number
-	fontDirStr       string                   // location of font definition files
-	capStyle         int                      // line cap style: butt 0, round 1, square 2
-	joinStyle        int                      // line segment join style: miter 0, round 1, bevel 2
-	blendList        []blendModeType          // slice[idx] of alpha transparency modes, 1-based
-	blendMap         map[string]int           // map into blendList
-	gradientList     []gradientType           // slice[idx] of gradient records
-	clipNest         int                      // Number of active clipping contexts
-	transformNest    int                      // Number of active transformation contexts
-	err              error                    // Set if error occurs during life cycle of instance
+	page             int                       // current page number
+	n                int                       // current object number
+	offsets          []int                     // array of object offsets
+	buffer           fmtBuffer                 // buffer holding in-memory PDF
+	pages            []*bytes.Buffer           // slice[page] of page content; 1-based
+	state            int                       // current document state
+	compress         bool                      // compression flag
+	k                float64                   // scale factor (number of points in user unit)
+	defOrientation   string                    // default orientation
+	curOrientation   string                    // current orientation
+	stdPageSizes     map[string]SizeType       // standard page sizes
+	defPageSize      SizeType                  // default page size
+	curPageSize      SizeType                  // current page size
+	pageSizes        map[int]SizeType          // used for pages with non default sizes or orientations
+	unitStr          string                    // unit of measure for all rendered objects except fonts
+	wPt, hPt         float64                   // dimensions of current page in points
+	w, h             float64                   // dimensions of current page in user unit
+	lMargin          float64                   // left margin
+	tMargin          float64                   // top margin
+	rMargin          float64                   // right margin
+	bMargin          float64                   // page break margin
+	cMargin          float64                   // cell margin
+	x, y             float64                   // current position in user unit
+	lasth            float64                   // height of last printed cell
+	lineWidth        float64                   // line width in user unit
+	fontpath         string                    // path containing fonts
+	coreFonts        map[string]bool           // array of core font names
+	fonts            map[string]fontDefType    // array of used fonts
+	fontFiles        map[string]fontFileType   // array of font files
+	diffs            []string                  // array of encoding differences
+	fontFamily       string                    // current font family
+	fontStyle        string                    // current font style
+	underline        bool                      // underlining flag
+	currentFont      fontDefType               // current font info
+	fontSizePt       float64                   // current font size in points
+	fontSize         float64                   // current font size in user unit
+	drawColor        string                    // commands for drawing color
+	fillColor        string                    // commands for filling color
+	textColor        string                    // commands for text color
+	colorFlag        bool                      // indicates whether fill and text colors are different
+	ws               float64                   // word spacing
+	images           map[string]*ImageInfoType // array of used images
+	pageLinks        [][]linkType              // pageLinks[page][link], both 1-based
+	links            []intLinkType             // array of internal links
+	outlines         []outlineType             // array of outlines
+	outlineRoot      int                       // root of outlines
+	autoPageBreak    bool                      // automatic page breaking
+	acceptPageBreak  func() bool               // returns true to accept page break
+	pageBreakTrigger float64                   // threshold used to trigger page breaks
+	inHeader         bool                      // flag set when processing header
+	headerFnc        func()                    // function provided by app and called to write header
+	inFooter         bool                      // flag set when processing footer
+	footerFnc        func()                    // function provided by app and called to write footer
+	zoomMode         string                    // zoom display mode
+	layoutMode       string                    // layout display mode
+	title            string                    // title
+	subject          string                    // subject
+	author           string                    // author
+	keywords         string                    // keywords
+	creator          string                    // creator
+	aliasNbPagesStr  string                    // alias for total number of pages
+	pdfVersion       string                    // PDF version number
+	fontDirStr       string                    // location of font definition files
+	capStyle         int                       // line cap style: butt 0, round 1, square 2
+	joinStyle        int                       // line segment join style: miter 0, round 1, bevel 2
+	blendList        []blendModeType           // slice[idx] of alpha transparency modes, 1-based
+	blendMap         map[string]int            // map into blendList
+	gradientList     []gradientType            // slice[idx] of gradient records
+	clipNest         int                       // Number of active clipping contexts
+	transformNest    int                       // Number of active transformation contexts
+	err              error                     // Set if error occurs during life cycle of instance
 }
 
 type encType struct {
