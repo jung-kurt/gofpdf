@@ -2651,11 +2651,8 @@ func (f *Fpdf) putfonts() {
 }
 
 func (f *Fpdf) putimages() {
-	for fileStr, img := range f.images {
+	for _, img := range f.images {
 		f.putimage(img)
-		img.data = img.data[0:0]
-		img.smask = img.smask[0:0]
-		f.images[fileStr] = img
 	}
 }
 
