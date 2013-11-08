@@ -1910,10 +1910,13 @@ func (f *Fpdf) Image(fileStr string, x, y, w, h float64, flow bool, tp string, l
 	return
 }
 
-// Registers an image, adding it to the PDF file but not adding it to the page. Use
-// Image() with the same filename to add the image to the page. Note that Image()
-// calls this function, so this function is only necessary if you need information
-// about the image. See Image() for restrictions on the image and the "tp" parameters.
+// Registers an image, adding it to the PDF file but not adding it to the page.
+// Use Image() with the same filename to add the image to the page. Note that
+// Image() calls this function, so this function is only necessary if you need
+// information about the image before placing it. See Image() for restrictions
+// on the image and the "tp" parameters.
+//
+// See tutorial 18 for an example of this function.
 func (f *Fpdf) RegisterImage(fileStr, tp string) (info *ImageInfoType) {
 	info, ok := f.images[fileStr]
 	if !ok {
@@ -2145,11 +2148,14 @@ func be16(buf []byte) int {
 	return 256*int(buf[0]) + int(buf[1])
 }
 
+func (f *Fpdf) newImageInfo() *ImageInfoType {
+	return &ImageInfoType{scale: f.k}
+}
+
 // Extract info from a JPEG file
 // Thank you, Bruno Michel, for providing this code.
 func (f *Fpdf) parsejpg(fileStr string) (info *ImageInfoType) {
-	info = &ImageInfoType{}
-
+	info = f.newImageInfo()
 	var err error
 	info.data, err = ioutil.ReadFile(fileStr)
 	if err != nil {
@@ -2204,8 +2210,7 @@ func (f *Fpdf) readByte(buf *bytes.Buffer) (val byte) {
 }
 
 func (f *Fpdf) parsepngstream(buf *bytes.Buffer) (info *ImageInfoType) {
-	info = &ImageInfoType{}
-
+	info = f.newImageInfo()
 	// 	Check signature
 	if string(buf.Next(8)) != "\x89PNG\x0d\x0a\x1a\x0a" {
 		f.err = fmt.Errorf("Not a PNG buffer")
@@ -2692,13 +2697,14 @@ func (f *Fpdf) putimage(info *ImageInfoType) {
 	// 	Soft mask
 	if len(info.smask) > 0 {
 		smask := &ImageInfoType{
-			w:    info.w,
-			h:    info.h,
-			cs:   "DeviceGray",
-			bpc:  8,
-			f:    info.f,
-			dp:   sprintf("/Predictor 15 /Colors 1 /BitsPerComponent 8 /Columns %d", int(info.w)),
-			data: info.smask,
+			w:     info.w,
+			h:     info.h,
+			cs:    "DeviceGray",
+			bpc:   8,
+			f:     info.f,
+			dp:    sprintf("/Predictor 15 /Colors 1 /BitsPerComponent 8 /Columns %d", int(info.w)),
+			data:  info.smask,
+			scale: f.k,
 		}
 		f.putimage(smask)
 	}

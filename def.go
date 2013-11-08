@@ -61,16 +61,22 @@ type ImageInfoType struct {
 	f     string
 	dp    string
 	trns  []int
+	scale float64 // document scaling factor
+}
+
+// The width and height of the image in the units of the Fpdf object.
+func (info *ImageInfoType) Extent() (wd, ht float64) {
+	return info.w / info.scale, info.h / info.scale
 }
 
 // The width of the image in the units of the Fpdf object.
-func (info *ImageInfoType) Width(f *Fpdf) float64 {
-	return info.w / f.k
+func (info *ImageInfoType) Width() float64 {
+	return info.w / info.scale
 }
 
 // The height of the image in the units of the Fpdf object.
-func (info *ImageInfoType) Height(f *Fpdf) float64 {
-	return info.h / f.k
+func (info *ImageInfoType) Height() float64 {
+	return info.h / info.scale
 }
 
 type fontFileType struct {
