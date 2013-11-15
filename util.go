@@ -28,9 +28,8 @@ import (
 func round(f float64) int {
 	if f < 0 {
 		return -int(math.Floor(-f + 0.5))
-	} else {
-		return int(math.Floor(f + 0.5))
 	}
+	return int(math.Floor(f + 0.5))
 }
 
 func sprintf(fmtStr string, args ...interface{}) string {
@@ -131,18 +130,16 @@ func utf8toutf16(s string) string {
 func intIf(cnd bool, a, b int) int {
 	if cnd {
 		return a
-	} else {
-		return b
 	}
+	return b
 }
 
 // Return aStr if cnd is true, otherwise bStr
 func strIf(cnd bool, aStr, bStr string) string {
 	if cnd {
 		return aStr
-	} else {
-		return bStr
 	}
+	return bStr
 }
 
 // Dump the internals of the specified values

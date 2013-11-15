@@ -22,7 +22,7 @@ import (
 
 // Version of FPDF from which this package is derived
 const (
-	FPDF_VERSION = "1.7"
+	cnFpdfVersion = "1.7"
 )
 
 type blendModeType struct {
@@ -37,17 +37,19 @@ type gradientType struct {
 	objNum            int
 }
 
-// Wd and Ht specify the horizontal and vertical extents of a document page.
+// SizeType fields Wd and Ht specify the horizontal and vertical extents of a
+// document element such as a page.
 type SizeType struct {
 	Wd, Ht float64
 }
 
-// X and Y specify the horizontal and vertical coordinates of a point,
-// typically used in drawing.
+// PointType fields X and Y specify the horizontal and vertical coordinates of
+// a point, typically used in drawing.
 type PointType struct {
 	X, Y float64
 }
 
+// ImageInfoType contains size, color and other information about an image
 type ImageInfoType struct {
 	data  []byte
 	smask []byte
@@ -64,17 +66,18 @@ type ImageInfoType struct {
 	scale float64 // document scaling factor
 }
 
-// The width and height of the image in the units of the Fpdf object.
+// Extent returns the width and height of the image in the units of the Fpdf
+// object.
 func (info *ImageInfoType) Extent() (wd, ht float64) {
 	return info.w / info.scale, info.h / info.scale
 }
 
-// The width of the image in the units of the Fpdf object.
+// Width returns the width of the image in the units of the Fpdf object.
 func (info *ImageInfoType) Width() float64 {
 	return info.w / info.scale
 }
 
-// The height of the image in the units of the Fpdf object.
+// Height returns the height of the image in the units of the Fpdf object.
 func (info *ImageInfoType) Height() float64 {
 	return info.h / info.scale
 }
@@ -116,7 +119,7 @@ type InitType struct {
 	FontDirStr     string
 }
 
-// Principal structure for creating a single PDF document
+// Fpdf is the principal structure for creating a single PDF document
 type Fpdf struct {
 	page             int                       // current page number
 	n                int                       // current object number

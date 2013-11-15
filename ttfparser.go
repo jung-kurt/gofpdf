@@ -30,7 +30,7 @@ import (
 	"strings"
 )
 
-// This structure contains metrics of a TrueType font.
+// TtfType contains metrics of a TrueType font.
 type TtfType struct {
 	Embeddable             bool
 	UnitsPerEm             uint16
@@ -56,7 +56,7 @@ type ttfParser struct {
 	numGlyphs        uint16
 }
 
-// Extract various metrics from a TrueType font file.
+// TtfParse extracts various metrics from a TrueType font file.
 func TtfParse(fileStr string) (TtfRec TtfType, err error) {
 	var t ttfParser
 	t.f, err = os.Open(fileStr)
@@ -68,11 +68,11 @@ func TtfParse(fileStr string) (TtfRec TtfType, err error) {
 		return
 	}
 	if version == "OTTO" {
-		err = fmt.Errorf("OpenType fonts based on PostScript outlines are not supported")
+		err = fmt.Errorf("fonts based on PostScript outlines are not supported")
 		return
 	}
 	if version != "\x00\x01\x00\x00" {
-		err = fmt.Errorf("Unrecognized file format")
+		err = fmt.Errorf("unrecognized file format")
 		return
 	}
 	numTables := int(t.ReadUShort())
@@ -123,7 +123,7 @@ func (t *ttfParser) ParseHead() (err error) {
 	t.Skip(3 * 4) // version, fontRevision, checkSumAdjustment
 	magicNumber := t.ReadULong()
 	if magicNumber != 0x5F0F3CF5 {
-		err = fmt.Errorf("Incorrect magic number")
+		err = fmt.Errorf("incorrect magic number")
 		return
 	}
 	t.Skip(2) // flags
@@ -189,7 +189,7 @@ func (t *ttfParser) ParseCmap() (err error) {
 		}
 	}
 	if offset31 == 0 {
-		err = fmt.Errorf("No Unicode encoding found")
+		err = fmt.Errorf("no Unicode encoding found")
 		return
 	}
 	startCount := make([]uint16, 0, 8)
@@ -200,7 +200,7 @@ func (t *ttfParser) ParseCmap() (err error) {
 	t.f.Seek(int64(t.tables["cmap"])+offset31, os.SEEK_SET)
 	format := t.ReadUShort()
 	if format != 4 {
-		err = fmt.Errorf("Unexpected subtable format: %d", format)
+		err = fmt.Errorf("unexpected subtable format: %d", format)
 		return
 	}
 	t.Skip(2 * 2) // length, language
@@ -282,7 +282,7 @@ func (t *ttfParser) ParseName() (err error) {
 			}
 		}
 		if t.rec.PostScriptName == "" {
-			err = fmt.Errorf("PostScript name not found")
+			err = fmt.Errorf("the name PostScript was not found")
 		}
 	}
 	return
@@ -329,7 +329,7 @@ func (t *ttfParser) Seek(tag string) (err error) {
 	if ok {
 		t.f.Seek(int64(ofs), os.SEEK_SET)
 	} else {
-		err = fmt.Errorf("Table not found: %s", tag)
+		err = fmt.Errorf("table not found: %s", tag)
 	}
 	return
 }
@@ -346,7 +346,7 @@ func (t *ttfParser) ReadStr(length int) (str string, err error) {
 		if n == length {
 			str = string(buf)
 		} else {
-			err = fmt.Errorf("Unable to read %d bytes", length)
+			err = fmt.Errorf("unable to read %d bytes", length)
 		}
 	}
 	return

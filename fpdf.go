@@ -107,7 +107,7 @@ func fpdfNew(orientationStr, unitStr, sizeStr, fontDirStr string, size SizeType)
 	case "in", "inch":
 		f.k = 72.0
 	default:
-		f.err = fmt.Errorf("Incorrect unit %s", unitStr)
+		f.err = fmt.Errorf("incorrect unit %s", unitStr)
 		return
 	}
 	f.unitStr = unitStr
@@ -140,7 +140,7 @@ func fpdfNew(orientationStr, unitStr, sizeStr, fontDirStr string, size SizeType)
 		f.w = f.defPageSize.Ht
 		f.h = f.defPageSize.Wd
 	default:
-		f.err = fmt.Errorf("Incorrect orientation: %s", orientationStr)
+		f.err = fmt.Errorf("incorrect orientation: %s", orientationStr)
 		return
 	}
 	f.curOrientation = f.defOrientation
@@ -204,18 +204,18 @@ func New(orientationStr, unitStr, sizeStr, fontDirStr string) (f *Fpdf) {
 	return fpdfNew(orientationStr, unitStr, sizeStr, fontDirStr, SizeType{0, 0})
 }
 
-// Returns true if no processing errors have occurred.
+// Ok returns true if no processing errors have occurred.
 func (f *Fpdf) Ok() bool {
 	return f.err == nil
 }
 
-// Returns true if a processing error has occurred.
+// Err returns true if a processing error has occurred.
 func (f *Fpdf) Err() bool {
 	return f.err != nil
 }
 
-// Set the internal Fpdf error with formatted text to halt PDF generation; this
-// may facilitate error handling by application.
+// SetErrorf sets the internal Fpdf error with formatted text to halt PDF
+// generation; this may facilitate error handling by application.
 //
 // See the documentation for printing in the standard fmt package for details
 // about fmtStr and args.
@@ -225,27 +225,28 @@ func (f *Fpdf) SetErrorf(fmtStr string, args ...interface{}) {
 	}
 }
 
-// Summary of Fpdf instance that satisfies the fmt.Stringer interface.
+// String satisfies the fmt.Stringer interface and summarizes the Fpdf
+// instance.
 func (f *Fpdf) String() string {
-	return "Fpdf " + FPDF_VERSION
+	return "Fpdf " + cnFpdfVersion
 }
 
-// Set error to halt PDF generation. This may facilitate error handling by
-// application. See also Ok(), Err() and Error().
+// SetError sets an error to halt PDF generation. This may facilitate error
+// handling by application. See also Ok(), Err() and Error().
 func (f *Fpdf) SetError(err error) {
 	if f.err == nil && err != nil {
 		f.err = err
 	}
 }
 
-// Returns the internal Fpdf error; this will be nil if no error has occurred.
+// Error returns the internal Fpdf error; this will be nil if no error has occurred.
 func (f *Fpdf) Error() error {
 	return f.err
 }
 
-// Defines the left, top and right margins. By default, they equal 1 cm. Call
-// this method to change them. If the value of the right margin is less than
-// zero, it is set to the same as the left margin.
+// SetMargins defines the left, top and right margins. By default, they equal 1
+// cm. Call this method to change them. If the value of the right margin is
+// less than zero, it is set to the same as the left margin.
 func (f *Fpdf) SetMargins(left, top, right float64) {
 	f.lMargin = left
 	f.tMargin = top
@@ -255,9 +256,9 @@ func (f *Fpdf) SetMargins(left, top, right float64) {
 	f.rMargin = right
 }
 
-// Defines the left margin. The method can be called before creating the first
-// page. If the current abscissa gets out of page, it is brought back to the
-// margin.
+// SetLeftMargin defines the left margin. The method can be called before
+// creating the first page. If the current abscissa gets out of page, it is
+// brought back to the margin.
 func (f *Fpdf) SetLeftMargin(margin float64) {
 	f.lMargin = margin
 	if f.page > 0 && f.x < margin {
@@ -265,58 +266,60 @@ func (f *Fpdf) SetLeftMargin(margin float64) {
 	}
 }
 
-// Set the location in the file system of the font and font definition files.
+// SetFontLocation sets the location in the file system of the font and font
+// definition files.
 func (f *Fpdf) SetFontLocation(fontDirStr string) {
 	f.fontpath = fontDirStr
 }
 
-// Sets the function that lets the application render the page header. The
-// specified function is automatically called by AddPage() and should not be
-// called directly by the application. The implementation in Fpdf is empty, so
-// you have to provide an appropriate function if you want page headers. fnc
-// will typically be a closure that has access to the Fpdf instance and other
-// document generation variables.
+// SetHeaderFunc sets the function that lets the application render the page
+// header. The specified function is automatically called by AddPage() and
+// should not be called directly by the application. The implementation in Fpdf
+// is empty, so you have to provide an appropriate function if you want page
+// headers. fnc will typically be a closure that has access to the Fpdf
+// instance and other document generation variables.
 func (f *Fpdf) SetHeaderFunc(fnc func()) {
 	f.headerFnc = fnc
 }
 
-// Sets the function that lets the application render the page footer. The
-// specified function is automatically called by AddPage() and Close() and
-// should not be called directly by the application. The implementation in Fpdf
-// is empty, so you have to provide an appropriate function if you want page
-// footers. fnc will typically be a closure that has access to the Fpdf
-// instance and other document generation variables.
+// SetFooterFunc sets the function that lets the application render the page
+// footer. The specified function is automatically called by AddPage() and
+// Close() and should not be called directly by the application. The
+// implementation in Fpdf is empty, so you have to provide an appropriate
+// function if you want page footers. fnc will typically be a closure that has
+// access to the Fpdf instance and other document generation variables.
 func (f *Fpdf) SetFooterFunc(fnc func()) {
 	f.footerFnc = fnc
 }
 
-// Defines the top margin. The method can be called before creating the first
-// page.
+// SetTopMargin defines the top margin. The method can be called before
+// creating the first page.
 func (f *Fpdf) SetTopMargin(margin float64) {
 	f.tMargin = margin
 }
 
-// Defines the right margin. The method can be called before creating the first
-// page.
+// SetRightMargin defines the right margin. The method can be called before
+// creating the first page.
 func (f *Fpdf) SetRightMargin(margin float64) {
 	f.rMargin = margin
 }
 
-// Enables or disables the automatic page breaking mode. When enabling, the
-// second parameter is the distance from the bottom of the page that defines
-// the triggering limit. By default, the mode is on and the margin is 2 cm.
+// SetAutoPageBreak enables or disables the automatic page breaking mode. When
+// enabling, the second parameter is the distance from the bottom of the page
+// that defines the triggering limit. By default, the mode is on and the margin
+// is 2 cm.
 func (f *Fpdf) SetAutoPageBreak(auto bool, margin float64) {
 	f.autoPageBreak = auto
 	f.bMargin = margin
 	f.pageBreakTrigger = f.h - margin
 }
 
-// Defines the way the document is to be displayed by the viewer. The zoom
-// level can be set: pages can be displayed entirely on screen, occupy the full
-// width of the window, use real size, be scaled by a specific zooming factor
-// or use viewer default (configured in the Preferences menu of Adobe Reader).
-// The page layout can be specified too: single at once, continuous display,
-// two columns or viewer default.
+// SetDisplayMode defines the way the document is to be displayed by the
+// viewer. The zoom level can be set: pages can be displayed entirely on
+// screen, occupy the full width of the window, use real size, be scaled by a
+// specific zooming factor or use viewer default (configured in the Preferences
+// menu of Adobe Reader). The page layout can be specified too: single at once,
+// continuous display, two columns or viewer default.
 //
 // zoomStr can be "fullpage" to display the entire page on screen, "fullwidth"
 // to use maximum width of window, "real" to use real size (equivalent to 100%
@@ -337,22 +340,22 @@ func (f *Fpdf) SetDisplayMode(zoomStr, layoutStr string) {
 		// || !is_string($zoom))
 		f.zoomMode = zoomStr
 	default:
-		f.err = fmt.Errorf("Incorrect zoom display mode: %s", zoomStr)
+		f.err = fmt.Errorf("incorrect zoom display mode: %s", zoomStr)
 		return
 	}
 	switch layoutStr {
 	case "single", "continuous", "two", "default":
 		f.layoutMode = layoutStr
 	default:
-		f.err = fmt.Errorf("Incorrect layout display mode: %s", layoutStr)
+		f.err = fmt.Errorf("incorrect layout display mode: %s", layoutStr)
 		return
 	}
 }
 
-// Activates or deactivates page compression with zlib. When activated, the
-// internal representation of each page is compressed, which leads to a
-// compression ratio of about 2 for the resulting document. Compression is on
-// by default.
+// SetCompression activates or deactivates page compression with zlib. When
+// activated, the internal representation of each page is compressed, which
+// leads to a compression ratio of about 2 for the resulting document.
+// Compression is on by default.
 func (f *Fpdf) SetCompression(compress bool) {
 	// 	if(function_exists('gzcompress'))
 	f.compress = compress
@@ -360,8 +363,8 @@ func (f *Fpdf) SetCompression(compress bool) {
 	// 		$this->compress = false;
 }
 
-// Defines the title of the document. isUTF8 indicates if the string is encoded
-// in ISO-8859-1 (false) or UTF-8 (true).
+// SetTitle defines the title of the document. isUTF8 indicates if the string
+// is encoded in ISO-8859-1 (false) or UTF-8 (true).
 func (f *Fpdf) SetTitle(titleStr string, isUTF8 bool) {
 	if isUTF8 {
 		titleStr = utf8toutf16(titleStr)
@@ -369,8 +372,8 @@ func (f *Fpdf) SetTitle(titleStr string, isUTF8 bool) {
 	f.title = titleStr
 }
 
-// Defines the subject of the document. isUTF8 indicates if the string is encoded
-// in ISO-8859-1 (false) or UTF-8 (true).
+// SetSubject defines the subject of the document. isUTF8 indicates if the
+// string is encoded in ISO-8859-1 (false) or UTF-8 (true).
 func (f *Fpdf) SetSubject(subjectStr string, isUTF8 bool) {
 	if isUTF8 {
 		subjectStr = utf8toutf16(subjectStr)
@@ -378,8 +381,8 @@ func (f *Fpdf) SetSubject(subjectStr string, isUTF8 bool) {
 	f.subject = subjectStr
 }
 
-// Defines the author of the document. isUTF8 indicates if the string is encoded
-// in ISO-8859-1 (false) or UTF-8 (true).
+// SetAuthor defines the author of the document. isUTF8 indicates if the string
+// is encoded in ISO-8859-1 (false) or UTF-8 (true).
 func (f *Fpdf) SetAuthor(authorStr string, isUTF8 bool) {
 	if isUTF8 {
 		authorStr = utf8toutf16(authorStr)
@@ -387,9 +390,9 @@ func (f *Fpdf) SetAuthor(authorStr string, isUTF8 bool) {
 	f.author = authorStr
 }
 
-// Defines the keywords of the document. keywordStr is a space-delimited
-// string, for example "invoice August". isUTF8 indicates if the string is
-// encoded
+// SetKeywords defines the keywords of the document. keywordStr is a
+// space-delimited string, for example "invoice August". isUTF8 indicates if
+// the string is encoded
 func (f *Fpdf) SetKeywords(keywordsStr string, isUTF8 bool) {
 	if isUTF8 {
 		keywordsStr = utf8toutf16(keywordsStr)
@@ -397,8 +400,8 @@ func (f *Fpdf) SetKeywords(keywordsStr string, isUTF8 bool) {
 	f.keywords = keywordsStr
 }
 
-// Defines the creator of the document. isUTF8 indicates if the string is encoded
-// in ISO-8859-1 (false) or UTF-8 (true).
+// SetCreator defines the creator of the document. isUTF8 indicates if the
+// string is encoded in ISO-8859-1 (false) or UTF-8 (true).
 func (f *Fpdf) SetCreator(creatorStr string, isUTF8 bool) {
 	if isUTF8 {
 		creatorStr = utf8toutf16(creatorStr)
@@ -406,8 +409,9 @@ func (f *Fpdf) SetCreator(creatorStr string, isUTF8 bool) {
 	f.creator = creatorStr
 }
 
-// Defines an alias for the total number of pages. It will be substituted as
-// the document is closed. This method is demonstrated in tutorial 2.
+// AliasNbPages defines an alias for the total number of pages. It will be
+// substituted as the document is closed. This method is demonstrated in
+// tutorial 2.
 func (f *Fpdf) AliasNbPages(aliasStr string) {
 	if aliasStr == "" {
 		aliasStr = "{nb}"
@@ -420,16 +424,16 @@ func (f *Fpdf) open() {
 	f.state = 1
 }
 
-// Terminates the PDF document. It is not necessary to call this method
+// Close terminates the PDF document. It is not necessary to call this method
 // explicitly because Output() and OutputAndClose() do it automatically. If the
 // document contains no page, AddPage() is called to prevent the generation of
 // an invalid document.
 func (f *Fpdf) Close() {
 	if f.err == nil {
 		if f.clipNest > 0 {
-			f.err = fmt.Errorf("Clip procedure must be explicitly ended")
+			f.err = fmt.Errorf("clip procedure must be explicitly ended")
 		} else if f.transformNest > 0 {
-			f.err = fmt.Errorf("Transformation procedure must be explicitly ended")
+			f.err = fmt.Errorf("transformation procedure must be explicitly ended")
 		}
 	}
 	if f.err != nil {
@@ -457,11 +461,11 @@ func (f *Fpdf) Close() {
 	return
 }
 
-// Returns the width and height of the specified page in the units established
-// in New(). These return values are followed by the unit of measure itself. If
-// pageNum is zero or otherwise out of bounds, it returns the default page
-// size, that is, the size of the page that would be added by AddPage(). This
-// function is demonstrated in tutorial 15.
+// PageSize returns the width and height of the specified page in the units
+// established in New(). These return values are followed by the unit of
+// measure itself. If pageNum is zero or otherwise out of bounds, it returns
+// the default page size, that is, the size of the page that would be added by
+// AddPage(). This function is demonstrated in tutorial 15.
 func (f *Fpdf) PageSize(pageNum int) (wd, ht float64, unitStr string) {
 	sz, ok := f.pageSizes[pageNum]
 	if ok {
@@ -472,8 +476,8 @@ func (f *Fpdf) PageSize(pageNum int) (wd, ht float64, unitStr string) {
 	return sz.Wd, sz.Ht, f.unitStr
 }
 
-// Adds a new page with non-default orientation or size. See AddPage() for more
-// details.
+// AddPageFormat adds a new page with non-default orientation or size. See
+// AddPage() for more details.
 //
 // See New() for a description of orientationStr.
 //
@@ -566,10 +570,10 @@ func (f *Fpdf) AddPageFormat(orientationStr string, size SizeType) {
 	return
 }
 
-// Adds a new page to the document. If a page is already present, the Footer()
-// method is called first to output the footer. Then the page is added, the
-// current position set to the top-left corner according to the left and top
-// margins, and Header() is called to display the header.
+// AddPage adds a new page to the document. If a page is already present, the
+// Footer() method is called first to output the footer. Then the page is
+// added, the current position set to the top-left corner according to the left
+// and top margins, and Header() is called to display the header.
 //
 // The font which was set before calling is automatically restored. There is no
 // need to call SetFont() again if you want to continue with the same font. The
@@ -589,7 +593,7 @@ func (f *Fpdf) AddPage() {
 	return
 }
 
-// Returns the current page number.
+// PageNo returns the current page number.
 func (f *Fpdf) PageNo() int {
 	return f.page
 }
@@ -629,10 +633,10 @@ func colorString(r, g, b int, grayStr, fullStr string) (str string) {
 	return
 }
 
-// Defines the color used for all drawing operations (lines, rectangles and
-// cell borders). It is expressed in RGB components (0 - 255). The method can
-// be called before the first page is created and the value is retained from
-// page to page.
+// SetDrawColor defines the color used for all drawing operations (lines,
+// rectangles and cell borders). It is expressed in RGB components (0 - 255).
+// The method can be called before the first page is created and the value is
+// retained from page to page.
 func (f *Fpdf) SetDrawColor(r, g, b int) {
 	f.drawColor = colorString(r, g, b, "G", "RG")
 	if f.page > 0 {
@@ -640,10 +644,10 @@ func (f *Fpdf) SetDrawColor(r, g, b int) {
 	}
 }
 
-// Defines the color used for all filling operations (filled rectangles and
-// cell backgrounds). It is expressed in RGB components (0 -255). The method
-// can be called before the first page is created and the value is retained
-// from page to page.
+// SetFillColor defines the color used for all filling operations (filled
+// rectangles and cell backgrounds). It is expressed in RGB components (0
+// -255). The method can be called before the first page is created and the
+// value is retained from page to page.
 func (f *Fpdf) SetFillColor(r, g, b int) {
 	f.fillColor = colorString(r, g, b, "g", "rg")
 	f.colorFlag = f.fillColor != f.textColor
@@ -652,15 +656,16 @@ func (f *Fpdf) SetFillColor(r, g, b int) {
 	}
 }
 
-// Defines the color used for text. It is expressed in RGB components (0 -
-// 255). The method can be called before the first page is created and the
-// value is retained from page to page.
+// SetTextColor defines the color used for text. It is expressed in RGB
+// components (0 - 255). The method can be called before the first page is
+// created and the value is retained from page to page.
 func (f *Fpdf) SetTextColor(r, g, b int) {
 	f.textColor = colorString(r, g, b, "g", "rg")
 	f.colorFlag = f.fillColor != f.textColor
 }
 
-// Returns the length of a string in user units. A font must be selected.
+// GetStringWidth returns the length of a string in user units. A font must be
+// currently selected.
 func (f *Fpdf) GetStringWidth(s string) float64 {
 	if f.err != nil {
 		return 0
@@ -675,9 +680,9 @@ func (f *Fpdf) GetStringWidth(s string) float64 {
 	return float64(w) * f.fontSize / 1000
 }
 
-// Defines the line width. By default, the value equals 0.2 mm. The method can
-// be called before the first page is created and the value is retained from
-// page to page.
+// SetLineWidth defines the line width. By default, the value equals 0.2 mm.
+// The method can be called before the first page is created and the value is
+// retained from page to page.
 func (f *Fpdf) SetLineWidth(width float64) {
 	f.lineWidth = width
 	if f.page > 0 {
@@ -685,10 +690,10 @@ func (f *Fpdf) SetLineWidth(width float64) {
 	}
 }
 
-// Defines the line cap style. styleStr should be "butt", "round" or "square".
-// A square style projects from the end of the line. The method can be called
-// before the first page is created and the value is retained from page to
-// page.
+// SetLineCapStyle defines the line cap style. styleStr should be "butt",
+// "round" or "square". A square style projects from the end of the line. The
+// method can be called before the first page is created and the value is
+// retained from page to page.
 func (f *Fpdf) SetLineCapStyle(styleStr string) {
 	var capStyle int
 	switch styleStr {
@@ -707,8 +712,8 @@ func (f *Fpdf) SetLineCapStyle(styleStr string) {
 	}
 }
 
-// Draws a line between points (x1, y1) and (x2, y2) using the current draw
-// color, line width and cap style.
+// Line draws a line between points (x1, y1) and (x2, y2) using the current
+// draw color, line width and cap style.
 func (f *Fpdf) Line(x1, y1, x2, y2 float64) {
 	f.outf("%.2f %.2f m %.2f %.2f l S", x1*f.k, (f.h-y1)*f.k, x2*f.k, (f.h-y2)*f.k)
 }
@@ -725,7 +730,7 @@ func fillDrawOp(styleStr string) (opStr string) {
 	return
 }
 
-// Outputs a rectangle of width w and height h with the upper left corner
+// Rect outputs a rectangle of width w and height h with the upper left corner
 // positioned at point (x, y).
 //
 // It can be drawn (border only), filled (with no border) or both. styleStr can
@@ -737,7 +742,7 @@ func (f *Fpdf) Rect(x, y, w, h float64, styleStr string) {
 	f.outf("%.2f %.2f %.2f %.2f re %s", x*f.k, (f.h-y)*f.k, w*f.k, -h*f.k, fillDrawOp(styleStr))
 }
 
-// Draw a circle centered on point (x, y) with radius r.
+// Circle draws a circle centered on point (x, y) with radius r.
 //
 // styleStr can be "F" for filled, "D" for outlined only, or "DF" or "FD" for
 // outlined and filled. An empty string will be replaced with "D". Drawing uses
@@ -749,8 +754,8 @@ func (f *Fpdf) Circle(x, y, r float64, styleStr string) {
 	f.Ellipse(x, y, r, r, 0, styleStr)
 }
 
-// Draw an ellipse centered at point (x, y). rx and ry specify its horizontal
-// and vertical radii.
+// Ellipse draws an ellipse centered at point (x, y). rx and ry specify its
+// horizontal and vertical radii.
 //
 // degRotate specifies the counter-clockwise angle in degrees that the ellipse
 // will be rotated.
@@ -776,9 +781,9 @@ func (f *Fpdf) curve(cx0, cy0, x1, y1, cx1, cy1 float64) {
 		(f.h-y1)*f.k, cx1*f.k, (f.h-cy1)*f.k)
 }
 
-// Draws a single-segment quadratic Bézier curve. The curve starts at the
-// point (x0, y0) and ends at the point (x1, y1). The control point (cx, cy)
-// specifies the curvature. At the start point, the curve is tangent to the
+// Curve draws a single-segment quadratic Bézier curve. The curve starts at
+// the point (x0, y0) and ends at the point (x1, y1). The control point (cx,
+// cy) specifies the curvature. At the start point, the curve is tangent to the
 // straight line between the start point and the control point. At the end
 // point, the curve is tangent to the straight line between the end point and
 // the control point.
@@ -795,12 +800,12 @@ func (f *Fpdf) Curve(x0, y0, cx, cy, x1, y1 float64, styleStr string) {
 		fillDrawOp(styleStr))
 }
 
-// Draws a single-segment cubic Bézier curve. The curve starts at the point
-// (x0, y0) and ends at the point (x1, y1). The control points (cx0, cy0) and
-// (cx1, cy1) specify the curvature. At the start point, the curve is tangent
-// to the straight line between the start point and the control point (cx0,
-// cy0). At the end point, the curve is tangent to the straight line between
-// the end point and the control point (cx1, cy1).
+// CurveCubic draws a single-segment cubic Bézier curve. The curve starts at
+// the point (x0, y0) and ends at the point (x1, y1). The control points (cx0,
+// cy0) and (cx1, cy1) specify the curvature. At the start point, the curve is
+// tangent to the straight line between the start point and the control point
+// (cx0, cy0). At the end point, the curve is tangent to the straight line
+// between the end point and the control point (cx1, cy1).
 //
 // styleStr can be "F" for filled, "D" for outlined only, or "DF" or "FD" for
 // outlined and filled. An empty string will be replaced with "D". Drawing uses
@@ -814,7 +819,7 @@ func (f *Fpdf) CurveCubic(x0, y0, cx0, cy0, cx1, cy1, x1, y1 float64, styleStr s
 		x1*f.k, (f.h-y1)*f.k, cx1*f.k, (f.h-cy1)*f.k, fillDrawOp(styleStr))
 }
 
-// Draw an elliptical arc centered at point (x, y). rx and ry specify its
+// Arc draws an elliptical arc centered at point (x, y). rx and ry specify its
 // horizontal and vertical radii.
 //
 // degRotate specifies the angle that the arc will be rotated. degStart and
@@ -879,8 +884,8 @@ func (f *Fpdf) Arc(x, y, rx, ry, degRotate, degStart, degEnd float64, styleStr s
 	}
 }
 
-// Set the alpha blending channel. The blending effect applies to text,
-// drawings and images.
+// SetAlpha sets the alpha blending channel. The blending effect applies to
+// text, drawings and images.
 //
 // alpha must be a value between 0.0 (fully transparent) to 1.0 (fully opaque).
 // Values outside of this range result in an error.
@@ -907,11 +912,11 @@ func (f *Fpdf) SetAlpha(alpha float64, blendModeStr string) {
 	case "":
 		bl.modeStr = "Normal"
 	default:
-		f.err = fmt.Errorf("Unrecognized blend mode \"%s\"", blendModeStr)
+		f.err = fmt.Errorf("unrecognized blend mode \"%s\"", blendModeStr)
 		return
 	}
 	if alpha < 0.0 || alpha > 1.0 {
-		f.err = fmt.Errorf("Alpha value (0.0 - 1.0) is out of range: %.3f", alpha)
+		f.err = fmt.Errorf("alpha value (0.0 - 1.0) is out of range: %.3f", alpha)
 		return
 	}
 	alphaStr := sprintf("%.3f", alpha)
@@ -944,9 +949,9 @@ func (f *Fpdf) gradient(tp int, r1, g1, b1 int, r2, g2, b2 int, x1, y1 float64, 
 	f.outf("/Sh%d sh", pos)
 }
 
-// Draws a rectangular area with a blending of one color to another. The
-// rectangle is of width w and height h. Its upper left corner is positioned at
-// point (x, y).
+// LinearGradient draws a rectangular area with a blending of one color to
+// another. The rectangle is of width w and height h. Its upper left corner is
+// positioned at point (x, y).
 //
 // Each color is specified with three component values, one each for red, green
 // and blue. The values range from 0 to 255. The first color is specified by
@@ -968,9 +973,9 @@ func (f *Fpdf) LinearGradient(x, y, w, h float64, r1, g1, b1 int, r2, g2, b2 int
 	f.gradientClipEnd()
 }
 
-// Draws a rectangular area with a blending of one color to another. The
-// rectangle is of width w and height h. Its upper left corner is positioned at
-// point (x, y).
+// RadialGradient draws a rectangular area with a blending of one color to
+// another. The rectangle is of width w and height h. Its upper left corner is
+// positioned at point (x, y).
 //
 // Each color is specified with three component values, one each for red, green
 // and blue. The values range from 0 to 255. The first color is specified by
@@ -992,13 +997,13 @@ func (f *Fpdf) RadialGradient(x, y, w, h float64, r1, g1, b1 int, r2, g2, b2 int
 	f.gradientClipEnd()
 }
 
-// Begins a rectangular clipping operation. The rectangle is of width w and
-// height h. Its upper left corner is positioned at point (x, y). outline is
-// true to draw a border with the current draw color and line width centered on
-// the rectangle's perimeter. Only the outer half of the border will be shown.
-// After calling this method, all rendering operations (for example, Image(),
-// LinearGradient(), etc) will be clipped by the specified rectangle. Call
-// ClipEnd() to restore unclipped operations.
+// ClipRect begins a rectangular clipping operation. The rectangle is of width
+// w and height h. Its upper left corner is positioned at point (x, y). outline
+// is true to draw a border with the current draw color and line width centered
+// on the rectangle's perimeter. Only the outer half of the border will be
+// shown. After calling this method, all rendering operations (for example,
+// Image(), LinearGradient(), etc) will be clipped by the specified rectangle.
+// Call ClipEnd() to restore unclipped operations.
 //
 // See tutorial 14 for an example of this function.
 func (f *Fpdf) ClipRect(x, y, w, h float64, outline bool) {
@@ -1006,14 +1011,14 @@ func (f *Fpdf) ClipRect(x, y, w, h float64, outline bool) {
 	f.outf("q %.2f %.2f %.2f %.2f re W %s", x*f.k, (f.h-y)*f.k, w*f.k, -h*f.k, strIf(outline, "S", "n"))
 }
 
-// Begins a clipping operation in which rendering is confined to the character
-// string specified by txtStr. The origin (x, y) is on the left of the first
-// character at the baseline. The current font is used. outline is true to draw
-// a border with the current draw color and line width centered on the
-// perimeters of the text characters. Only the outer half of the border will be
-// shown. After calling this method, all rendering operations (for example,
-// Image(), LinearGradient(), etc) will be clipped. Call ClipEnd() to restore
-// unclipped operations.
+// ClipText begins a clipping operation in which rendering is confined to the
+// character string specified by txtStr. The origin (x, y) is on the left of
+// the first character at the baseline. The current font is used. outline is
+// true to draw a border with the current draw color and line width centered on
+// the perimeters of the text characters. Only the outer half of the border
+// will be shown. After calling this method, all rendering operations (for
+// example, Image(), LinearGradient(), etc) will be clipped. Call ClipEnd() to
+// restore unclipped operations.
 //
 // See tutorial 14 for an example of this function.
 func (f *Fpdf) ClipText(x, y float64, txtStr string, outline bool) {
@@ -1027,11 +1032,11 @@ func (f *Fpdf) clipArc(x1, y1, x2, y2, x3, y3 float64) {
 		x2*f.k, (h-y2)*f.k, x3*f.k, (h-y3)*f.k)
 }
 
-// Begins a rectangular clipping operation. The rectangle is of width w and
-// height h. Its upper left corner is positioned at point (x, y). The rounded
-// corners of the rectangle are specified by radius r. outline is true to draw
-// a border with the current draw color and line width centered on the
-// rectangle's perimeter. Only the outer half of the border will be shown.
+// ClipRoundedRect begins a rectangular clipping operation. The rectangle is of
+// width w and height h. Its upper left corner is positioned at point (x, y).
+// The rounded corners of the rectangle are specified by radius r. outline is
+// true to draw a border with the current draw color and line width centered on
+// the rectangle's perimeter. Only the outer half of the border will be shown.
 // After calling this method, all rendering operations (for example, Image(),
 // LinearGradient(), etc) will be clipped by the specified rectangle. Call
 // ClipEnd() to restore unclipped operations.
@@ -1062,13 +1067,13 @@ func (f *Fpdf) ClipRoundedRect(x, y, w, h, r float64, outline bool) {
 	f.outf(" W %s", strIf(outline, "S", "n"))
 }
 
-// Begins an elliptical clipping operation. The ellipse is centered at (x, y).
-// Its horizontal and vertical radii are specified by rx and ry. outline is
-// true to draw a border with the current draw color and line width centered on
-// the ellipse's perimeter. Only the outer half of the border will be shown.
-// After calling this method, all rendering operations (for example, Image(),
-// LinearGradient(), etc) will be clipped by the specified ellipse. Call
-// ClipEnd() to restore unclipped operations.
+// ClipEllipse begins an elliptical clipping operation. The ellipse is centered
+// at (x, y). Its horizontal and vertical radii are specified by rx and ry.
+// outline is true to draw a border with the current draw color and line width
+// centered on the ellipse's perimeter. Only the outer half of the border will
+// be shown. After calling this method, all rendering operations (for example,
+// Image(), LinearGradient(), etc) will be clipped by the specified ellipse.
+// Call ClipEnd() to restore unclipped operations.
 //
 // See tutorial 14 for an example of this function.
 func (f *Fpdf) ClipEllipse(x, y, rx, ry float64, outline bool) {
@@ -1097,10 +1102,10 @@ func (f *Fpdf) ClipEllipse(x, y, rx, ry float64, outline bool) {
 		strIf(outline, "S", "n"))
 }
 
-// Begins a circular clipping operation. The circle is centered at (x, y) and
-// has radius r. outline is true to draw a border with the current draw color
-// and line width centered on the circle's perimeter. Only the outer half of
-// the border will be shown. After calling this method, all rendering
+// ClipCircle begins a circular clipping operation. The circle is centered at
+// (x, y) and has radius r. outline is true to draw a border with the current
+// draw color and line width centered on the circle's perimeter. Only the outer
+// half of the border will be shown. After calling this method, all rendering
 // operations (for example, Image(), LinearGradient(), etc) will be clipped by
 // the specified circle. Call ClipEnd() to restore unclipped operations.
 //
@@ -1109,11 +1114,11 @@ func (f *Fpdf) ClipCircle(x, y, r float64, outline bool) {
 	f.ClipEllipse(x, y, r, r, outline)
 }
 
-// Begins a clipping operation within a polygon. The figure is defined by a
-// series of vertices specified by points. The x and y fields of the points use
-// the units established in New(). The last point in the slice will be
-// implicitly joined to the first to close the polygon. outline is true to draw
-// a border with the current draw color and line width centered on the
+// ClipPolygon begins a clipping operation within a polygon. The figure is
+// defined by a series of vertices specified by points. The x and y fields of
+// the points use the units established in New(). The last point in the slice
+// will be implicitly joined to the first to close the polygon. outline is true
+// to draw a border with the current draw color and line width centered on the
 // polygon's perimeter. Only the outer half of the border will be shown. After
 // calling this method, all rendering operations (for example, Image(),
 // LinearGradient(), etc) will be clipped by the specified polygon. Call
@@ -1133,10 +1138,10 @@ func (f *Fpdf) ClipPolygon(points []PointType, outline bool) {
 	f.out(s.String())
 }
 
-// Ends a clipping operation that was started with a call to ClipRect(),
-// ClipRoundedRect(), ClipText(), ClipEllipse(), ClipCircle() or ClipPolygon().
-// Clipping operations can be nested. The document cannot be successfully
-// output while a clipping operation is active.
+// ClipEnd ends a clipping operation that was started with a call to
+// ClipRect(), ClipRoundedRect(), ClipText(), ClipEllipse(), ClipCircle() or
+// ClipPolygon(). Clipping operations can be nested. The document cannot be
+// successfully output while a clipping operation is active.
 //
 // See tutorial 14 for an example of this function.
 func (f *Fpdf) ClipEnd() {
@@ -1145,13 +1150,13 @@ func (f *Fpdf) ClipEnd() {
 			f.clipNest--
 			f.out("Q")
 		} else {
-			f.err = fmt.Errorf("Error attempting to end clip operation out of sequence")
+			f.err = fmt.Errorf("error attempting to end clip operation out of sequence")
 		}
 	}
 }
 
-// Imports a TrueType, OpenType or Type1 font and makes it available. It is
-// necessary to generate a font definition file first with the makefont
+// AddFont imports a TrueType, OpenType or Type1 font and makes it available.
+// It is necessary to generate a font definition file first with the makefont
 // utility. It is not necessary to call this function for the core PDF fonts
 // (courier, helvetica, times, zapfdingbats).
 //
@@ -1229,9 +1234,9 @@ func (f *Fpdf) AddFont(familyStr, styleStr, fileStr string) {
 	return
 }
 
-// Sets the font used to print character strings. It is mandatory to call this
-// method at least once before printing text or the resulting document will not
-// be valid.
+// SetFont sets the font used to print character strings. It is mandatory to
+// call this method at least once before printing text or the resulting
+// document will not be valid.
 //
 // The font can be either a standard one or a font added via the AddFont()
 // method. Standard fonts use the Windows encoding cp1252 (Western Europe).
@@ -1305,7 +1310,7 @@ func (f *Fpdf) SetFont(familyStr, styleStr string, size float64) {
 				}
 			}
 		} else {
-			f.err = fmt.Errorf("Undefined font: %s %s", familyStr, styleStr)
+			f.err = fmt.Errorf("undefined font: %s %s", familyStr, styleStr)
 			return
 		}
 	}
@@ -1321,7 +1326,7 @@ func (f *Fpdf) SetFont(familyStr, styleStr string, size float64) {
 	return
 }
 
-// Defines the size of the current font in points.
+// SetFontSize defines the size of the current font in points.
 func (f *Fpdf) SetFontSize(size float64) {
 	if f.fontSizePt == size {
 		return
@@ -1333,16 +1338,16 @@ func (f *Fpdf) SetFontSize(size float64) {
 	}
 }
 
-// Creates a new internal link and returns its identifier. An internal link is
-// a clickable area which directs to another place within the document. The
-// identifier can then be passed to Cell(), Write(), Image() or Link(). The
+// AddLink creates a new internal link and returns its identifier. An internal
+// link is a clickable area which directs to another place within the document.
+// The identifier can then be passed to Cell(), Write(), Image() or Link(). The
 // destination is defined with SetLink().
 func (f *Fpdf) AddLink() int {
 	f.links = append(f.links, intLinkType{})
 	return len(f.links) - 1
 }
 
-// Defines the page and position a link points to. See AddLink().
+// SetLink defines the page and position a link points to. See AddLink().
 func (f *Fpdf) SetLink(link int, y float64, page int) {
 	if y == -1 {
 		y = f.y
@@ -1364,7 +1369,7 @@ func (f *Fpdf) newLink(x, y, w, h float64, link int, linkStr string) {
 		linkType{x * f.k, f.hPt - y*f.k, w * f.k, h * f.k, link, linkStr})
 }
 
-// Puts a link on a rectangular area of the page. Text or image links are
+// Link puts a link on a rectangular area of the page. Text or image links are
 // generally put via Cell(), Write() or Image(), but this method can be useful
 // for instance to define a clickable area inside an image. link is the value
 // returned by AddLink().
@@ -1372,17 +1377,17 @@ func (f *Fpdf) Link(x, y, w, h float64, link int) {
 	f.newLink(x, y, w, h, link, "")
 }
 
-// Puts a link on a rectangular area of the page. Text or image links are
-// generally put via Cell(), Write() or Image(), but this method can be useful
-// for instance to define a clickable area inside an image. linkStr is the
-// target URL.
+// LinkString puts a link on a rectangular area of the page. Text or image
+// links are generally put via Cell(), Write() or Image(), but this method can
+// be useful for instance to define a clickable area inside an image. linkStr
+// is the target URL.
 func (f *Fpdf) LinkString(x, y, w, h float64, linkStr string) {
 	f.newLink(x, y, w, h, 0, linkStr)
 }
 
-// Sets a bookmark that will be displayed in a sidebar outline. txtStr is the
-// title of the bookmark. level specifies the level of the bookmark in the
-// outline; 0 is the top level, 1 is just below, and so on. y specifies the
+// Bookmark sets a bookmark that will be displayed in a sidebar outline. txtStr
+// is the title of the bookmark. level specifies the level of the bookmark in
+// the outline; 0 is the top level, 1 is just below, and so on. y specifies the
 // vertical position of the bookmark destination in the current page; -1
 // indicates the current position.
 //
@@ -1394,10 +1399,10 @@ func (f *Fpdf) Bookmark(txtStr string, level int, y float64) {
 	f.outlines = append(f.outlines, outlineType{text: txtStr, level: level, y: y, p: f.PageNo(), prev: -1, last: -1, next: -1, first: -1})
 }
 
-// Prints a character string. The origin (x, y) is on the left of the first
-// character at the baseline. This method allows to place a string precisely on
-// the page, but it is usually easier to use Cell(), MultiCell() or Write()
-// which are the standard methods to print text.
+// Text prints a character string. The origin (x, y) is on the left of the
+// first character at the baseline. This method allows to place a string
+// precisely on the page, but it is usually easier to use Cell(), MultiCell()
+// or Write() which are the standard methods to print text.
 func (f *Fpdf) Text(x, y float64, txtStr string) {
 	s := sprintf("BT %.2f %.2f Td (%s) Tj ET", x*f.k, (f.h-y)*f.k, f.escape(txtStr))
 	if f.underline && txtStr != "" {
@@ -1424,8 +1429,8 @@ func (f *Fpdf) SetAcceptPageBreakFunc(fnc func() bool) {
 	f.acceptPageBreak = fnc
 }
 
-// Prints a cell (rectangular area) with optional borders, background color and
-// character string. The upper-left corner of the cell corresponds to the
+// CellFormat prints a rectangular cell with optional borders, background color
+// and character string. The upper-left corner of the cell corresponds to the
 // current position. The text can be aligned or centered. After the call, the
 // current position moves to the right or to the next line. It is possible to
 // put a link on the text.
@@ -1571,20 +1576,20 @@ func (f *Fpdf) CellFormat(w, h float64, txtStr string, borderStr string, ln int,
 	return
 }
 
-// A simpler version of CellFormat with no fill, border, links or special
-// alignment.
+// Cell is a simpler version of CellFormat with no fill, border, links or
+// special alignment.
 func (f *Fpdf) Cell(w, h float64, txtStr string) {
 	f.CellFormat(w, h, txtStr, "", 0, "L", false, 0, "")
 }
 
-// A simpler printf-style version of CellFormat with no fill, border, links or
-// special alignment. See documentation for the fmt package for details on
-// fmtStr and args.
+// Cellf is a simpler printf-style version of CellFormat with no fill, border,
+// links or special alignment. See documentation for the fmt package for
+// details on fmtStr and args.
 func (f *Fpdf) Cellf(w, h float64, fmtStr string, args ...interface{}) {
 	f.CellFormat(w, h, sprintf(fmtStr, args...), "", 0, "L", false, 0, "")
 }
 
-// This method allows printing text with line breaks. They can be automatic (as
+// MultiCell allows printing text with line breaks. They can be automatic (as
 // soon as the text reaches the right border of the cell) or explicit (via the
 // \n character). As many cells as necessary are output, one below the other.
 //
@@ -1791,7 +1796,7 @@ func (f *Fpdf) write(h float64, txtStr string, link int, linkStr string) {
 	}
 }
 
-// This method prints text from the current position. When the right margin is
+// Write prints text from the current position. When the right margin is
 // reached (or the \n character is met) a line break occurs and text continues
 // from the left margin. Upon method exit, the current position is left just at
 // the end of the text.
@@ -1803,27 +1808,28 @@ func (f *Fpdf) Write(h float64, txtStr string) {
 	f.write(h, txtStr, 0, "")
 }
 
-// Like Write but uses printf-style formatting. See the documentation for
-// package fmt for more details on fmtStr and args.
+// Writef is like Write but uses printf-style formatting. See the documentation
+// for package fmt for more details on fmtStr and args.
 func (f *Fpdf) Writef(h float64, fmtStr string, args ...interface{}) {
 	f.write(h, sprintf(fmtStr, args...), 0, "")
 }
 
-// Write text that when clicked launches an external URL. See Write() for
-// argument details.
+// WriteLinkString writes text that when clicked launches an external URL. See
+// Write() for argument details.
 func (f *Fpdf) WriteLinkString(h float64, displayStr, targetStr string) {
 	f.write(h, displayStr, 0, targetStr)
 }
 
-// Write text that when clicked jumps to another location in the PDF. linkId is
-// an identifier returned by AddLink(). See Write() for argument details.
-func (f *Fpdf) WriteLinkId(h float64, displayStr string, linkId int) {
-	f.write(h, displayStr, linkId, "")
+// WriteLinkID write text that when clicked jumps to another location in the
+// PDF. linkID is an identifier returned by AddLink(). See Write() for argument
+// details.
+func (f *Fpdf) WriteLinkID(h float64, displayStr string, linkID int) {
+	f.write(h, displayStr, linkID, "")
 }
 
-// Performs a line break. The current abscissa goes back to the left margin and
-// the ordinate increases by the amount passed in parameter. A negative value
-// of h indicates the height of the last printed cell.
+// Ln performs a line break. The current abscissa goes back to the left margin
+// and the ordinate increases by the amount passed in parameter. A negative
+// value of h indicates the height of the last printed cell.
 func (f *Fpdf) Ln(h float64) {
 	f.x = f.lMargin
 	if h < 0 {
@@ -1833,11 +1839,11 @@ func (f *Fpdf) Ln(h float64) {
 	}
 }
 
-// Puts a JPEG, PNG or GIF image. The size it will take on the page can be
-// specified in different ways. If both w and h are 0, the image is rendered at
-// 96 dpi. If either w or h is zero, it will be calculated from the other
-// dimension so that the aspect ratio is maintained. If w and h are negative,
-// their absolute values indicate their dpi extents.
+// Image puts a JPEG, PNG or GIF image in the current page. The size it will
+// take on the page can be specified in different ways. If both w and h are 0,
+// the image is rendered at 96 dpi. If either w or h is zero, it will be
+// calculated from the other dimension so that the aspect ratio is maintained.
+// If w and h are negative, their absolute values indicate their dpi extents.
 //
 // Supported JPEG formats are 24 bit, 32 bit and gray scale. Supported PNG
 // formats are 24 bit, indexed color, and 8 bit indexed gray scale. If a GIF
@@ -1910,11 +1916,11 @@ func (f *Fpdf) Image(fileStr string, x, y, w, h float64, flow bool, tp string, l
 	return
 }
 
-// Registers an image, adding it to the PDF file but not adding it to the page.
-// Use Image() with the same filename to add the image to the page. Note that
-// Image() calls this function, so this function is only necessary if you need
-// information about the image before placing it. See Image() for restrictions
-// on the image and the "tp" parameters.
+// RegisterImage registers an image, adding it to the PDF file but not adding
+// it to the page. Use Image() with the same filename to add the image to the
+// page. Note that Image() calls this function, so this function is only
+// necessary if you need information about the image before placing it. See
+// Image() for restrictions on the image and the "tp" parameters.
 //
 // See tutorial 18 for an example of this function.
 func (f *Fpdf) RegisterImage(fileStr, tp string) (info *ImageInfoType) {
@@ -1924,7 +1930,7 @@ func (f *Fpdf) RegisterImage(fileStr, tp string) (info *ImageInfoType) {
 		if tp == "" {
 			pos := strings.LastIndex(fileStr, ".")
 			if pos < 0 {
-				f.err = fmt.Errorf("Image file has no extension and no type was specified: %s", fileStr)
+				f.err = fmt.Errorf("image file has no extension and no type was specified: %s", fileStr)
 				return
 			}
 			tp = fileStr[pos+1:]
@@ -1941,7 +1947,7 @@ func (f *Fpdf) RegisterImage(fileStr, tp string) (info *ImageInfoType) {
 		case "gif":
 			info = f.parsegif(fileStr)
 		default:
-			f.err = fmt.Errorf("Unsupported image type: %s", tp)
+			f.err = fmt.Errorf("unsupported image type: %s", tp)
 		}
 		if f.err != nil {
 			return
@@ -1953,12 +1959,12 @@ func (f *Fpdf) RegisterImage(fileStr, tp string) (info *ImageInfoType) {
 	return info
 }
 
-// Returns the abscissa of the current position.
+// GetX returns the abscissa of the current position.
 func (f *Fpdf) GetX() float64 {
 	return f.x
 }
 
-// Defines the abscissa of the current position. If the passed value is
+// SetX defines the abscissa of the current position. If the passed value is
 // negative, it is relative to the right of the page.
 func (f *Fpdf) SetX(x float64) {
 	if x >= 0 {
@@ -1968,13 +1974,14 @@ func (f *Fpdf) SetX(x float64) {
 	}
 }
 
-// Returns the ordinate of the current position.
+// GetY returns the ordinate of the current position.
 func (f *Fpdf) GetY() float64 {
 	return f.y
 }
 
-// Moves the current abscissa back to the left margin and sets the ordinate. If
-// the passed value is negative, it is relative to the bottom of the page.
+// SetY moves the current abscissa back to the left margin and sets the
+// ordinate. If the passed value is negative, it is relative to the bottom of
+// the page.
 func (f *Fpdf) SetY(y float64) {
 	// dbg("SetY x %.2f, lMargin %.2f", f.x, f.lMargin)
 	f.x = f.lMargin
@@ -1985,15 +1992,15 @@ func (f *Fpdf) SetY(y float64) {
 	}
 }
 
-// Defines the abscissa and ordinate of the current position. If the passed
-// values are negative, they are relative respectively to the right and bottom
-// of the page.
+// SetXY defines the abscissa and ordinate of the current position. If the
+// passed values are negative, they are relative respectively to the right and
+// bottom of the page.
 func (f *Fpdf) SetXY(x, y float64) {
 	f.SetY(y)
 	f.SetX(x)
 }
 
-// Send the PDF document to the writer specified by w. This method will close
+// OutputAndClose send the PDF document to the writer specified by w. This method will close
 // both f and w, even if an error is detected and no document is produced.
 func (f *Fpdf) OutputAndClose(w io.WriteCloser) error {
 	f.Output(w)
@@ -2001,10 +2008,10 @@ func (f *Fpdf) OutputAndClose(w io.WriteCloser) error {
 	return f.err
 }
 
-// Send the PDF document to the writer specified by w. No output will take
-// place if an error has occured in the document generation process. w remains
-// open after this function returns. After returning, f is in a closed state
-// and its methods should not be called.
+// Output sends the PDF document to the writer specified by w. No output will
+// take place if an error has occured in the document generation process. w
+// remains open after this function returns. After returning, f is in a closed
+// state and its methods should not be called.
 func (f *Fpdf) Output(w io.Writer) error {
 	if f.err != nil {
 		return f.err
@@ -2034,7 +2041,7 @@ func (f *Fpdf) getpagesizestr(sizeStr string) (size SizeType) {
 		size.Ht /= f.k
 
 	} else {
-		f.err = fmt.Errorf("Unknown page size %s", sizeStr)
+		f.err = fmt.Errorf("unknown page size %s", sizeStr)
 	}
 	return
 }
@@ -2177,7 +2184,7 @@ func (f *Fpdf) parsejpg(fileStr string) (info *ImageInfoType) {
 	case color.YCbCrModel:
 		info.cs = "DeviceRGB"
 	default:
-		f.err = fmt.Errorf("JPEG buffer has unsupported color space (%v)", config.ColorModel)
+		f.err = fmt.Errorf("image JPEG buffer has unsupported color space (%v)", config.ColorModel)
 		return
 	}
 	return
@@ -2213,13 +2220,13 @@ func (f *Fpdf) parsepngstream(buf *bytes.Buffer) (info *ImageInfoType) {
 	info = f.newImageInfo()
 	// 	Check signature
 	if string(buf.Next(8)) != "\x89PNG\x0d\x0a\x1a\x0a" {
-		f.err = fmt.Errorf("Not a PNG buffer")
+		f.err = fmt.Errorf("not a PNG buffer")
 		return
 	}
 	// Read header chunk
 	_ = buf.Next(4)
 	if string(buf.Next(4)) != "IHDR" {
-		f.err = fmt.Errorf("Incorrect PNG buffer")
+		f.err = fmt.Errorf("incorrect PNG buffer")
 		return
 	}
 	w := f.readBeInt32(buf)
@@ -2240,21 +2247,21 @@ func (f *Fpdf) parsepngstream(buf *bytes.Buffer) (info *ImageInfoType) {
 	case 3:
 		colspace = "Indexed"
 	default:
-		f.err = fmt.Errorf("Unknown color type in PNG buffer: %d", ct)
+		f.err = fmt.Errorf("unknown color type in PNG buffer: %d", ct)
 	}
 	if f.err != nil {
 		return
 	}
 	if f.readByte(buf) != 0 {
-		f.err = fmt.Errorf("'Unknown compression method in PNG buffer")
+		f.err = fmt.Errorf("'unknown compression method in PNG buffer")
 		return
 	}
 	if f.readByte(buf) != 0 {
-		f.err = fmt.Errorf("'Unknown filter method in PNG buffer")
+		f.err = fmt.Errorf("'unknown filter method in PNG buffer")
 		return
 	}
 	if f.readByte(buf) != 0 {
-		f.err = fmt.Errorf("Interlacing not supported in PNG buffer")
+		f.err = fmt.Errorf("interlacing not supported in PNG buffer")
 		return
 	}
 	_ = buf.Next(4)
@@ -2305,7 +2312,7 @@ func (f *Fpdf) parsepngstream(buf *bytes.Buffer) (info *ImageInfoType) {
 		}
 	}
 	if colspace == "Indexed" && len(pal) == 0 {
-		f.err = fmt.Errorf("Missing palette in PNG buffer")
+		f.err = fmt.Errorf("missing palette in PNG buffer")
 	}
 	info.w = float64(w)
 	info.h = float64(h)
@@ -2638,7 +2645,7 @@ func (f *Fpdf) putfonts() {
 			f.out(s.String())
 			f.out("endobj")
 		} else {
-			f.err = fmt.Errorf("Unsupported font type: %s", tp)
+			f.err = fmt.Errorf("unsupported font type: %s", tp)
 			return
 			// Allow for additional types
 			// 			$mtd = 'put'.strtolower($type);
@@ -2816,7 +2823,7 @@ func (f *Fpdf) putresources() {
 }
 
 func (f *Fpdf) putinfo() {
-	f.outf("/Producer %s", f.textstring("FPDF "+FPDF_VERSION))
+	f.outf("/Producer %s", f.textstring("FPDF "+cnFpdfVersion))
 	if len(f.title) > 0 {
 		f.outf("/Title %s", f.textstring(f.title))
 	}

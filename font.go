@@ -53,7 +53,7 @@ func loadMap(encodingFileStr string) (encList encListType, err error) {
 	f, err = os.Open(encodingFileStr)
 	if err == nil {
 		defer f.Close()
-		for j, _ := range encList {
+		for j := range encList {
 			encList[j].uv = -1
 			encList[j].name = ".notdef"
 		}
@@ -67,7 +67,7 @@ func loadMap(encodingFileStr string) (encList encListType, err error) {
 				if pos < 256 {
 					encList[pos] = enc
 				} else {
-					err = fmt.Errorf("Map position 0x%2X exceeds 0xFF", pos)
+					err = fmt.Errorf("map position 0x%2X exceeds 0xFF", pos)
 					return
 				}
 			} else {
@@ -90,7 +90,7 @@ func getInfoFromTrueType(fileStr string, msgWriter io.Writer, embed bool, encLis
 	}
 	if embed {
 		if !ttf.Embeddable {
-			err = fmt.Errorf("Font license does not allow embedding")
+			err = fmt.Errorf("font license does not allow embedding")
 			return
 		}
 		info.Data, err = ioutil.ReadFile(fileStr)
@@ -149,7 +149,7 @@ func segmentRead(f *os.File) (s segmentType, err error) {
 		return
 	}
 	if s.marker != 128 {
-		err = fmt.Errorf("Font file is not a valid binary Type1")
+		err = fmt.Errorf("font file is not a valid binary Type1")
 		return
 	}
 	if err = binary.Read(f, binary.LittleEndian, &s.tp); err != nil {
@@ -193,10 +193,10 @@ func getInfoFromType1(fileStr string, msgWriter io.Writer, embed bool, encList e
 	afmFileStr := fileStr[0:len(fileStr)-3] + "afm"
 	size, ok := fileSize(afmFileStr)
 	if !ok {
-		err = fmt.Errorf("AFM font file %s not found", afmFileStr)
+		err = fmt.Errorf("font file (ATM) %s not found", afmFileStr)
 		return
 	} else if size == 0 {
-		err = fmt.Errorf("AFM font file %s empty or not readable", afmFileStr)
+		err = fmt.Errorf("font file (AFM) %s empty or not readable", afmFileStr)
 		return
 	}
 	var f *os.File
@@ -260,7 +260,7 @@ func getInfoFromType1(fileStr string, msgWriter io.Writer, embed bool, encList e
 		return
 	}
 	if info.FontName == "" {
-		err = fmt.Errorf("FontName missing in AFM file %s", afmFileStr)
+		err = fmt.Errorf("the field FontName missing in AFM file %s", afmFileStr)
 		return
 	}
 	info.Bold = wt == "bold" || wt == "black"
@@ -369,10 +369,10 @@ func makeDefinitionFile(fileStr, tpStr, encodingFileStr string, embed bool, encL
 	return
 }
 
-// Generate a font definition file in JSON format. A definition file of this
-// type is required to use non-core fonts in the PDF documents that gofpdf
-// generates. See the makefont utility in the gofpdf package for a command line
-// interface to this function.
+// MakeFont generates a font definition file in JSON format. A definition file
+// of this type is required to use non-core fonts in the PDF documents that
+// gofpdf generates. See the makefont utility in the gofpdf package for a
+// command line interface to this function.
 //
 // fontFileStr is the name of the TrueType (or OpenType based on TrueType) or
 // Type1 file from which to generate a definition file.
@@ -392,7 +392,7 @@ func MakeFont(fontFileStr, encodingFileStr, dstDirStr string, msgWriter io.Write
 		msgWriter = ioutil.Discard
 	}
 	if !fileExist(fontFileStr) {
-		err = fmt.Errorf("Font file not found: %s", fontFileStr)
+		err = fmt.Errorf("font file not found: %s", fontFileStr)
 		return
 	}
 	extStr := strings.ToLower(fontFileStr[len(fontFileStr)-3:])
@@ -403,7 +403,7 @@ func MakeFont(fontFileStr, encodingFileStr, dstDirStr string, msgWriter io.Write
 	} else if extStr == "pfb" {
 		tpStr = "Type1"
 	} else {
-		err = fmt.Errorf("Unrecognized font file extension: %s", extStr)
+		err = fmt.Errorf("unrecognized font file extension: %s", extStr)
 		return
 	}
 	var encList encListType

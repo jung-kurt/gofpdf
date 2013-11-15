@@ -24,7 +24,7 @@ import (
 )
 
 func ExampleTtfParse() {
-	ttf, err := gofpdf.TtfParse(FONT_DIR + "/calligra.ttf")
+	ttf, err := gofpdf.TtfParse(cnFontDir + "/calligra.ttf")
 	if err == nil {
 		fmt.Printf("Postscript name:  %s\n", ttf.PostScriptName)
 		fmt.Printf("unitsPerEm:       %8d\n", ttf.UnitsPerEm)
@@ -55,7 +55,7 @@ func hexStr(s string) string {
 }
 
 func ExampleFpdf_GetStringWidth() {
-	pdf := gofpdf.New("", "", "", FONT_DIR)
+	pdf := gofpdf.New("", "", "", cnFontDir)
 	pdf.SetFont("Helvetica", "", 12)
 	pdf.AddPage()
 	for _, s := range []string{"Hello", "世界", "\xe7a va?"} {

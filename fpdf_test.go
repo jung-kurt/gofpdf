@@ -29,10 +29,10 @@ import (
 
 // Absolute path needed for gocov tool; relative OK for test
 const (
-	GOFPDF_DIR = "."
-	FONT_DIR   = GOFPDF_DIR + "/font"
-	IMG_DIR    = GOFPDF_DIR + "/image"
-	TEXT_DIR   = GOFPDF_DIR + "/text"
+	cnGofpdfDir = "."
+	cnFontDir   = cnGofpdfDir + "/font"
+	cnImgDir    = cnGofpdfDir + "/image"
+	cnTextDir   = cnGofpdfDir + "/text"
 )
 
 type nullWriter struct {
@@ -79,7 +79,7 @@ func docWriter(pdf *gofpdf.Fpdf, idx int) *pdfWriter {
 	pw.idx = idx
 	if pdf.Ok() {
 		var err error
-		fileStr := fmt.Sprintf("%s/pdf/tutorial%02d.pdf", GOFPDF_DIR, idx)
+		fileStr := fmt.Sprintf("%s/pdf/tutorial%02d.pdf", cnGofpdfDir, idx)
 		pw.fl, err = os.Create(fileStr)
 		if err != nil {
 			pdf.SetErrorf("Error opening output file %s", fileStr)
@@ -174,7 +174,7 @@ func lorem() string {
 
 // Hello, world
 func ExampleFpdf_tutorial01() {
-	pdf := gofpdf.New("P", "mm", "A4", FONT_DIR)
+	pdf := gofpdf.New("P", "mm", "A4", cnFontDir)
 	pdf.AddPage()
 	pdf.SetFont("Arial", "B", 16)
 	pdf.Cell(40, 10, "Hello World!")
@@ -185,9 +185,9 @@ func ExampleFpdf_tutorial01() {
 
 // Header, footer and page-breaking
 func ExampleFpdf_tutorial02() {
-	pdf := gofpdf.New("P", "mm", "A4", FONT_DIR)
+	pdf := gofpdf.New("P", "mm", "A4", cnFontDir)
 	pdf.SetHeaderFunc(func() {
-		pdf.Image(IMG_DIR+"/logo.png", 10, 6, 30, 0, false, "", 0, "")
+		pdf.Image(cnImgDir+"/logo.png", 10, 6, 30, 0, false, "", 0, "")
 		pdf.SetY(5)
 		pdf.SetFont("Arial", "B", 15)
 		pdf.Cell(80, 0, "")
@@ -212,7 +212,7 @@ func ExampleFpdf_tutorial02() {
 
 // Word-wrapping, line justification and page-breaking
 func ExampleFpdf_tutorial03() {
-	pdf := gofpdf.New("P", "mm", "A4", FONT_DIR)
+	pdf := gofpdf.New("P", "mm", "A4", cnFontDir)
 	titleStr := "20000 Leagues Under the Seas"
 	pdf.SetTitle(titleStr, false)
 	pdf.SetAuthor("Jules Verne", false)
@@ -274,8 +274,8 @@ func ExampleFpdf_tutorial03() {
 		chapterTitle(chapNum, titleStr)
 		chapterBody(fileStr)
 	}
-	printChapter(1, "A RUNAWAY REEF", TEXT_DIR+"/20k_c1.txt")
-	printChapter(2, "THE PROS AND CONS", TEXT_DIR+"/20k_c2.txt")
+	printChapter(1, "A RUNAWAY REEF", cnTextDir+"/20k_c1.txt")
+	printChapter(2, "THE PROS AND CONS", cnTextDir+"/20k_c2.txt")
 	pdf.OutputAndClose(docWriter(pdf, 3))
 	// Output:
 	// Successfully generated pdf/tutorial03.pdf
@@ -285,7 +285,7 @@ func ExampleFpdf_tutorial03() {
 func ExampleFpdf_tutorial04() {
 	var y0 float64
 	var crrntCol int
-	pdf := gofpdf.New("P", "mm", "A4", FONT_DIR)
+	pdf := gofpdf.New("P", "mm", "A4", cnFontDir)
 	titleStr := "20000 Leagues Under the Seas"
 	pdf.SetTitle(titleStr, false)
 	pdf.SetAuthor("Jules Verne", false)
@@ -339,12 +339,11 @@ func ExampleFpdf_tutorial04() {
 			pdf.SetY(y0)
 			// Keep on page
 			return false
-		} else {
-			// Go back to first column
-			setCol(0)
-			// Page break
-			return true
 		}
+		// Go back to first column
+		setCol(0)
+		// Page break
+		return true
 	})
 	pdf.SetHeaderFunc(func() {
 		// Arial bold 15
@@ -375,8 +374,8 @@ func ExampleFpdf_tutorial04() {
 		// Page number
 		pdf.CellFormat(0, 10, fmt.Sprintf("Page %d", pdf.PageNo()), "", 0, "C", false, 0, "")
 	})
-	printChapter(1, "A RUNAWAY REEF", TEXT_DIR+"/20k_c1.txt")
-	printChapter(2, "THE PROS AND CONS", TEXT_DIR+"/20k_c2.txt")
+	printChapter(1, "A RUNAWAY REEF", cnTextDir+"/20k_c1.txt")
+	printChapter(2, "THE PROS AND CONS", cnTextDir+"/20k_c2.txt")
 	pdf.OutputAndClose(docWriter(pdf, 4))
 	// Output:
 	// Successfully generated pdf/tutorial04.pdf
@@ -384,7 +383,7 @@ func ExampleFpdf_tutorial04() {
 
 // Various table styles
 func ExampleFpdf_tutorial05() {
-	pdf := gofpdf.New("P", "mm", "A4", FONT_DIR)
+	pdf := gofpdf.New("P", "mm", "A4", cnFontDir)
 	type countryType struct {
 		nameStr, capitalStr, areaStr, popStr string
 	}
@@ -406,12 +405,12 @@ func ExampleFpdf_tutorial05() {
 					c.popStr = list[3]
 					countryList = append(countryList, c)
 				} else {
-					err = fmt.Errorf("Error tokenizing %s", lineStr)
+					err = fmt.Errorf("error tokenizing %s", lineStr)
 				}
 			}
 			fl.Close()
 			if len(countryList) == 0 {
-				err = fmt.Errorf("Error loading data from %s", fileStr)
+				err = fmt.Errorf("error loading data from %s", fileStr)
 			}
 		}
 		if err != nil {
@@ -489,7 +488,7 @@ func ExampleFpdf_tutorial05() {
 		}
 		pdf.CellFormat(wSum, 0, "", "T", 0, "", false, 0, "")
 	}
-	loadData(TEXT_DIR + "/countries.txt")
+	loadData(cnTextDir + "/countries.txt")
 	pdf.SetFont("Arial", "", 14)
 	pdf.AddPage()
 	basicTable()
@@ -506,7 +505,7 @@ func ExampleFpdf_tutorial05() {
 func ExampleFpdf_tutorial06() {
 	var boldLvl, italicLvl, underscoreLvl int
 	var hrefStr string
-	pdf := gofpdf.New("P", "mm", "A4", FONT_DIR)
+	pdf := gofpdf.New("P", "mm", "A4", cnFontDir)
 	setStyle := func(boldAdj, italicAdj, underscoreAdj int) {
 		styleStr := ""
 		boldLvl += boldAdj
@@ -532,7 +531,7 @@ func ExampleFpdf_tutorial06() {
 		pdf.SetTextColor(0, 0, 0)
 	}
 
-	writeHtml := func(htmlStr string) {
+	writeHTML := func(htmlStr string) {
 		list := htmlTokenize(htmlStr)
 		var ok bool
 		for _, el := range list {
@@ -579,19 +578,19 @@ func ExampleFpdf_tutorial06() {
 	pdf.Write(5, "To find out what's new in this tutorial, click ")
 	pdf.SetFont("", "U", 0)
 	link := pdf.AddLink()
-	pdf.WriteLinkId(5, "here", link)
+	pdf.WriteLinkID(5, "here", link)
 	pdf.SetFont("", "", 0)
 	// Second page
 	pdf.AddPage()
 	pdf.SetLink(link, 0, -1)
-	pdf.Image(IMG_DIR+"/logo.png", 10, 12, 30, 0, false, "", 0, "http://www.fpdf.org")
+	pdf.Image(cnImgDir+"/logo.png", 10, 12, 30, 0, false, "", 0, "http://www.fpdf.org")
 	pdf.SetLeftMargin(45)
 	pdf.SetFontSize(14)
 	htmlStr := `You can now easily print text mixing different styles: <b>bold</b>, ` +
 		`<i>italic</i>, <u>underlined</u>, or <b><i><u>all at once</u></i></b>!<br><br>` +
 		`You can also insert links on text, such as ` +
 		`<a href="http://www.fpdf.org">www.fpdf.org</a>, or on an image: click on the logo.`
-	writeHtml(htmlStr)
+	writeHTML(htmlStr)
 	pdf.OutputAndClose(docWriter(pdf, 6))
 	// Output:
 	// Successfully generated pdf/tutorial06.pdf
@@ -599,7 +598,7 @@ func ExampleFpdf_tutorial06() {
 
 // Non-standard font
 func ExampleFpdf_tutorial07() {
-	pdf := gofpdf.New("P", "mm", "A4", FONT_DIR)
+	pdf := gofpdf.New("P", "mm", "A4", cnFontDir)
 	pdf.AddFont("Calligrapher", "", "calligra.json")
 	pdf.AddPage()
 	pdf.SetFont("Calligrapher", "", 35)
@@ -611,18 +610,18 @@ func ExampleFpdf_tutorial07() {
 
 // Various image types
 func ExampleFpdf_tutorial08() {
-	pdf := gofpdf.New("P", "mm", "A4", FONT_DIR)
+	pdf := gofpdf.New("P", "mm", "A4", cnFontDir)
 	pdf.AddPage()
 	pdf.SetFont("Arial", "", 11)
-	pdf.Image(IMG_DIR+"/logo.png", 10, 10, 30, 0, false, "", 0, "")
+	pdf.Image(cnImgDir+"/logo.png", 10, 10, 30, 0, false, "", 0, "")
 	pdf.Text(50, 20, "logo.png")
-	pdf.Image(IMG_DIR+"/logo.gif", 10, 40, 30, 0, false, "", 0, "")
+	pdf.Image(cnImgDir+"/logo.gif", 10, 40, 30, 0, false, "", 0, "")
 	pdf.Text(50, 50, "logo.gif")
-	pdf.Image(IMG_DIR+"/logo-gray.png", 10, 70, 30, 0, false, "", 0, "")
+	pdf.Image(cnImgDir+"/logo-gray.png", 10, 70, 30, 0, false, "", 0, "")
 	pdf.Text(50, 80, "logo-gray.png")
-	pdf.Image(IMG_DIR+"/logo-rgb.png", 10, 100, 30, 0, false, "", 0, "")
+	pdf.Image(cnImgDir+"/logo-rgb.png", 10, 100, 30, 0, false, "", 0, "")
 	pdf.Text(50, 110, "logo-rgb.png")
-	pdf.Image(IMG_DIR+"/logo.jpg", 10, 130, 30, 0, false, "", 0, "")
+	pdf.Image(cnImgDir+"/logo.jpg", 10, 130, 30, 0, false, "", 0, "")
 	pdf.Text(50, 140, "logo.jpg")
 	pdf.OutputAndClose(docWriter(pdf, 8))
 	// Output:
@@ -634,7 +633,7 @@ func ExampleFpdf_tutorial09() {
 	var y0 float64
 	var crrntCol int
 	loremStr := lorem()
-	pdf := gofpdf.New("L", "mm", "A4", FONT_DIR)
+	pdf := gofpdf.New("L", "mm", "A4", cnFontDir)
 	const (
 		pageWd = 297.0 // A4 210.0 x 297.0
 		margin = 10.0
@@ -666,18 +665,17 @@ func ExampleFpdf_tutorial09() {
 			pdf.SetY(y0)
 			// Start new column, not new page
 			return false
-		} else {
-			setCol(0)
-			return true
 		}
+		setCol(0)
+		return true
 	})
 	pdf.AddPage()
 	pdf.SetFont("Times", "", 12)
 	for j := 0; j < 20; j++ {
 		if j == 1 {
-			pdf.Image(IMG_DIR+"/fpdf.png", -1, 0, colWd, 0, true, "", 0, "")
+			pdf.Image(cnImgDir+"/fpdf.png", -1, 0, colWd, 0, true, "", 0, "")
 		} else if j == 5 {
-			pdf.Image(IMG_DIR+"/golang-gopher.png", -1, 0, colWd, 0, true, "", 0, "")
+			pdf.Image(cnImgDir+"/golang-gopher.png", -1, 0, colWd, 0, true, "", 0, "")
 		}
 		pdf.MultiCell(colWd, 5, loremStr, "", "", false)
 		pdf.Ln(-1)
@@ -689,9 +687,9 @@ func ExampleFpdf_tutorial09() {
 
 // Test the corner cases as reported by the gocov tool
 func ExampleFpdf_tutorial10() {
-	gofpdf.MakeFont(FONT_DIR+"/calligra.ttf", FONT_DIR+"/cp1252.map", FONT_DIR, nil, true)
+	gofpdf.MakeFont(cnFontDir+"/calligra.ttf", cnFontDir+"/cp1252.map", cnFontDir, nil, true)
 	pdf := gofpdf.New("", "", "", "")
-	pdf.SetFontLocation(FONT_DIR)
+	pdf.SetFontLocation(cnFontDir)
 	pdf.SetTitle("世界", true)
 	pdf.SetAuthor("世界", true)
 	pdf.SetSubject("世界", true)
@@ -712,7 +710,7 @@ func ExampleFpdf_tutorial11() {
 		thin  = 0.2
 		thick = 3.0
 	)
-	pdf := gofpdf.New("", "", "", FONT_DIR)
+	pdf := gofpdf.New("", "", "", cnFontDir)
 	pdf.SetFont("Helvetica", "", 12)
 	pdf.SetFillColor(200, 200, 220)
 	pdf.AddPage()
@@ -800,7 +798,7 @@ func ExampleFpdf_tutorial12() {
 	modeList := []string{"Normal", "Multiply", "Screen", "Overlay",
 		"Darken", "Lighten", "ColorDodge", "ColorBurn", "HardLight", "SoftLight",
 		"Difference", "Exclusion", "Hue", "Saturation", "Color", "Luminosity"}
-	pdf := gofpdf.New("", "", "", FONT_DIR)
+	pdf := gofpdf.New("", "", "", cnFontDir)
 	pdf.SetLineWidth(2)
 	pdf.SetAutoPageBreak(false, 0)
 	pdf.AddPage()
@@ -824,7 +822,7 @@ func ExampleFpdf_tutorial12() {
 			pdf.SetXY(x, y+2)
 			pdf.CellFormat(rectW, rectH, "A", "", 0, "C", false, 0, "")
 			pdf.SetAlpha(0.5, modeList[j])
-			pdf.Image(IMG_DIR+"/golang-gopher.png", x-gapX, y, rectW+2*gapX, 0, false, "", 0, "")
+			pdf.Image(cnImgDir+"/golang-gopher.png", x-gapX, y, rectW+2*gapX, 0, false, "", 0, "")
 			pdf.SetAlpha(1.0, "Normal")
 			x += rectW + gapX
 			j++
@@ -838,7 +836,7 @@ func ExampleFpdf_tutorial12() {
 
 // Gradients
 func ExampleFpdf_tutorial13() {
-	pdf := gofpdf.New("", "", "", FONT_DIR)
+	pdf := gofpdf.New("", "", "", cnFontDir)
 	pdf.SetFont("Helvetica", "", 12)
 	pdf.AddPage()
 	pdf.LinearGradient(0, 0, 210, 100, 250, 250, 255, 220, 220, 225, 0, 0, 0, .5)
@@ -857,7 +855,7 @@ func ExampleFpdf_tutorial13() {
 
 // Clipping examples
 func ExampleFpdf_tutorial14() {
-	pdf := gofpdf.New("", "", "", FONT_DIR)
+	pdf := gofpdf.New("", "", "", cnFontDir)
 	y := 10.0
 	pdf.AddPage()
 
@@ -889,7 +887,7 @@ func ExampleFpdf_tutorial14() {
 
 	y += 28
 	pdf.ClipEllipse(26, y+10, 16, 10, true)
-	pdf.Image(IMG_DIR+"/logo.jpg", 10, y, 32, 0, false, "JPG", 0, "")
+	pdf.Image(cnImgDir+"/logo.jpg", 10, y, 32, 0, false, "JPG", 0, "")
 	pdf.ClipEnd()
 
 	pdf.ClipCircle(60, y+10, 10, true)
@@ -920,7 +918,7 @@ func ExampleFpdf_tutorial15() {
 	pdf := gofpdf.NewCustom(&gofpdf.InitType{
 		UnitStr:    "in",
 		Size:       gofpdf.SizeType{6, 6},
-		FontDirStr: FONT_DIR,
+		FontDirStr: cnFontDir,
 	})
 	pdf.SetMargins(0.5, 1, 0.5)
 	pdf.SetFont("Times", "", 14)
@@ -948,7 +946,7 @@ func ExampleFpdf_tutorial15() {
 
 // Bookmark test
 func ExampleFpdf_tutorial16() {
-	pdf := gofpdf.New("P", "mm", "A4", FONT_DIR)
+	pdf := gofpdf.New("P", "mm", "A4", cnFontDir)
 	pdf.AddPage()
 	pdf.SetFont("Arial", "", 15)
 	pdf.Bookmark("Page 1", 0, 0)
@@ -975,7 +973,7 @@ func ExampleFpdf_tutorial17() {
 	)
 	var refX, refY float64
 	var refStr string
-	pdf := gofpdf.New("P", "mm", "A4", FONT_DIR)
+	pdf := gofpdf.New("P", "mm", "A4", cnFontDir)
 	pdf.AddPage()
 	color := func(val int) {
 		pdf.SetDrawColor(val, val, val)
@@ -1102,12 +1100,12 @@ func ExampleFpdf_tutorial18() {
 	var infoPtr *gofpdf.ImageInfoType
 	var fileStr string
 	var imgWd, imgHt, lf, tp float64
-	pdf := gofpdf.New("P", "mm", "A4", FONT_DIR)
+	pdf := gofpdf.New("P", "mm", "A4", cnFontDir)
 	pdf.AddPage()
 	pdf.SetMargins(10, 10, 10)
 	pdf.SetFont("Helvetica", "", 15)
 	for j, str := range fileList {
-		fileStr = filepath.Join(IMG_DIR, str)
+		fileStr = filepath.Join(cnImgDir, str)
 		infoPtr = pdf.RegisterImage(fileStr, "")
 		imgWd, imgHt = infoPtr.Extent()
 		switch j {
