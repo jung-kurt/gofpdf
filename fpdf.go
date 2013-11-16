@@ -410,8 +410,8 @@ func (f *Fpdf) SetCreator(creatorStr string, isUTF8 bool) {
 }
 
 // AliasNbPages defines an alias for the total number of pages. It will be
-// substituted as the document is closed. This method is demonstrated in
-// tutorial 2.
+// substituted as the document is closed. An empty string is replaced with the
+// string "{nb}". This method is demonstrated in tutorial 2.
 func (f *Fpdf) AliasNbPages(aliasStr string) {
 	if aliasStr == "" {
 		aliasStr = "{nb}"
@@ -1400,7 +1400,7 @@ func (f *Fpdf) Bookmark(txtStr string, level int, y float64) {
 }
 
 // Text prints a character string. The origin (x, y) is on the left of the
-// first character at the baseline. This method allows to place a string
+// first character at the baseline. This method permits a string to be placed
 // precisely on the page, but it is usually easier to use Cell(), MultiCell()
 // or Write() which are the standard methods to print text.
 func (f *Fpdf) Text(x, y float64, txtStr string) {
@@ -1589,7 +1589,7 @@ func (f *Fpdf) Cellf(w, h float64, fmtStr string, args ...interface{}) {
 	f.CellFormat(w, h, sprintf(fmtStr, args...), "", 0, "L", false, 0, "")
 }
 
-// MultiCell allows printing text with line breaks. They can be automatic (as
+// MultiCell supports printing text with line breaks. They can be automatic (as
 // soon as the text reaches the right border of the cell) or explicit (via the
 // \n character). As many cells as necessary are output, one below the other.
 //
