@@ -273,7 +273,7 @@ func (f *Fpdf) GetCellMargin() float64 {
 	return f.cMargin
 }
 
-// SetCellMargin set the cell margin. This is the amount of space before and
+// SetCellMargin sets the cell margin. This is the amount of space before and
 // after the text within a cell that's left blank, and is in units passed to
 // New().
 func (f *Fpdf) SetCellMargin(margin float64) {
