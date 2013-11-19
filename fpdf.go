@@ -266,6 +266,20 @@ func (f *Fpdf) SetLeftMargin(margin float64) {
 	}
 }
 
+// Return the cell margin. This is the amount of space before and after the text
+// within a cell that's left blank, and is in units passed to New(). It defaults
+// to 1mm.
+func (f *Fpdf) GetCellMargin() float64 {
+	return f.cMargin
+}
+
+// Set the cell margin. This is the amount of space before and after the text
+// within a cell that's left blank, and is in units passed to New(). It defaults
+// to 1mm.
+func (f *Fpdf) SetCellMargin(margin float64) {
+	f.cMargin = margin
+}
+
 // SetFontLocation sets the location in the file system of the font and font
 // definition files.
 func (f *Fpdf) SetFontLocation(fontDirStr string) {
@@ -1438,7 +1452,8 @@ func (f *Fpdf) SetAcceptPageBreakFunc(fnc func() bool) {
 // If automatic page breaking is enabled and the cell goes beyond the limit, a
 // page break is done before outputting.
 //
-// w and h specify the width and height of the cell.
+// w and h specify the width and height of the cell. If w is 0, it will be set
+// to the remaining horizontal space on the page (until the right margin).
 //
 // txtStr specifies the text to display.
 //
