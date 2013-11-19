@@ -1452,8 +1452,9 @@ func (f *Fpdf) SetAcceptPageBreakFunc(fnc func() bool) {
 // If automatic page breaking is enabled and the cell goes beyond the limit, a
 // page break is done before outputting.
 //
-// w and h specify the width and height of the cell. If w is 0, it will be set
-// to the remaining horizontal space on the page (until the right margin).
+// w and h specify the width and height of the cell. If w is 0, the cell
+// extends up to the right margin. Specifying 0 for h will result in no output,
+// but the current position will be advanced by w.
 //
 // txtStr specifies the text to display.
 //
