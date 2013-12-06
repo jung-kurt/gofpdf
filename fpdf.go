@@ -1605,6 +1605,59 @@ func (f *Fpdf) Cellf(w, h float64, fmtStr string, args ...interface{}) {
 	f.CellFormat(w, h, sprintf(fmtStr, args...), "", 0, "L", false, 0, "")
 }
 
+// SplitLines splits text into several lines using the current font. Each line
+// has its length limited to a maximum width given by w. This function can be
+// used to determine the total height of wrapped text for vertical placement
+// purposes.
+//
+// You can use MultiCell if you want to print a text on several lines in a
+// simple way.
+//
+// See tutorial 19 for an example of this function.
+func (f *Fpdf) SplitLines(txt []byte, w float64) [][]byte {
+	// Function contributed by Bruno Michel
+	lines := [][]byte{}
+	cw := &f.currentFont.Cw
+	wmax := (w - 2*f.cMargin) * 1000 / f.fontSize
+	s := bytes.Replace(txt, []byte("\r"), []byte{}, -1)
+	nb := len(s)
+	for nb > 0 && s[nb-1] == '\n' {
+		nb--
+	}
+	s = s[0:nb]
+	sep := -1
+	i := 0
+	j := 0
+	l := 0.0
+	for i < nb {
+		c := s[i]
+		l += float64(cw[c])
+		if c == ' ' || c == '\t' || c == '\n' {
+			sep = i
+		}
+		if c == '\n' || l > wmax {
+			if sep == -1 {
+				if i == j {
+					i++
+				}
+				sep = i
+			} else {
+				i = sep + 1
+			}
+			lines = append(lines, s[j:sep])
+			sep = -1
+			j = i
+			l = 0
+		} else {
+			i++
+		}
+	}
+	if i != j {
+		lines = append(lines, s[j:i])
+	}
+	return lines
+}
+
 // MultiCell supports printing text with line breaks. They can be automatic (as
 // soon as the text reaches the right border of the cell) or explicit (via the
 // \n character). As many cells as necessary are output, one below the other.

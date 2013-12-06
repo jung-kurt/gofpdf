@@ -1131,3 +1131,30 @@ func ExampleFpdf_tutorial18() {
 	// Output:
 	// Successfully generated pdf/tutorial18.pdf
 }
+
+// Example to demonstrate Bruno Michel's line splitting function.
+func ExampleFpdf_tutorial19() {
+	const (
+		fontPtSize = 18.0
+		lineHt     = fontPtSize * 25.4 / 72.0
+		wd         = 100.0
+	)
+	pdf := gofpdf.New("P", "mm", "A4", cnFontDir) // A4 210.0 x 297.0
+	pdf.SetFont("Times", "", fontPtSize)
+	pdf.AddPage()
+	pdf.SetMargins(10, 10, 10)
+	lines := pdf.SplitLines([]byte(lorem()), wd)
+	ht := float64(len(lines)) * lineHt
+	y := (297.0 - ht) / 2.0
+	pdf.SetDrawColor(128, 128, 128)
+	pdf.SetFillColor(255, 255, 210)
+	x := (210.0 - (wd + 40.0)) / 2.0
+	pdf.Rect(x, y-20.0, wd+40.0, ht+40.0, "FD")
+	pdf.SetY(y)
+	for _, line := range lines {
+		pdf.CellFormat(190.0, lineHt, string(line), "", 1, "C", false, 0, "")
+	}
+	pdf.OutputAndClose(docWriter(pdf, 19))
+	// Output:
+	// Successfully generated pdf/tutorial19.pdf
+}
