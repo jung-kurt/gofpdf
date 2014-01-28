@@ -148,7 +148,7 @@ func pathParse(pathStr string) (segs []SvgBasicSegmentType, err error) {
 		if argCount == 0 {
 			absolutizePath(segs)
 		} else {
-			err = fmt.Errorf("Expecting additional (%d) numeric arguments", argCount)
+			err = fmt.Errorf("expecting additional (%d) numeric arguments", argCount)
 		}
 	}
 	return
@@ -191,14 +191,14 @@ func SvgBasicParse(buf []byte) (sig SvgBasicType, err error) {
 				}
 			}
 		} else {
-			err = fmt.Errorf("Unacceptable values for basic SVG extent: %.2f x %.2f",
+			err = fmt.Errorf("unacceptable values for basic SVG extent: %.2f x %.2f",
 				sig.Wd, sig.Ht)
 		}
 	}
 	return
 }
 
-// SvgBasicParse parses a simple scalable vector graphics (SVG) file into a
+// SvgBasicFileParse parses a simple scalable vector graphics (SVG) file into a
 // basic descriptor. See SvgBasicParse for additional comments and tutorial 20
 // for an example of this function.
 func SvgBasicFileParse(svgFileStr string) (sig SvgBasicType, err error) {
