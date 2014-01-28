@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013 Kurt Jung (Gmail: kurt.w.jung)
+ * Copyright (c) 2013-2014 Kurt Jung (Gmail: kurt.w.jung)
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -15,21 +15,8 @@
  */
 
 /*
-Package gofpdf implements a PDF document generator.
-
-This package's code and documentation are closely derived from the FPDF library
-created by Olivier Plathey, and a number of font and image resources are copied
-directly from it. Drawing support is adapted from the FPDF geometric figures
-script by David Hernández Sanz. Transparency support is adapted from the FPDF
-transparency script by Martin Hall-May. Support for gradients and clipping is
-adapted from FPDF scripts by Andreas Würmser. Support for outline bookmarks is
-adapted from Olivier Plathey by Manuel Cornes. Support for transformations is
-adapted from the FPDF transformation script by Moritz Wagner and Andreas
-Würmser. Lawrence Kesteloot provided code to allow an image's extent to be
-determined prior to placement. Bruno Michel has provided valuable assistance
-with the code.
-
-The FPDF website is http://www.fpdf.org/.
+Package gofpdf implements a PDF document generator with high level support for
+text, drawing and images.
 
 Features
 
@@ -57,10 +44,31 @@ Features
 
 • Clipping
 
+• Basic path-only SVG images
+
 gofpdf has no dependencies other than the Go standard library. All tests pass
 on Linux, Mac and Windows platforms. Like FPDF version 1.7, from which gofpdf
-is derived, this package does not yet support UTF-8 source text. gofpdf is
-copyrighted by Kurt Jung and is released under the MIT License.
+is derived, this package does not yet support UTF-8 source text.
+
+Acknowledgments
+
+This package's code and documentation are closely derived from the FPDF library
+created by Olivier Plathey, and a number of font and image resources are copied
+directly from it. Drawing support is adapted from the FPDF geometric figures
+script by David Hernández Sanz. Transparency support is adapted from the FPDF
+transparency script by Martin Hall-May. Support for gradients and clipping is
+adapted from FPDF scripts by Andreas Würmser. Support for outline bookmarks is
+adapted from Olivier Plathey by Manuel Cornes. Support for transformations is
+adapted from the FPDF transformation script by Moritz Wagner and Andreas
+Würmser. Lawrence Kesteloot provided code to allow an image's extent to be
+determined prior to placement. Bruno Michel has provided valuable assistance
+with the code.
+
+The FPDF website is http://www.fpdf.org/.
+
+License
+
+gofpdf is copyrighted by Kurt Jung and is released under the MIT License.
 
 Installation
 

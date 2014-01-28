@@ -826,7 +826,7 @@ func (f *Fpdf) Curve(x0, y0, cx, cy, x1, y1 float64, styleStr string) {
 // the current draw color, line width, and cap style centered on the curve's
 // path. Filling uses the current fill color.
 //
-// See tutorial 11 for an example of this function.
+// See tutorials 11 and 20 for examples of this function.
 func (f *Fpdf) CurveCubic(x0, y0, cx0, cy0, x1, y1, cx1, cy1 float64, styleStr string) {
 	f.point(x0, y0)
 	f.outf("%.5f %.5f %.5f %.5f %.5f %.5f c %s", cx0*f.k, (f.h-cy0)*f.k,

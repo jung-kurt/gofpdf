@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013 Kurt Jung (Gmail: kurt.w.jung)
+ * Copyright (c) 2013-2014 Kurt Jung (Gmail: kurt.w.jung)
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -86,6 +86,18 @@ func docWriter(pdf *gofpdf.Fpdf, idx int) *pdfWriter {
 		}
 	}
 	return pw
+}
+
+func imageFile(fileStr string) string {
+	return filepath.Join(cnImgDir, fileStr)
+}
+
+func fontFile(fileStr string) string {
+	return filepath.Join(cnFontDir, fileStr)
+}
+
+func textFile(fileStr string) string {
+	return filepath.Join(cnTextDir, fileStr)
 }
 
 // Convert 'ABCDEFG' to, for example, 'A,BCD,EFG'
@@ -187,7 +199,7 @@ func ExampleFpdf_tutorial01() {
 func ExampleFpdf_tutorial02() {
 	pdf := gofpdf.New("P", "mm", "A4", cnFontDir)
 	pdf.SetHeaderFunc(func() {
-		pdf.Image(cnImgDir+"/logo.png", 10, 6, 30, 0, false, "", 0, "")
+		pdf.Image(imageFile("logo.png"), 10, 6, 30, 0, false, "", 0, "")
 		pdf.SetY(5)
 		pdf.SetFont("Arial", "B", 15)
 		pdf.Cell(80, 0, "")
@@ -274,8 +286,8 @@ func ExampleFpdf_tutorial03() {
 		chapterTitle(chapNum, titleStr)
 		chapterBody(fileStr)
 	}
-	printChapter(1, "A RUNAWAY REEF", cnTextDir+"/20k_c1.txt")
-	printChapter(2, "THE PROS AND CONS", cnTextDir+"/20k_c2.txt")
+	printChapter(1, "A RUNAWAY REEF", textFile("20k_c1.txt"))
+	printChapter(2, "THE PROS AND CONS", textFile("20k_c2.txt"))
 	pdf.OutputAndClose(docWriter(pdf, 3))
 	// Output:
 	// Successfully generated pdf/tutorial03.pdf
@@ -374,8 +386,8 @@ func ExampleFpdf_tutorial04() {
 		// Page number
 		pdf.CellFormat(0, 10, fmt.Sprintf("Page %d", pdf.PageNo()), "", 0, "C", false, 0, "")
 	})
-	printChapter(1, "A RUNAWAY REEF", cnTextDir+"/20k_c1.txt")
-	printChapter(2, "THE PROS AND CONS", cnTextDir+"/20k_c2.txt")
+	printChapter(1, "A RUNAWAY REEF", textFile("20k_c1.txt"))
+	printChapter(2, "THE PROS AND CONS", textFile("20k_c2.txt"))
 	pdf.OutputAndClose(docWriter(pdf, 4))
 	// Output:
 	// Successfully generated pdf/tutorial04.pdf
@@ -488,7 +500,7 @@ func ExampleFpdf_tutorial05() {
 		}
 		pdf.CellFormat(wSum, 0, "", "T", 0, "", false, 0, "")
 	}
-	loadData(cnTextDir + "/countries.txt")
+	loadData(textFile("countries.txt"))
 	pdf.SetFont("Arial", "", 14)
 	pdf.AddPage()
 	basicTable()
@@ -583,7 +595,7 @@ func ExampleFpdf_tutorial06() {
 	// Second page
 	pdf.AddPage()
 	pdf.SetLink(link, 0, -1)
-	pdf.Image(cnImgDir+"/logo.png", 10, 12, 30, 0, false, "", 0, "http://www.fpdf.org")
+	pdf.Image(imageFile("logo.png"), 10, 12, 30, 0, false, "", 0, "http://www.fpdf.org")
 	pdf.SetLeftMargin(45)
 	pdf.SetFontSize(14)
 	htmlStr := `You can now easily print text mixing different styles: <b>bold</b>, ` +
@@ -613,15 +625,15 @@ func ExampleFpdf_tutorial08() {
 	pdf := gofpdf.New("P", "mm", "A4", cnFontDir)
 	pdf.AddPage()
 	pdf.SetFont("Arial", "", 11)
-	pdf.Image(cnImgDir+"/logo.png", 10, 10, 30, 0, false, "", 0, "")
+	pdf.Image(imageFile("logo.png"), 10, 10, 30, 0, false, "", 0, "")
 	pdf.Text(50, 20, "logo.png")
-	pdf.Image(cnImgDir+"/logo.gif", 10, 40, 30, 0, false, "", 0, "")
+	pdf.Image(imageFile("logo.gif"), 10, 40, 30, 0, false, "", 0, "")
 	pdf.Text(50, 50, "logo.gif")
-	pdf.Image(cnImgDir+"/logo-gray.png", 10, 70, 30, 0, false, "", 0, "")
+	pdf.Image(imageFile("logo-gray.png"), 10, 70, 30, 0, false, "", 0, "")
 	pdf.Text(50, 80, "logo-gray.png")
-	pdf.Image(cnImgDir+"/logo-rgb.png", 10, 100, 30, 0, false, "", 0, "")
+	pdf.Image(imageFile("logo-rgb.png"), 10, 100, 30, 0, false, "", 0, "")
 	pdf.Text(50, 110, "logo-rgb.png")
-	pdf.Image(cnImgDir+"/logo.jpg", 10, 130, 30, 0, false, "", 0, "")
+	pdf.Image(imageFile("logo.jpg"), 10, 130, 30, 0, false, "", 0, "")
 	pdf.Text(50, 140, "logo.jpg")
 	pdf.OutputAndClose(docWriter(pdf, 8))
 	// Output:
@@ -673,9 +685,9 @@ func ExampleFpdf_tutorial09() {
 	pdf.SetFont("Times", "", 12)
 	for j := 0; j < 20; j++ {
 		if j == 1 {
-			pdf.Image(cnImgDir+"/fpdf.png", -1, 0, colWd, 0, true, "", 0, "")
+			pdf.Image(imageFile("fpdf.png"), -1, 0, colWd, 0, true, "", 0, "")
 		} else if j == 5 {
-			pdf.Image(cnImgDir+"/golang-gopher.png", -1, 0, colWd, 0, true, "", 0, "")
+			pdf.Image(imageFile("golang-gopher.png"), -1, 0, colWd, 0, true, "", 0, "")
 		}
 		pdf.MultiCell(colWd, 5, loremStr, "", "", false)
 		pdf.Ln(-1)
@@ -687,7 +699,7 @@ func ExampleFpdf_tutorial09() {
 
 // Test the corner cases as reported by the gocov tool
 func ExampleFpdf_tutorial10() {
-	gofpdf.MakeFont(cnFontDir+"/calligra.ttf", cnFontDir+"/cp1252.map", cnFontDir, nil, true)
+	gofpdf.MakeFont(fontFile("calligra.ttf"), fontFile("cp1252.map"), cnFontDir, nil, true)
 	pdf := gofpdf.New("", "", "", "")
 	pdf.SetFontLocation(cnFontDir)
 	pdf.SetTitle("世界", true)
@@ -822,7 +834,7 @@ func ExampleFpdf_tutorial12() {
 			pdf.SetXY(x, y+2)
 			pdf.CellFormat(rectW, rectH, "A", "", 0, "C", false, 0, "")
 			pdf.SetAlpha(0.5, modeList[j])
-			pdf.Image(cnImgDir+"/golang-gopher.png", x-gapX, y, rectW+2*gapX, 0, false, "", 0, "")
+			pdf.Image(imageFile("golang-gopher.png"), x-gapX, y, rectW+2*gapX, 0, false, "", 0, "")
 			pdf.SetAlpha(1.0, "Normal")
 			x += rectW + gapX
 			j++
@@ -887,7 +899,7 @@ func ExampleFpdf_tutorial14() {
 
 	y += 28
 	pdf.ClipEllipse(26, y+10, 16, 10, true)
-	pdf.Image(cnImgDir+"/logo.jpg", 10, y, 32, 0, false, "JPG", 0, "")
+	pdf.Image(imageFile("logo.jpg"), 10, y, 32, 0, false, "JPG", 0, "")
 	pdf.ClipEnd()
 
 	pdf.ClipCircle(60, y+10, 10, true)
@@ -1105,7 +1117,7 @@ func ExampleFpdf_tutorial18() {
 	pdf.SetMargins(10, 10, 10)
 	pdf.SetFont("Helvetica", "", 15)
 	for j, str := range fileList {
-		fileStr = filepath.Join(cnImgDir, str)
+		fileStr = imageFile(str)
 		infoPtr = pdf.RegisterImage(fileStr, "")
 		imgWd, imgHt = infoPtr.Extent()
 		switch j {
@@ -1157,4 +1169,86 @@ func ExampleFpdf_tutorial19() {
 	pdf.OutputAndClose(docWriter(pdf, 19))
 	// Output:
 	// Successfully generated pdf/tutorial19.pdf
+}
+
+// This example demonstrates how to render a simple path-only SVG image of the
+// type generated by the jSignature web control.
+func ExampleFpdf_tutorial20() {
+	const (
+		fontPtSize = 18.0
+		lineHt     = fontPtSize * 25.4 / 72.0
+		wd         = 100.0
+		sigFileStr = "signature.svg"
+	)
+	var (
+		sig gofpdf.SvgBasicType
+		err error
+	)
+	pdf := gofpdf.New("P", "mm", "A4", cnFontDir) // A4 210.0 x 297.0
+	link := func(showStr, urlStr string) {
+		pdf.SetFont("", "U", 0)
+		pdf.SetTextColor(0, 0, 128)
+		pdf.WriteLinkString(lineHt, showStr, urlStr)
+		pdf.SetTextColor(0, 0, 0)
+		pdf.SetFont("", "", 0)
+	}
+	pdf.SetFont("Times", "", fontPtSize)
+	pdf.AddPage()
+	pdf.SetMargins(10, 10, 10)
+	pdf.Write(lineHt, "This example renders a simple ")
+	link("SVG", "http://www.w3.org/TR/SVG/")
+	pdf.Write(lineHt, " (scalable vector graphics) image that contains only "+
+		"basic path commands without any styling, color fill, reflection or "+
+		"endpoint closures. In particular, the type of vector graphic returned from a ")
+	link("jSignature", "http://willowsystems.github.io/jSignature/#/demo/")
+	pdf.Write(lineHt, " web control is supported and is used in this example.")
+	pdf.Ln(3 * lineHt)
+	sig, err = gofpdf.SvgBasicFileParse(imageFile(sigFileStr))
+	if err == nil {
+		scale := 150 / sig.Wd
+		scaleY := 50 / sig.Ht
+		if scale > scaleY {
+			scale = scaleY
+		}
+		originX := (210.0 - scale*sig.Wd) / 2.0
+		originY := pdf.GetY() + 10
+		var x, y, newX, newY float64
+		var cx0, cy0, cx1, cy1 float64
+		var path []gofpdf.SvgBasicSegmentType
+		var seg gofpdf.SvgBasicSegmentType
+		val := func(arg int) (float64, float64) {
+			return originX + scale*seg.Arg[arg], originY + scale*seg.Arg[arg+1]
+		}
+		pdf.SetLineCapStyle("round")
+		pdf.SetLineWidth(0.25)
+		pdf.SetDrawColor(0, 0, 128)
+		for j := 0; j < len(sig.Segments) && pdf.Ok(); j++ {
+			path = sig.Segments[j]
+			for k := 0; k < len(path) && pdf.Ok(); k++ {
+				seg = path[k]
+				switch seg.Cmd {
+				case 'M':
+					x, y = val(0)
+					pdf.SetXY(x, y)
+				case 'L':
+					newX, newY = val(0)
+					pdf.Line(x, y, newX, newY)
+					x, y = newX, newY
+				case 'C':
+					cx0, cy0 = val(0)
+					cx1, cy1 = val(2)
+					newX, newY = val(4)
+					pdf.CurveCubic(x, y, cx0, cy0, newX, newY, cx1, cy1, "D")
+					x, y = newX, newY
+				default:
+					pdf.SetErrorf("Unexpected path command '%c'", seg.Cmd)
+				}
+			}
+		}
+	} else {
+		pdf.SetError(err)
+	}
+	pdf.OutputAndClose(docWriter(pdf, 20))
+	// Output:
+	// Successfully generated pdf/tutorial20.pdf
 }
