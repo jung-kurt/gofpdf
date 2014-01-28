@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013 Kurt Jung (Gmail: kurt.w.jung)
+ * Copyright (c) 2013-2014 Kurt Jung (Gmail: kurt.w.jung)
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -827,10 +827,10 @@ func (f *Fpdf) Curve(x0, y0, cx, cy, x1, y1 float64, styleStr string) {
 // path. Filling uses the current fill color.
 //
 // See tutorial 11 for an example of this function.
-func (f *Fpdf) CurveCubic(x0, y0, cx0, cy0, cx1, cy1, x1, y1 float64, styleStr string) {
+func (f *Fpdf) CurveCubic(x0, y0, cx0, cy0, x1, y1, cx1, cy1 float64, styleStr string) {
 	f.point(x0, y0)
 	f.outf("%.5f %.5f %.5f %.5f %.5f %.5f c %s", cx0*f.k, (f.h-cy0)*f.k,
-		x1*f.k, (f.h-y1)*f.k, cx1*f.k, (f.h-cy1)*f.k, fillDrawOp(styleStr))
+		cx1*f.k, (f.h-cy1)*f.k, x1*f.k, (f.h-y1)*f.k, fillDrawOp(styleStr))
 }
 
 // Arc draws an elliptical arc centered at point (x, y). rx and ry specify its
@@ -1889,7 +1889,7 @@ func (f *Fpdf) WriteLinkString(h float64, displayStr, targetStr string) {
 	f.write(h, displayStr, 0, targetStr)
 }
 
-// WriteLinkID write text that when clicked jumps to another location in the
+// WriteLinkID writes text that when clicked jumps to another location in the
 // PDF. linkID is an identifier returned by AddLink(). See Write() for argument
 // details.
 func (f *Fpdf) WriteLinkID(h float64, displayStr string, linkID int) {
