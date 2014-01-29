@@ -80,11 +80,11 @@ func fpdfNew(orientationStr, unitStr, sizeStr, fontDirStr string, size SizeType)
 	f.lasth = 0
 	f.fontFamily = ""
 	f.fontStyle = ""
-	f.fontSizePt = 12
+	f.SetFontSize(12)
 	f.underline = false
-	f.drawColor = "0 G"
-	f.fillColor = "0 g"
-	f.textColor = "0 g"
+	f.SetDrawColor(0, 0, 0) // "0 G"
+	f.SetFillColor(0, 0, 0) // "0 g"
+	f.SetTextColor(0, 0, 0) // "0 g"
 	f.colorFlag = false
 	f.ws = 0
 	f.fontpath = fontDirStr
@@ -512,9 +512,9 @@ func (f *Fpdf) AddPageFormat(orientationStr string, size SizeType) {
 	}
 	fontsize := f.fontSizePt
 	lw := f.lineWidth
-	dc := f.drawColor
-	fc := f.fillColor
-	tc := f.textColor
+	dc := f.color.draw
+	fc := f.color.fill
+	tc := f.color.text
 	cf := f.colorFlag
 	if f.page > 0 {
 		// Page footer
@@ -542,15 +542,15 @@ func (f *Fpdf) AddPageFormat(orientationStr string, size SizeType) {
 		}
 	}
 	// 	Set colors
-	f.drawColor = dc
-	if dc != "0 G" {
-		f.out(dc)
+	f.color.draw = dc
+	if dc.str != "0 G" {
+		f.out(dc.str)
 	}
-	f.fillColor = fc
-	if fc != "0 g" {
-		f.out(fc)
+	f.color.fill = fc
+	if fc.str != "0 g" {
+		f.out(fc.str)
 	}
-	f.textColor = tc
+	f.color.text = tc
 	f.colorFlag = cf
 	// 	Page header
 	if f.headerFnc != nil {
@@ -571,15 +571,15 @@ func (f *Fpdf) AddPageFormat(orientationStr string, size SizeType) {
 		}
 	}
 	// Restore colors
-	if f.drawColor != dc {
-		f.drawColor = dc
-		f.out(dc)
+	if f.color.draw.str != dc.str {
+		f.color.draw = dc
+		f.out(dc.str)
 	}
-	if f.fillColor != fc {
-		f.fillColor = fc
-		f.out(fc)
+	if f.color.fill.str != fc.str {
+		f.color.fill = fc
+		f.out(fc.str)
 	}
-	f.textColor = tc
+	f.color.text = tc
 	f.colorFlag = cf
 	return
 }
@@ -613,36 +613,34 @@ func (f *Fpdf) PageNo() int {
 }
 
 type clrType struct {
-	r, g, b float64
+	r, g, b    float64
+	ir, ig, ib int
+	gray       bool
+	str        string
 }
 
-func colorComp(v int) float64 {
+func colorComp(v int) (int, float64) {
 	if v < 0 {
 		v = 0
 	} else if v > 255 {
 		v = 255
 	}
-	return float64(v) / 255.0
+	return v, float64(v) / 255.0
 }
 
-func colorValueString(r, g, b int) string {
-	clr := colorValue(r, g, b)
-	return sprintf("%.3f %.3f %.3f", clr.r, clr.g, clr.b)
-}
-
-func colorValue(r, g, b int) (clr clrType) {
-	clr.r = colorComp(r)
-	clr.g = colorComp(g)
-	clr.b = colorComp(b)
-	return
-}
-
-func colorString(r, g, b int, grayStr, fullStr string) (str string) {
-	clr := colorValue(r, g, b)
-	if r == g && r == b {
-		str = sprintf("%.3f %s", clr.r, grayStr)
+func colorValue(r, g, b int, grayStr, fullStr string) (clr clrType) {
+	clr.ir, clr.r = colorComp(r)
+	clr.ig, clr.g = colorComp(g)
+	clr.ib, clr.b = colorComp(b)
+	clr.gray = clr.ir == clr.ig && clr.r == clr.b
+	if len(grayStr) > 0 {
+		if clr.gray {
+			clr.str = sprintf("%.3f %s", clr.r, grayStr)
+		} else {
+			clr.str = sprintf("%.3f %.3f %.3f %s", clr.r, clr.g, clr.b, fullStr)
+		}
 	} else {
-		str = sprintf("%.3f %.3f %.3f %s", clr.r, clr.g, clr.b, fullStr)
+		clr.str = sprintf("%.3f %.3f %.3f", clr.r, clr.g, clr.b)
 	}
 	return
 }
@@ -652,10 +650,16 @@ func colorString(r, g, b int, grayStr, fullStr string) (str string) {
 // The method can be called before the first page is created and the value is
 // retained from page to page.
 func (f *Fpdf) SetDrawColor(r, g, b int) {
-	f.drawColor = colorString(r, g, b, "G", "RG")
+	f.color.draw = colorValue(r, g, b, "G", "RG")
+	// f.drawColor = colorString(f.color.draw, "G", "RG")
 	if f.page > 0 {
-		f.out(f.drawColor)
+		f.out(f.color.draw.str)
 	}
+}
+
+// GetDrawColor returns the current draw color as RGB components (0 - 255).
+func (f *Fpdf) GetDrawColor() (int, int, int) {
+	return f.color.draw.ir, f.color.draw.ig, f.color.draw.ib
 }
 
 // SetFillColor defines the color used for all filling operations (filled
@@ -663,19 +667,31 @@ func (f *Fpdf) SetDrawColor(r, g, b int) {
 // -255). The method can be called before the first page is created and the
 // value is retained from page to page.
 func (f *Fpdf) SetFillColor(r, g, b int) {
-	f.fillColor = colorString(r, g, b, "g", "rg")
-	f.colorFlag = f.fillColor != f.textColor
+	f.color.fill = colorValue(r, g, b, "g", "rg")
+	// f.fillColor = colorString(f.color.fill, "g", "rg")
+	f.colorFlag = f.color.fill.str != f.color.text.str
 	if f.page > 0 {
-		f.out(f.fillColor)
+		f.out(f.color.fill.str)
 	}
+}
+
+// GetFillColor returns the current fill color as RGB components (0 - 255).
+func (f *Fpdf) GetFillColor() (int, int, int) {
+	return f.color.fill.ir, f.color.fill.ig, f.color.fill.ib
 }
 
 // SetTextColor defines the color used for text. It is expressed in RGB
 // components (0 - 255). The method can be called before the first page is
 // created and the value is retained from page to page.
 func (f *Fpdf) SetTextColor(r, g, b int) {
-	f.textColor = colorString(r, g, b, "g", "rg")
-	f.colorFlag = f.fillColor != f.textColor
+	f.color.text = colorValue(r, g, b, "g", "rg")
+	// f.textColor = colorString(f.color.text, "g", "rg")
+	f.colorFlag = f.color.fill.str != f.color.text.str
+}
+
+// GetTextColor returns the current text color as RGB components (0 - 255).
+func (f *Fpdf) GetTextColor() (int, int, int) {
+	return f.color.text.ir, f.color.text.ig, f.color.text.ib
 }
 
 // GetStringWidth returns the length of a string in user units. A font must be
@@ -958,8 +974,10 @@ func (f *Fpdf) gradientClipEnd() {
 
 func (f *Fpdf) gradient(tp int, r1, g1, b1 int, r2, g2, b2 int, x1, y1 float64, x2, y2 float64, r float64) {
 	pos := len(f.gradientList)
-	f.gradientList = append(f.gradientList, gradientType{tp, colorValueString(r1, g1, b1),
-		colorValueString(r2, g2, b2), x1, y1, x2, y2, r, 0})
+	clr1 := colorValue(r1, g1, b1, "", "")
+	clr2 := colorValue(r2, g2, b2, "", "")
+	f.gradientList = append(f.gradientList, gradientType{tp, clr1.str, clr2.str,
+		x1, y1, x2, y2, r, 0})
 	f.outf("/Sh%d sh", pos)
 }
 
@@ -1352,6 +1370,13 @@ func (f *Fpdf) SetFontSize(size float64) {
 	}
 }
 
+// GetFontSize returns the size of the current font in points followed by the
+// size in the unit of measure specified in New(). The second value can be used
+// as a line height value in drawing operations.
+func (f *Fpdf) GetFontSize() (ptSize, unitSize float64) {
+	return f.fontSizePt, f.fontSize
+}
+
 // AddLink creates a new internal link and returns its identifier. An internal
 // link is a clickable area which directs to another place within the document.
 // The identifier can then be passed to Cell(), Write(), Image() or Link(). The
@@ -1423,7 +1448,7 @@ func (f *Fpdf) Text(x, y float64, txtStr string) {
 		s += " " + f.dounderline(x, y, txtStr)
 	}
 	if f.colorFlag {
-		s = sprintf("q %s %s Q", f.textColor, s)
+		s = sprintf("q %s %s Q", f.color.text.str, s)
 	}
 	f.out(s)
 }
@@ -1555,7 +1580,7 @@ func (f *Fpdf) CellFormat(w, h float64, txtStr string, borderStr string, ln int,
 			dx = f.cMargin
 		}
 		if f.colorFlag {
-			s.printf("q %s ", f.textColor)
+			s.printf("q %s ", f.color.text.str)
 		}
 		txt2 := strings.Replace(txtStr, "\\", "\\\\", -1)
 		txt2 = strings.Replace(txt2, "(", "\\(", -1)
@@ -2026,6 +2051,11 @@ func (f *Fpdf) RegisterImage(fileStr, tp string) (info *ImageInfoType) {
 	}
 
 	return info
+}
+
+// GetXY returns the abscissa and ordinate of the current position.
+func (f *Fpdf) GetXY() (float64, float64) {
+	return f.x, f.y
 }
 
 // GetX returns the abscissa of the current position.

@@ -23,7 +23,6 @@ import (
 	"io/ioutil"
 	"os"
 	"path/filepath"
-	"regexp"
 	"strings"
 )
 
@@ -108,71 +107,6 @@ func strDelimit(str string, sepstr string, sepcount int) string {
 		pos = pos - sepcount
 	}
 	return str
-}
-
-type htmlSegmentType struct {
-	cat  byte              // 'O' open tag, 'C' close tag, 'T' text
-	str  string            // Literal text unchanged, tags are lower case
-	attr map[string]string // Attribute keys are lower case
-}
-
-// Returns a list of HTML tags and literal elements. This is done with regular
-// expressions, so the result is only marginally better than useless.
-// Adapted from http://www.fpdf.org/
-func htmlTokenize(htmlStr string) (list []htmlSegmentType) {
-	list = make([]htmlSegmentType, 0, 16)
-	htmlStr = strings.Replace(htmlStr, "\n", " ", -1)
-	htmlStr = strings.Replace(htmlStr, "\r", "", -1)
-	tagRe, _ := regexp.Compile(`(?U)<.*>`)
-	attrRe, _ := regexp.Compile(`([^=]+)=["']?([^"']+)`)
-	capList := tagRe.FindAllStringIndex(htmlStr, -1)
-	if capList != nil {
-		var seg htmlSegmentType
-		var parts []string
-		pos := 0
-		for _, cap := range capList {
-			if pos < cap[0] {
-				seg.cat = 'T'
-				seg.str = htmlStr[pos:cap[0]]
-				seg.attr = nil
-				list = append(list, seg)
-			}
-			if htmlStr[cap[0]+1] == '/' {
-				seg.cat = 'C'
-				seg.str = strings.ToLower(htmlStr[cap[0]+2 : cap[1]-1])
-				seg.attr = nil
-				list = append(list, seg)
-			} else {
-				// Extract attributes
-				parts = strings.Split(htmlStr[cap[0]+1:cap[1]-1], " ")
-				if len(parts) > 0 {
-					for j, part := range parts {
-						if j == 0 {
-							seg.cat = 'O'
-							seg.str = strings.ToLower(parts[0])
-							seg.attr = make(map[string]string)
-						} else {
-							attrList := attrRe.FindAllStringSubmatch(part, -1)
-							if attrList != nil {
-								for _, attr := range attrList {
-									seg.attr[strings.ToLower(attr[1])] = attr[2]
-								}
-							}
-						}
-					}
-					list = append(list, seg)
-				}
-			}
-			pos = cap[1]
-		}
-		if len(htmlStr) > pos {
-			seg.cat = 'T'
-			seg.str = htmlStr[pos:]
-			seg.attr = nil
-			list = append(list, seg)
-		}
-	}
-	return
 }
 
 func lorem() string {
@@ -513,96 +447,32 @@ func ExampleFpdf_tutorial05() {
 	// Successfully generated pdf/tutorial05.pdf
 }
 
-// Internal and external links
+// This example demonstrates internal and external links with and without basic
+// HTML.
 func ExampleFpdf_tutorial06() {
-	var boldLvl, italicLvl, underscoreLvl int
-	var hrefStr string
 	pdf := gofpdf.New("P", "mm", "A4", cnFontDir)
-	setStyle := func(boldAdj, italicAdj, underscoreAdj int) {
-		styleStr := ""
-		boldLvl += boldAdj
-		if boldLvl > 0 {
-			styleStr += "B"
-		}
-		italicLvl += italicAdj
-		if italicLvl > 0 {
-			styleStr += "I"
-		}
-		underscoreLvl += underscoreAdj
-		if underscoreLvl > 0 {
-			styleStr += "U"
-		}
-		pdf.SetFont("", styleStr, 0)
-	}
-	putLink := func(urlStr, txtStr string) {
-		// Put a hyperlink
-		pdf.SetTextColor(0, 0, 255)
-		setStyle(0, 0, 1)
-		pdf.WriteLinkString(5, txtStr, urlStr)
-		setStyle(0, 0, -1)
-		pdf.SetTextColor(0, 0, 0)
-	}
-
-	writeHTML := func(htmlStr string) {
-		list := htmlTokenize(htmlStr)
-		var ok bool
-		for _, el := range list {
-			switch el.cat {
-			case 'T':
-				if len(hrefStr) > 0 {
-					putLink(hrefStr, el.str)
-					hrefStr = ""
-				} else {
-					pdf.Write(5, el.str)
-				}
-			case 'O':
-				switch el.str {
-				case "b":
-					setStyle(1, 0, 0)
-				case "i":
-					setStyle(0, 1, 0)
-				case "u":
-					setStyle(0, 0, 1)
-				case "br":
-					pdf.Ln(5)
-				case "a":
-					hrefStr, ok = el.attr["href"]
-					if !ok {
-						hrefStr = ""
-					}
-				}
-			case 'C':
-				switch el.str {
-				case "b":
-					setStyle(-1, 0, 0)
-				case "i":
-					setStyle(0, -1, 0)
-				case "u":
-					setStyle(0, 0, -1)
-
-				}
-			}
-		}
-	}
-	// First page
+	// First page: manual local link
 	pdf.AddPage()
-	pdf.SetFont("Arial", "", 20)
-	pdf.Write(5, "To find out what's new in this tutorial, click ")
+	pdf.SetFont("Helvetica", "", 20)
+	_, lineHt := pdf.GetFontSize()
+	pdf.Write(lineHt, "To find out what's new in this tutorial, click ")
 	pdf.SetFont("", "U", 0)
 	link := pdf.AddLink()
-	pdf.WriteLinkID(5, "here", link)
+	pdf.WriteLinkID(lineHt, "here", link)
 	pdf.SetFont("", "", 0)
-	// Second page
+	// Second page: image link and basic HTML with link
 	pdf.AddPage()
 	pdf.SetLink(link, 0, -1)
 	pdf.Image(imageFile("logo.png"), 10, 12, 30, 0, false, "", 0, "http://www.fpdf.org")
 	pdf.SetLeftMargin(45)
 	pdf.SetFontSize(14)
+	_, lineHt = pdf.GetFontSize()
 	htmlStr := `You can now easily print text mixing different styles: <b>bold</b>, ` +
 		`<i>italic</i>, <u>underlined</u>, or <b><i><u>all at once</u></i></b>!<br><br>` +
 		`You can also insert links on text, such as ` +
 		`<a href="http://www.fpdf.org">www.fpdf.org</a>, or on an image: click on the logo.`
-	writeHTML(htmlStr)
+	html := pdf.HtmlBasicNew()
+	html.Write(lineHt, htmlStr)
 	pdf.OutputAndClose(docWriter(pdf, 6))
 	// Output:
 	// Successfully generated pdf/tutorial06.pdf
@@ -1008,7 +878,7 @@ func ExampleFpdf_tutorial17() {
 
 	titleStr := "Transformations"
 	titlePt := 36.0
-	titleHt := titlePt * 25.4 / 72.0
+	titleHt := pdf.PointConvert(titlePt)
 	pdf.SetFont("Helvetica", "", titlePt)
 	titleWd := pdf.GetStringWidth(titleStr)
 	titleX := (210 - titleWd) / 2
@@ -1148,11 +1018,11 @@ func ExampleFpdf_tutorial18() {
 func ExampleFpdf_tutorial19() {
 	const (
 		fontPtSize = 18.0
-		lineHt     = fontPtSize * 25.4 / 72.0
 		wd         = 100.0
 	)
 	pdf := gofpdf.New("P", "mm", "A4", cnFontDir) // A4 210.0 x 297.0
 	pdf.SetFont("Times", "", fontPtSize)
+	_, lineHt := pdf.GetFontSize()
 	pdf.AddPage()
 	pdf.SetMargins(10, 10, 10)
 	lines := pdf.SplitLines([]byte(lorem()), wd)
@@ -1175,8 +1045,7 @@ func ExampleFpdf_tutorial19() {
 // type generated by the jSignature web control.
 func ExampleFpdf_tutorial20() {
 	const (
-		fontPtSize = 18.0
-		lineHt     = fontPtSize * 25.4 / 72.0
+		fontPtSize = 16.0
 		wd         = 100.0
 		sigFileStr = "signature.svg"
 	)
@@ -1185,66 +1054,31 @@ func ExampleFpdf_tutorial20() {
 		err error
 	)
 	pdf := gofpdf.New("P", "mm", "A4", cnFontDir) // A4 210.0 x 297.0
-	link := func(showStr, urlStr string) {
-		pdf.SetFont("", "U", 0)
-		pdf.SetTextColor(0, 0, 128)
-		pdf.WriteLinkString(lineHt, showStr, urlStr)
-		pdf.SetTextColor(0, 0, 0)
-		pdf.SetFont("", "", 0)
-	}
 	pdf.SetFont("Times", "", fontPtSize)
+	lineHt := pdf.PointConvert(fontPtSize)
 	pdf.AddPage()
 	pdf.SetMargins(10, 10, 10)
-	pdf.Write(lineHt, "This example renders a simple ")
-	link("SVG", "http://www.w3.org/TR/SVG/")
-	pdf.Write(lineHt, " (scalable vector graphics) image that contains only "+
-		"basic path commands without any styling, color fill, reflection or "+
-		"endpoint closures. In particular, the type of vector graphic returned from a ")
-	link("jSignature", "http://willowsystems.github.io/jSignature/#/demo/")
-	pdf.Write(lineHt, " web control is supported and is used in this example.")
-	pdf.Ln(3 * lineHt)
+	htmlStr := `This example renders a simple ` +
+		`<a href="http://www.w3.org/TR/SVG/">SVG</a> (scalable vector graphics) ` +
+		`image that contains only basic path commands without any styling, ` +
+		`color fill, reflection or endpoint closures. In particular, the ` +
+		`type of vector graphic returned from a ` +
+		`<a href="http://willowsystems.github.io/jSignature/#/demo/">jSignature</a> ` +
+		`web control is supported and is used in this example.`
+	html := pdf.HtmlBasicNew()
+	html.Write(lineHt, htmlStr)
 	sig, err = gofpdf.SvgBasicFileParse(imageFile(sigFileStr))
 	if err == nil {
-		scale := 150 / sig.Wd
-		scaleY := 50 / sig.Ht
+		scale := 100 / sig.Wd
+		scaleY := 30 / sig.Ht
 		if scale > scaleY {
 			scale = scaleY
-		}
-		originX := (210.0 - scale*sig.Wd) / 2.0
-		originY := pdf.GetY() + 10
-		var x, y, newX, newY float64
-		var cx0, cy0, cx1, cy1 float64
-		var path []gofpdf.SvgBasicSegmentType
-		var seg gofpdf.SvgBasicSegmentType
-		val := func(arg int) (float64, float64) {
-			return originX + scale*seg.Arg[arg], originY + scale*seg.Arg[arg+1]
 		}
 		pdf.SetLineCapStyle("round")
 		pdf.SetLineWidth(0.25)
 		pdf.SetDrawColor(0, 0, 128)
-		for j := 0; j < len(sig.Segments) && pdf.Ok(); j++ {
-			path = sig.Segments[j]
-			for k := 0; k < len(path) && pdf.Ok(); k++ {
-				seg = path[k]
-				switch seg.Cmd {
-				case 'M':
-					x, y = val(0)
-					pdf.SetXY(x, y)
-				case 'L':
-					newX, newY = val(0)
-					pdf.Line(x, y, newX, newY)
-					x, y = newX, newY
-				case 'C':
-					cx0, cy0 = val(0)
-					cx1, cy1 = val(2)
-					newX, newY = val(4)
-					pdf.CurveCubic(x, y, cx0, cy0, newX, newY, cx1, cy1, "D")
-					x, y = newX, newY
-				default:
-					pdf.SetErrorf("Unexpected path command '%c'", seg.Cmd)
-				}
-			}
-		}
+		pdf.SetXY((210.0-scale*sig.Wd)/2.0, pdf.GetY()+10)
+		pdf.SvgBasicWrite(&sig, scale)
 	} else {
 		pdf.SetError(err)
 	}

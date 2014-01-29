@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013 Kurt Jung (Gmail: kurt.w.jung)
+ * Copyright (c) 2013-2014 Kurt Jung (Gmail: kurt.w.jung)
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -64,6 +64,14 @@ type ImageInfoType struct {
 	dp    string
 	trns  []int
 	scale float64 // document scaling factor
+}
+
+// PointConvert returns the value of pt, expressed in points (1/72 inch), as a
+// value expressed in the unit of measure specified in New(). Since font
+// management in Fpdf uses points, this method can help with line height
+// calculations and other methods that require user units.
+func (f *Fpdf) PointConvert(pt float64) float64 {
+	return pt / f.k
 }
 
 // Extent returns the width and height of the image in the units of the Fpdf
@@ -157,10 +165,6 @@ type Fpdf struct {
 	currentFont      fontDefType               // current font info
 	fontSizePt       float64                   // current font size in points
 	fontSize         float64                   // current font size in user unit
-	drawColor        string                    // commands for drawing color
-	fillColor        string                    // commands for filling color
-	textColor        string                    // commands for text color
-	colorFlag        bool                      // indicates whether fill and text colors are different
 	ws               float64                   // word spacing
 	images           map[string]*ImageInfoType // array of used images
 	pageLinks        [][]linkType              // pageLinks[page][link], both 1-based
@@ -192,6 +196,10 @@ type Fpdf struct {
 	clipNest         int                       // Number of active clipping contexts
 	transformNest    int                       // Number of active transformation contexts
 	err              error                     // Set if error occurs during life cycle of instance
+	colorFlag        bool                      // indicates whether fill and text colors are different
+	color            struct {                  // Composite values of colors
+		draw, fill, text clrType
+	}
 }
 
 type encType struct {
