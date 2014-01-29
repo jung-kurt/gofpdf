@@ -82,9 +82,9 @@ func fpdfNew(orientationStr, unitStr, sizeStr, fontDirStr string, size SizeType)
 	f.fontStyle = ""
 	f.SetFontSize(12)
 	f.underline = false
-	f.SetDrawColor(0, 0, 0) // "0 G"
-	f.SetFillColor(0, 0, 0) // "0 g"
-	f.SetTextColor(0, 0, 0) // "0 g"
+	f.SetDrawColor(0, 0, 0)
+	f.SetFillColor(0, 0, 0)
+	f.SetTextColor(0, 0, 0)
 	f.colorFlag = false
 	f.ws = 0
 	f.fontpath = fontDirStr
@@ -651,7 +651,6 @@ func colorValue(r, g, b int, grayStr, fullStr string) (clr clrType) {
 // retained from page to page.
 func (f *Fpdf) SetDrawColor(r, g, b int) {
 	f.color.draw = colorValue(r, g, b, "G", "RG")
-	// f.drawColor = colorString(f.color.draw, "G", "RG")
 	if f.page > 0 {
 		f.out(f.color.draw.str)
 	}
@@ -668,7 +667,6 @@ func (f *Fpdf) GetDrawColor() (int, int, int) {
 // value is retained from page to page.
 func (f *Fpdf) SetFillColor(r, g, b int) {
 	f.color.fill = colorValue(r, g, b, "g", "rg")
-	// f.fillColor = colorString(f.color.fill, "g", "rg")
 	f.colorFlag = f.color.fill.str != f.color.text.str
 	if f.page > 0 {
 		f.out(f.color.fill.str)
@@ -685,7 +683,6 @@ func (f *Fpdf) GetFillColor() (int, int, int) {
 // created and the value is retained from page to page.
 func (f *Fpdf) SetTextColor(r, g, b int) {
 	f.color.text = colorValue(r, g, b, "g", "rg")
-	// f.textColor = colorString(f.color.text, "g", "rg")
 	f.colorFlag = f.color.fill.str != f.color.text.str
 }
 
