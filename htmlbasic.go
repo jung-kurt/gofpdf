@@ -88,10 +88,10 @@ func HtmlBasicTokenize(htmlStr string) (list []HtmlBasicSegmentType) {
 }
 
 // HtmlBasicType is used for rendering a very basic subset of HTML. It supports
-// only the bold, italic and underscore attributes and hyperlinks. In the Link
+// only hyperlinks and bold, italic and underscore attributes. In the Link
 // structure, the ClrR, ClrG and ClrB fields (0 through 255) define the color
-// of hyperlinks. The Bold, Italic and Underscore values (0 for off, 1 for on)
-// define the hyperlink style.
+// of hyperlinks. The Bold, Italic and Underscore values define the hyperlink
+// style.
 type HtmlBasicType struct {
 	pdf  *Fpdf
 	Link struct {
@@ -110,11 +110,11 @@ func (f *Fpdf) HtmlBasicNew() (html HtmlBasicType) {
 }
 
 // Write prints text from the current position using the currently selected
-// font. The text can be encoded with a basic subset of HTML that includes tags
-// for italic (I), bold (B) and underscore (U) attributes and hyperlinks. When
-// the right margin is reached a line break occurs and text continues from the
-// left margin. Upon method exit, the current position is left at the end of
-// the text.
+// font. The text can be encoded with a basic subset of HTML that includes
+// hyperlinks and tags for italic (I), bold (B) and underscore (U) attributes.
+// When the right margin is reached a line break occurs and text continues from
+// the left margin. Upon method exit, the current position is left at the end
+// of the text.
 //
 // lineHt indicates the line height in the unit of measure specified in New().
 func (html *HtmlBasicType) Write(lineHt float64, htmlStr string) {
