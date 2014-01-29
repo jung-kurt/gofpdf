@@ -471,7 +471,7 @@ func ExampleFpdf_tutorial06() {
 		`<i>italic</i>, <u>underlined</u>, or <b><i><u>all at once</u></i></b>!<br><br>` +
 		`You can also insert links on text, such as ` +
 		`<a href="http://www.fpdf.org">www.fpdf.org</a>, or on an image: click on the logo.`
-	html := pdf.HtmlBasicNew()
+	html := pdf.HTMLBasicNew()
 	html.Write(lineHt, htmlStr)
 	pdf.OutputAndClose(docWriter(pdf, 6))
 	// Output:
@@ -1050,7 +1050,7 @@ func ExampleFpdf_tutorial20() {
 		sigFileStr = "signature.svg"
 	)
 	var (
-		sig gofpdf.SvgBasicType
+		sig gofpdf.SVGBasicType
 		err error
 	)
 	pdf := gofpdf.New("P", "mm", "A4", cnFontDir) // A4 210.0 x 297.0
@@ -1065,9 +1065,9 @@ func ExampleFpdf_tutorial20() {
 		`type of vector graphic returned from a ` +
 		`<a href="http://willowsystems.github.io/jSignature/#/demo/">jSignature</a> ` +
 		`web control is supported and is used in this example.`
-	html := pdf.HtmlBasicNew()
+	html := pdf.HTMLBasicNew()
 	html.Write(lineHt, htmlStr)
-	sig, err = gofpdf.SvgBasicFileParse(imageFile(sigFileStr))
+	sig, err = gofpdf.SVGBasicFileParse(imageFile(sigFileStr))
 	if err == nil {
 		scale := 100 / sig.Wd
 		scaleY := 30 / sig.Ht
@@ -1078,7 +1078,7 @@ func ExampleFpdf_tutorial20() {
 		pdf.SetLineWidth(0.25)
 		pdf.SetDrawColor(0, 0, 128)
 		pdf.SetXY((210.0-scale*sig.Wd)/2.0, pdf.GetY()+10)
-		pdf.SvgBasicWrite(&sig, scale)
+		pdf.SVGBasicWrite(&sig, scale)
 	} else {
 		pdf.SetError(err)
 	}

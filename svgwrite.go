@@ -16,7 +16,7 @@
 
 package gofpdf
 
-// SvgBasicWrite renders the paths encoded in the basic SVG image specified by
+// SVGBasicWrite renders the paths encoded in the basic SVG image specified by
 // sb. The scale value is used to convert the coordinates in the path to the
 // unit of measure specified in New(). The current position (as set with a call
 // to SetXY()) is used as the origin of the image. The current line cap style
@@ -25,12 +25,12 @@ package gofpdf
 // paths.
 //
 // See example 20 for a demonstration of this function.
-func (f *Fpdf) SvgBasicWrite(sb *SvgBasicType, scale float64) {
+func (f *Fpdf) SVGBasicWrite(sb *SVGBasicType, scale float64) {
 	originX, originY := f.GetXY()
 	var x, y, newX, newY float64
 	var cx0, cy0, cx1, cy1 float64
-	var path []SvgBasicSegmentType
-	var seg SvgBasicSegmentType
+	var path []SVGBasicSegmentType
+	var seg SVGBasicSegmentType
 	val := func(arg int) (float64, float64) {
 		return originX + scale*seg.Arg[arg], originY + scale*seg.Arg[arg+1]
 	}

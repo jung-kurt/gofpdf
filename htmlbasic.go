@@ -21,25 +21,27 @@ import (
 	"strings"
 )
 
-type HtmlBasicSegmentType struct {
+// HTMLBasicSegmentType defines a segment of literal text in which the current
+// attributes do not vary, or an open tag or a close tag.
+type HTMLBasicSegmentType struct {
 	Cat  byte              // 'O' open tag, 'C' close tag, 'T' text
 	Str  string            // Literal text unchanged, tags are lower case
 	Attr map[string]string // Attribute keys are lower case
 }
 
-// HtmlBasicTokenize returns a list of HTML tags and literal elements. This is
+// HTMLBasicTokenize returns a list of HTML tags and literal elements. This is
 // done with regular expressions, so the result is only marginally better than
 // useless.
-func HtmlBasicTokenize(htmlStr string) (list []HtmlBasicSegmentType) {
+func HTMLBasicTokenize(htmlStr string) (list []HTMLBasicSegmentType) {
 	// This routine is adapted from http://www.fpdf.org/
-	list = make([]HtmlBasicSegmentType, 0, 16)
+	list = make([]HTMLBasicSegmentType, 0, 16)
 	htmlStr = strings.Replace(htmlStr, "\n", " ", -1)
 	htmlStr = strings.Replace(htmlStr, "\r", "", -1)
 	tagRe, _ := regexp.Compile(`(?U)<.*>`)
 	attrRe, _ := regexp.Compile(`([^=]+)=["']?([^"']+)`)
 	capList := tagRe.FindAllStringIndex(htmlStr, -1)
 	if capList != nil {
-		var seg HtmlBasicSegmentType
+		var seg HTMLBasicSegmentType
 		var parts []string
 		pos := 0
 		for _, cap := range capList {
@@ -87,12 +89,12 @@ func HtmlBasicTokenize(htmlStr string) (list []HtmlBasicSegmentType) {
 	return
 }
 
-// HtmlBasicType is used for rendering a very basic subset of HTML. It supports
+// HTMLBasicType is used for rendering a very basic subset of HTML. It supports
 // only hyperlinks and bold, italic and underscore attributes. In the Link
 // structure, the ClrR, ClrG and ClrB fields (0 through 255) define the color
 // of hyperlinks. The Bold, Italic and Underscore values define the hyperlink
 // style.
-type HtmlBasicType struct {
+type HTMLBasicType struct {
 	pdf  *Fpdf
 	Link struct {
 		ClrR, ClrG, ClrB         int
@@ -100,9 +102,9 @@ type HtmlBasicType struct {
 	}
 }
 
-// HtmlBasicNew returns an instance that facilitates writing basic HTML in the
+// HTMLBasicNew returns an instance that facilitates writing basic HTML in the
 // specified PDF file.
-func (f *Fpdf) HtmlBasicNew() (html HtmlBasicType) {
+func (f *Fpdf) HTMLBasicNew() (html HTMLBasicType) {
 	html.pdf = f
 	html.Link.ClrR, html.Link.ClrG, html.Link.ClrB = 0, 0, 128
 	html.Link.Bold, html.Link.Italic, html.Link.Underscore = false, false, true
@@ -117,7 +119,7 @@ func (f *Fpdf) HtmlBasicNew() (html HtmlBasicType) {
 // of the text.
 //
 // lineHt indicates the line height in the unit of measure specified in New().
-func (html *HtmlBasicType) Write(lineHt float64, htmlStr string) {
+func (html *HTMLBasicType) Write(lineHt float64, htmlStr string) {
 	var boldLvl, italicLvl, underscoreLvl, linkBold, linkItalic, linkUnderscore int
 	var textR, textG, textB = html.pdf.GetTextColor()
 	var hrefStr string
@@ -154,7 +156,7 @@ func (html *HtmlBasicType) Write(lineHt float64, htmlStr string) {
 		setStyle(-linkBold, -linkItalic, -linkUnderscore)
 		html.pdf.SetTextColor(textR, textG, textB)
 	}
-	list := HtmlBasicTokenize(htmlStr)
+	list := HTMLBasicTokenize(htmlStr)
 	var ok bool
 	for _, el := range list {
 		switch el.Cat {
