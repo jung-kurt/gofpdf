@@ -1489,8 +1489,11 @@ func (f *Fpdf) SetAcceptPageBreakFunc(fnc func() bool) {
 // values are 0 (to the right), 1 (to the beginning of the next line), and 2
 // (below). Putting 1 is equivalent to putting 0 and calling Ln() just after.
 //
-// alignStr allows the text to be aligned to the right ("R"), center ("C") or
-// left ("L" or "").
+// alignStr specifies how the text is to be positionined within the cell.
+// Horizontal alignment is controlled by including "L", "C" or "R" (left,
+// center, right) in alignStr. Vertical alignment is controlled by including
+// "T", "M" or "B" (top, middle, bottom) in alignStr. The default alignment is
+// left middle.
 //
 // fill is true to paint the cell background or false to leave it transparent.
 //
@@ -1498,6 +1501,8 @@ func (f *Fpdf) SetAcceptPageBreakFunc(fnc func() bool) {
 //
 // linkStr is a target URL or empty for no external link. A non--zero value for
 // link takes precedence over linkStr.
+//
+// See tutorial 21 for a demonstration of text alignment within a cell.
 func (f *Fpdf) CellFormat(w, h float64, txtStr string, borderStr string, ln int, alignStr string, fill bool, link int, linkStr string) {
 	// dbg("CellFormat. h = %.2f, borderStr = %s", h, borderStr)
 	if f.err != nil {
@@ -1567,14 +1572,22 @@ func (f *Fpdf) CellFormat(w, h float64, txtStr string, borderStr string, ln int,
 		}
 	}
 	if len(txtStr) > 0 {
-		var dx float64
-		if alignStr == "R" {
+		var dx, dy float64
+		// Horizontal alignment
+		if strings.Index(alignStr, "R") != -1 {
 			dx = w - f.cMargin - f.GetStringWidth(txtStr)
-		} else if alignStr == "C" {
+		} else if strings.Index(alignStr, "C") != -1 {
 			dx = (w - f.GetStringWidth(txtStr)) / 2
-			// dbg("center cell, dx %.2f\n", dx)
 		} else {
 			dx = f.cMargin
+		}
+		// Vertical alignment
+		if strings.Index(alignStr, "T") != -1 {
+			dy = (f.fontSize - h) / 2.0
+		} else if strings.Index(alignStr, "B") != -1 {
+			dy = (h - f.fontSize) / 2.0
+		} else {
+			dy = 0
 		}
 		if f.colorFlag {
 			s.printf("q %s ", f.color.text.str)
@@ -1585,16 +1598,16 @@ func (f *Fpdf) CellFormat(w, h float64, txtStr string, borderStr string, ln int,
 		// if strings.Contains(txt2, "end of excerpt") {
 		// dbg("f.h %.2f, f.y %.2f, h %.2f, f.fontSize %.2f, k %.2f", f.h, f.y, h, f.fontSize, k)
 		// }
-		s.printf("BT %.2f %.2f Td (%s) Tj ET", (f.x+dx)*k, (f.h-(f.y+.5*h+.3*f.fontSize))*k, txt2)
+		s.printf("BT %.2f %.2f Td (%s) Tj ET", (f.x+dx)*k, (f.h-(f.y+dy+.5*h+.3*f.fontSize))*k, txt2)
 		//BT %.2F %.2F Td (%s) Tj ET',($this->x+$dx)*$k,($this->h-($this->y+.5*$h+.3*$this->FontSize))*$k,$txt2);
 		if f.underline {
-			s.printf(" %s", f.dounderline(f.x+dx, f.y+.5*h+.3*f.fontSize, txtStr))
+			s.printf(" %s", f.dounderline(f.x+dx, f.y+dy+.5*h+.3*f.fontSize, txtStr))
 		}
 		if f.colorFlag {
 			s.printf(" Q")
 		}
 		if link > 0 || len(linkStr) > 0 {
-			f.newLink(f.x+dx, f.y+.5*h-.5*f.fontSize, f.GetStringWidth(txtStr), f.fontSize, link, linkStr)
+			f.newLink(f.x+dx, f.y+dy+.5*h-.5*f.fontSize, f.GetStringWidth(txtStr), f.fontSize, link, linkStr)
 		}
 	}
 	str := s.String()

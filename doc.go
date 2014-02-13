@@ -61,7 +61,8 @@ adapted from FPDF scripts by Andreas Würmser. Support for outline bookmarks is
 adapted from Olivier Plathey by Manuel Cornes. Support for transformations is
 adapted from the FPDF transformation script by Moritz Wagner and Andreas
 Würmser. Lawrence Kesteloot provided code to allow an image's extent to be
-determined prior to placement. Bruno Michel has provided valuable assistance
+determined prior to placement. Support for vertical alignment within a cell was
+provided by Stefan Schroeder. Bruno Michel has provided valuable assistance
 with the code.
 
 The FPDF website is http://www.fpdf.org/.

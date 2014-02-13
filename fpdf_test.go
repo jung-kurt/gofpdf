@@ -1086,3 +1086,40 @@ func ExampleFpdf_tutorial20() {
 	// Output:
 	// Successfully generated pdf/tutorial20.pdf
 }
+
+// This example demonstrates Stefan Schroeder's code to control vertical
+// alignment.
+func ExampleFpdf_tutorial21() {
+	type recType struct {
+		align, txt string
+	}
+	recList := []recType{
+		recType{"TL", "top left"},
+		recType{"TC", "top center"},
+		recType{"TR", "top right"},
+		recType{"LM", "middle left"},
+		recType{"CM", "middle center"},
+		recType{"RM", "middle right"},
+		recType{"BL", "bottom left"},
+		recType{"BC", "bottom center"},
+		recType{"BR", "bottom right"},
+	}
+	pdf := gofpdf.New("P", "mm", "A4", cnFontDir) // A4 210.0 x 297.0
+	pdf.SetFont("Helvetica", "", 16)
+	linkStr := ""
+	for pageJ := 0; pageJ < 2; pageJ++ {
+		pdf.AddPage()
+		pdf.SetMargins(10, 10, 10)
+		pdf.SetAutoPageBreak(false, 0)
+		borderStr := "1"
+		for _, rec := range recList {
+			pdf.SetXY(20, 20)
+			pdf.CellFormat(170, 257, rec.txt, borderStr, 0, rec.align, false, 0, linkStr)
+			borderStr = ""
+		}
+		linkStr = "https://code.google.com/p/gofpdf/"
+	}
+	pdf.OutputAndClose(docWriter(pdf, 21))
+	// Output:
+	// Successfully generated pdf/tutorial21.pdf
+}
