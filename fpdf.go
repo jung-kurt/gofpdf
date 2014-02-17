@@ -34,6 +34,7 @@ import (
 	"io"
 	"io/ioutil"
 	"math"
+	"os"
 	"path"
 	"strings"
 	"time"
@@ -439,9 +440,9 @@ func (f *Fpdf) open() {
 }
 
 // Close terminates the PDF document. It is not necessary to call this method
-// explicitly because Output() and OutputAndClose() do it automatically. If the
-// document contains no page, AddPage() is called to prevent the generation of
-// an invalid document.
+// explicitly because Output(), OutputAndClose() and OutputFileAndClose() do it
+// automatically. If the document contains no page, AddPage() is called to
+// prevent the generation of an invalid document.
 func (f *Fpdf) Close() {
 	if f.err == nil {
 		if f.clipNest > 0 {
@@ -2109,11 +2110,28 @@ func (f *Fpdf) SetXY(x, y float64) {
 	f.SetX(x)
 }
 
-// OutputAndClose send the PDF document to the writer specified by w. This method will close
-// both f and w, even if an error is detected and no document is produced.
+// OutputAndClose sends the PDF document to the writer specified by w. This
+// method will close both f and w, even if an error is detected and no document
+// is produced.
 func (f *Fpdf) OutputAndClose(w io.WriteCloser) error {
 	f.Output(w)
 	w.Close()
+	return f.err
+}
+
+// OutputFileAndClose creates or truncates the file specified by fileStr and
+// writes the PDF document to it. This method will close f and the newly
+// written file, even if an error is detected and no document is produced.
+func (f *Fpdf) OutputFileAndClose(fileStr string) error {
+	if f.err == nil {
+		pdfFile, err := os.Create(fileStr)
+		if err == nil {
+			f.Output(pdfFile)
+			pdfFile.Close()
+		} else {
+			f.err = err
+		}
+	}
 	return f.err
 }
 

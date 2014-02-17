@@ -124,7 +124,13 @@ func ExampleFpdf_tutorial01() {
 	pdf.AddPage()
 	pdf.SetFont("Arial", "B", 16)
 	pdf.Cell(40, 10, "Hello World!")
-	pdf.OutputAndClose(docWriter(pdf, 1))
+	fileStr := filepath.Join(cnGofpdfDir, "pdf/tutorial01.pdf")
+	err := pdf.OutputFileAndClose(fileStr)
+	if err == nil {
+		fmt.Println("Successfully generated pdf/tutorial01.pdf")
+	} else {
+		fmt.Println(err)
+	}
 	// Output:
 	// Successfully generated pdf/tutorial01.pdf
 }
