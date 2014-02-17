@@ -2122,6 +2122,8 @@ func (f *Fpdf) OutputAndClose(w io.WriteCloser) error {
 // OutputFileAndClose creates or truncates the file specified by fileStr and
 // writes the PDF document to it. This method will close f and the newly
 // written file, even if an error is detected and no document is produced.
+//
+// This function is demonstrated in tutorial 1.
 func (f *Fpdf) OutputFileAndClose(fileStr string) error {
 	if f.err == nil {
 		pdfFile, err := os.Create(fileStr)
