@@ -21,6 +21,7 @@ import (
 	"compress/zlib"
 	"fmt"
 	// "github.com/davecgh/go-spew/spew"
+	"io"
 	"math"
 	"os"
 )
@@ -58,16 +59,10 @@ func fileSize(filename string) (size int64, ok bool) {
 	return
 }
 
-// Returns a new buffer populated with the contents of the specified file
-func bufferFromFile(fileStr string) (b *bytes.Buffer, err error) {
-	var fl *os.File
-	fl, err = os.Open(fileStr)
-	if err != nil {
-		return
-	}
-	defer fl.Close()
+// Returns a new buffer populated with the contents of the specified Reader
+func bufferFromReader(r io.Reader) (b *bytes.Buffer, err error) {
 	b = new(bytes.Buffer)
-	_, err = b.ReadFrom(fl)
+	_, err = b.ReadFrom(r)
 	return
 }
 

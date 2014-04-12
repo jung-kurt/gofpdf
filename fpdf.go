@@ -2021,6 +2021,46 @@ func (f *Fpdf) Image(fileStr string, x, y, w, h float64, flow bool, tp string, l
 	return
 }
 
+// RegisterImageReader registers an image, reading it from Reader,
+// adding it to the PDF file but not adding it to the page.
+// Use Image() with the same name to add the image to the
+// page.
+// Note, that tp should be specified in this case.
+// See Image() for restrictions on the image and the "tp" parameters.
+func (f *Fpdf) RegisterImageReader(imgName, tp string, r io.Reader) (info *ImageInfoType) {
+	info, ok := f.images[imgName]
+	if ok {
+		return info
+	}
+
+	// First use of this image, get info
+	if tp == "" {
+		f.err = fmt.Errorf("image type should be specified if reading from custom reader")
+		return info
+	}
+	tp = strings.ToLower(tp)
+	if tp == "jpeg" {
+		tp = "jpg"
+	}
+	switch tp {
+	case "jpg":
+		info = f.parsejpg(r)
+	case "png":
+		info = f.parsepng(r)
+	case "gif":
+		info = f.parsegif(r)
+	default:
+		f.err = fmt.Errorf("unsupported image type: %s", tp)
+	}
+	if f.err != nil {
+		return
+	}
+	info.i = len(f.images) + 1
+	f.images[imgName] = info
+
+	return info
+}
+
 // RegisterImage registers an image, adding it to the PDF file but not adding
 // it to the page. Use Image() with the same filename to add the image to the
 // page. Note that Image() calls this function, so this function is only
@@ -2030,38 +2070,28 @@ func (f *Fpdf) Image(fileStr string, x, y, w, h float64, flow bool, tp string, l
 // See tutorial 18 for an example of this function.
 func (f *Fpdf) RegisterImage(fileStr, tp string) (info *ImageInfoType) {
 	info, ok := f.images[fileStr]
-	if !ok {
-		// First use of this image, get info
-		if tp == "" {
-			pos := strings.LastIndex(fileStr, ".")
-			if pos < 0 {
-				f.err = fmt.Errorf("image file has no extension and no type was specified: %s", fileStr)
-				return
-			}
-			tp = fileStr[pos+1:]
-		}
-		tp = strings.ToLower(tp)
-		if tp == "jpeg" {
-			tp = "jpg"
-		}
-		switch tp {
-		case "jpg":
-			info = f.parsejpg(fileStr)
-		case "png":
-			info = f.parsepng(fileStr)
-		case "gif":
-			info = f.parsegif(fileStr)
-		default:
-			f.err = fmt.Errorf("unsupported image type: %s", tp)
-		}
-		if f.err != nil {
-			return
-		}
-		info.i = len(f.images) + 1
-		f.images[fileStr] = info
+	if ok {
+		return info
 	}
 
-	return info
+	file, err := os.Open(fileStr)
+	if err != nil {
+		f.err = err
+		return
+	}
+	defer file.Close()
+
+	// First use of this image, get info
+	if tp == "" {
+		pos := strings.LastIndex(fileStr, ".")
+		if pos < 0 {
+			f.err = fmt.Errorf("image file has no extension and no type was specified: %s", fileStr)
+			return
+		}
+		tp = fileStr[pos+1:]
+	}
+
+	return f.RegisterImageReader(fileStr, tp, file)
 }
 
 // GetXY returns the abscissa and ordinate of the current position.
@@ -2288,16 +2318,21 @@ func (f *Fpdf) newImageInfo() *ImageInfoType {
 	return &ImageInfoType{scale: f.k}
 }
 
-// Extract info from a JPEG file
+// Extract info from io.Reader with JPEG data
 // Thank you, Bruno Michel, for providing this code.
-func (f *Fpdf) parsejpg(fileStr string) (info *ImageInfoType) {
+func (f *Fpdf) parsejpg(r io.Reader) (info *ImageInfoType) {
 	info = f.newImageInfo()
-	var err error
-	info.data, err = ioutil.ReadFile(fileStr)
+	var (
+		data bytes.Buffer
+		err error
+	)
+	_, err = data.ReadFrom(r)
 	if err != nil {
 		f.err = err
 		return
 	}
+	info.data = data.Bytes()
+
 	config, err := jpeg.DecodeConfig(bytes.NewReader(info.data))
 	if err != nil {
 		f.err = err
@@ -2319,9 +2354,9 @@ func (f *Fpdf) parsejpg(fileStr string) (info *ImageInfoType) {
 	return
 }
 
-// Extract info from a PNG file
-func (f *Fpdf) parsepng(fileStr string) (info *ImageInfoType) {
-	buf, err := bufferFromFile(fileStr)
+// Extract info from a PNG data
+func (f *Fpdf) parsepng(r io.Reader) (info *ImageInfoType) {
+	buf, err := bufferFromReader(r)
 	if err != nil {
 		f.err = err
 		return
@@ -2506,16 +2541,15 @@ func (f *Fpdf) parsepngstream(buf *bytes.Buffer) (info *ImageInfoType) {
 	return
 }
 
-// Extract info from a GIF file (via PNG conversion)
-func (f *Fpdf) parsegif(fileStr string) (info *ImageInfoType) {
-	data, err := ioutil.ReadFile(fileStr)
+// Extract info from a GIF data (via PNG conversion)
+func (f *Fpdf) parsegif(r io.Reader) (info *ImageInfoType) {
+	data, err := bufferFromReader(r)
 	if err != nil {
 		f.err = err
 		return
 	}
-	gifBuf := bytes.NewBuffer(data)
 	var img image.Image
-	img, err = gif.Decode(gifBuf)
+	img, err = gif.Decode(data)
 	if err != nil {
 		f.err = err
 		return
