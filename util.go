@@ -69,7 +69,7 @@ func bufferFromReader(r io.Reader) (b *bytes.Buffer, err error) {
 // Returns a zlib-compressed copy of the specified byte array
 func sliceCompress(data []byte) []byte {
 	var buf bytes.Buffer
-	cmp := zlib.NewWriter(&buf)
+	cmp, _ := zlib.NewWriterLevel(&buf, zlib.BestSpeed)
 	cmp.Write(data)
 	cmp.Close()
 	return buf.Bytes()
