@@ -1208,6 +1208,22 @@ func (f *Fpdf) ClipEnd() {
 //
 // See tutorial 7 for an example of this function.
 func (f *Fpdf) AddFont(familyStr, styleStr, fileStr string) {
+	if fileStr == "" {
+		fileStr = strings.Replace(familyStr, " ", "", -1) + strings.ToLower(styleStr) + ".json"
+	}
+	fileStr = path.Join(f.fontpath, fileStr)
+
+	file, err := os.Open(fileStr)
+	if err != nil {
+		f.err = err
+		return
+	}
+	defer file.Close()
+
+	f.AddFontFromReader(familyStr, styleStr, fileStr, file)
+}
+
+func (f *Fpdf) AddFontFromReader(familyStr, styleStr, fileStr string, r io.Reader) {
 	if f.err != nil {
 		return
 	}
@@ -1217,7 +1233,6 @@ func (f *Fpdf) AddFont(familyStr, styleStr, fileStr string) {
 	if fileStr == "" {
 		fileStr = strings.Replace(familyStr, " ", "", -1) + strings.ToLower(styleStr) + ".json"
 	}
-	fileStr = path.Join(f.fontpath, fileStr)
 	styleStr = strings.ToUpper(styleStr)
 	if styleStr == "IB" {
 		styleStr = "BI"
@@ -1230,7 +1245,7 @@ func (f *Fpdf) AddFont(familyStr, styleStr, fileStr string) {
 		return
 	}
 	var info fontDefType
-	info = f.loadfont(fileStr)
+	info = f.loadfont(r)
 	if f.err != nil {
 		return
 	}
@@ -2254,18 +2269,19 @@ func (f *Fpdf) endpage() {
 	f.state = 1
 }
 
-// Load a font definition file from the font directory
-func (f *Fpdf) loadfont(fontStr string) (def fontDefType) {
+// Load a font definition file from the given Reader
+func (f *Fpdf) loadfont(r io.Reader) (def fontDefType) {
 	if f.err != nil {
 		return
 	}
 	// dbg("Loading font [%s]", fontStr)
-	buf, err := ioutil.ReadFile(fontStr)
+	var buf bytes.Buffer
+	_, err := buf.ReadFrom(r)
 	if err != nil {
 		f.err = err
 		return
 	}
-	err = json.Unmarshal(buf, &def)
+	err = json.Unmarshal(buf.Bytes(), &def)
 	if err != nil {
 		f.err = err
 	}
