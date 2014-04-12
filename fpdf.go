@@ -2036,13 +2036,14 @@ func (f *Fpdf) Image(fileStr string, x, y, w, h float64, flow bool, tp string, l
 	return
 }
 
-// RegisterImageReader registers an image, reading it from Reader,
-// adding it to the PDF file but not adding it to the page.
-// Use Image() with the same name to add the image to the
-// page.
-// Note, that tp should be specified in this case.
+// RegisterImageReader registers an image, reading it from Reader r, adding it
+// to the PDF file but not adding it to the page. Use Image() with the same
+// name to add the image to the page. Note that tp should be specified in this
+// case.
+//
 // See Image() for restrictions on the image and the "tp" parameters.
 func (f *Fpdf) RegisterImageReader(imgName, tp string, r io.Reader) (info *ImageInfoType) {
+	// Thanks, Ivan Daniluk, for generalizing this code to use the Reader interface.
 	info, ok := f.images[imgName]
 	if ok {
 		return info
@@ -2340,7 +2341,7 @@ func (f *Fpdf) parsejpg(r io.Reader) (info *ImageInfoType) {
 	info = f.newImageInfo()
 	var (
 		data bytes.Buffer
-		err error
+		err  error
 	)
 	_, err = data.ReadFrom(r)
 	if err != nil {
