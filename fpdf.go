@@ -1220,28 +1220,26 @@ func (f *Fpdf) AddFont(familyStr, styleStr, fileStr string) {
 	}
 	defer file.Close()
 
-	f.AddFontFromReader(familyStr, styleStr, fileStr, file)
+	f.AddFontFromReader(familyStr, styleStr, file)
 }
 
-func (f *Fpdf) AddFontFromReader(familyStr, styleStr, fileStr string, r io.Reader) {
+// AddFontFromReader imports a TrueType, OpenType or Type1 font and makes it
+// available using a reader that satisifies the io.Reader interface. See
+// AddFont for details about familyStr and styleStr.
+func (f *Fpdf) AddFontFromReader(familyStr, styleStr string, r io.Reader) {
 	if f.err != nil {
 		return
 	}
 	// dbg("Adding family [%s], style [%s]", familyStr, styleStr)
 	var ok bool
 	familyStr = strings.ToLower(familyStr)
-	if fileStr == "" {
-		fileStr = strings.Replace(familyStr, " ", "", -1) + strings.ToLower(styleStr) + ".json"
-	}
 	styleStr = strings.ToUpper(styleStr)
 	if styleStr == "IB" {
 		styleStr = "BI"
 	}
 	fontkey := familyStr + styleStr
-	// dbg("fontkey [%s]", fontkey)
 	_, ok = f.fonts[fontkey]
 	if ok {
-		// dbg("fontkey found; returning")
 		return
 	}
 	var info fontDefType
@@ -1250,7 +1248,6 @@ func (f *Fpdf) AddFontFromReader(familyStr, styleStr, fileStr string, r io.Reade
 		return
 	}
 	info.I = len(f.fonts)
-	// dbg("font [%s], I [%d]", fileStr, info.I)
 	if len(info.Diff) > 0 {
 		// Search existing encodings
 		n := -1
