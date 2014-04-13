@@ -152,9 +152,10 @@ and http://dejavu-fonts.org/.
 
 Roadmap
 
-• Handle UTF-8 source text
+• Handle UTF-8 source text natively. Until then, automatic translation of
+UTF-8 runes to code page bytes is provided.
 
-• Improve test coverage as reported by gocov (https://github.com/axw/gocov‎)
+• Improve test coverage as reported by the coverage tool.
 
 */
 package gofpdf

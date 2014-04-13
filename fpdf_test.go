@@ -1158,3 +1158,30 @@ func ExampleFpdf_tutorial22() {
 	// Output:
 	// Successfully generated pdf/tutorial22.pdf
 }
+
+// This example demonstrates the conversion of UTF-8 strings to an 8-bit font
+// encoding.
+func ExampleFpdf_tutorial23() {
+	pdf := gofpdf.New("P", "mm", "A4", cnFontDir) // A4 210.0 x 297.0
+	fontSize := 16.0
+	pdf.SetFont("Helvetica", "", fontSize)
+	ht := pdf.PointConvert(fontSize)
+	tr := pdf.UnicodeTranslatorFromDescriptor("") // Default: "cp1252"
+	write := func(str string) {
+		// fmt.Println(str, tr(str))
+		pdf.CellFormat(190, ht, tr(str), "", 1, "C", false, 0, "")
+		pdf.Ln(ht)
+	}
+	pdf.AddPage()
+	str := ` gofpdf provides a translator that will convert any UTF-8 code point ` +
+		`that is present in the specified code page.`
+	pdf.MultiCell(190, ht, str, "", "L", false)
+	pdf.Ln(2 * ht)
+	write("Voix ambiguë d'un cœur qui au zéphyr préfère les jattes de kiwi.")
+	write("Falsches Üben von Xylophonmusik quält jeden größeren Zwerg.")
+	write("Heizölrückstoßabdämpfung")
+	write("Forårsjævndøgn / Efterårsjævndøgn")
+	pdf.OutputAndClose(docWriter(pdf, 23))
+	// Output:
+	// Successfully generated pdf/tutorial23.pdf
+}

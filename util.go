@@ -21,9 +21,11 @@ import (
 	"compress/zlib"
 	"fmt"
 	// "github.com/davecgh/go-spew/spew"
+	"bufio"
 	"io"
 	"math"
 	"os"
+	"path/filepath"
 )
 
 func round(f float64) int {
@@ -146,3 +148,96 @@ func strIf(cnd bool, aStr, bStr string) string {
 // 		fl.Close()
 // 	}
 // }
+
+func repClosure(m map[rune]byte) func(string) string {
+	var buf bytes.Buffer
+	return func(str string) string {
+		var ch byte
+		var ok bool
+		buf.Truncate(0)
+		for _, r := range str {
+			if r < 0x80 {
+				ch = byte(r)
+			} else {
+				ch, ok = m[r]
+				if !ok {
+					ch = byte('.')
+				}
+			}
+			buf.WriteByte(ch)
+		}
+		return string(buf.Bytes())
+	}
+}
+
+// UnicodeTranslator returns a function that can be used to translate, where
+// possible, utf-8 strings to a form that is compatible with the specified code
+// page. The returned function accepts a string and returns a string.
+//
+// r is a reader that should read a buffer made up of content lines that
+// pertain to the code page of interest. Each line is made up of three
+// whitespace separated fields. The first begins with "!" and is followed by
+// two hexadecimal digits that identify the glyph position in the code page of
+// interest. The second field begins with "U+" and is followed by the unicode
+// code point value. The third is the glyph name. A number of these code page
+// map files are packaged with the gfpdf library in the font directory.
+//
+// An error occurs only if a line is read that does not conform to the expected
+// format.
+func UnicodeTranslator(r io.Reader) (f func(string) string, err error) {
+	m := make(map[rune]byte)
+	var uPos, cPos uint32
+	var lineStr, nameStr string
+	sc := bufio.NewScanner(r)
+	for sc.Scan() {
+		lineStr = sc.Text()
+		if len(lineStr) > 0 {
+			_, err = fmt.Sscanf(lineStr, "!%2X U+%4X %s", &cPos, &uPos, &nameStr)
+			if err == nil {
+				if cPos >= 0x80 {
+					m[rune(uPos)] = byte(cPos)
+				}
+			}
+		}
+	}
+	if err == nil {
+		f = repClosure(m)
+	}
+	return
+}
+
+// UnicodeTranslatorFromFile returns a function that can be used to translate,
+// where possible, utf-8 strings to a form that is compatible with the
+// specified code page. See UnicodeTranslator for more details.
+//
+// fileStr identifies a font descriptor file that maps glyph positions to names.
+func UnicodeTranslatorFromFile(fileStr string) (f func(string) string, err error) {
+	var fl *os.File
+	fl, err = os.Open(fileStr)
+	if err == nil {
+		f, err = UnicodeTranslator(fl)
+		fl.Close()
+	}
+	return
+}
+
+// UnicodeTranslatorFromDescriptor returns a function that can be used to
+// translate, where possible, utf-8 strings to a form that is compatible with
+// the specified code page. See UnicodeTranslator for more details.
+//
+// cpStr identifies a code page. A descriptor file in the font directory, set
+// with the fontDirStr argument in the call to New(), should have this name
+// plus the extension ".map". If cpStr is empty, it will be replaced with
+// "cp1252", the gofpdf code page default.
+//
+// See tutorial 23 for an example of this function.
+func (f *Fpdf) UnicodeTranslatorFromDescriptor(cpStr string) (rep func(string) string) {
+	if f.err != nil {
+		return
+	}
+	if len(cpStr) == 0 {
+		cpStr = "cp1252"
+	}
+	rep, f.err = UnicodeTranslatorFromFile(filepath.Join(f.fontpath, cpStr) + ".map")
+	return
+}
