@@ -1166,9 +1166,8 @@ func ExampleFpdf_tutorial23() {
 	fontSize := 16.0
 	pdf.SetFont("Helvetica", "", fontSize)
 	ht := pdf.PointConvert(fontSize)
-	tr := pdf.UnicodeTranslatorFromDescriptor("") // Default: "cp1252"
+	tr := pdf.UnicodeTranslatorFromDescriptor("") // "" defaults to "cp1252"
 	write := func(str string) {
-		// fmt.Println(str, tr(str))
 		pdf.CellFormat(190, ht, tr(str), "", 1, "C", false, 0, "")
 		pdf.Ln(ht)
 	}
