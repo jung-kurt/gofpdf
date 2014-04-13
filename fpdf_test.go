@@ -1172,7 +1172,7 @@ func ExampleFpdf_tutorial23() {
 		pdf.Ln(ht)
 	}
 	pdf.AddPage()
-	str := ` gofpdf provides a translator that will convert any UTF-8 code point ` +
+	str := `Gofpdf provides a translator that will convert any UTF-8 code point ` +
 		`that is present in the specified code page.`
 	pdf.MultiCell(190, ht, str, "", "L", false)
 	pdf.Ln(2 * ht)
