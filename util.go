@@ -166,7 +166,7 @@ func repClosure(m map[rune]byte) func(string) string {
 			}
 			buf.WriteByte(ch)
 		}
-		return string(buf.Bytes())
+		return buf.String()
 	}
 }
 
