@@ -196,6 +196,7 @@ type Fpdf struct {
 	clipNest         int                       // Number of active clipping contexts
 	transformNest    int                       // Number of active transformation contexts
 	err              error                     // Set if error occurs during life cycle of instance
+	protect          protectType               // document protection structure
 	colorFlag        bool                      // indicates whether fill and text colors are different
 	color            struct {                  // Composite values of colors
 		draw, fill, text clrType

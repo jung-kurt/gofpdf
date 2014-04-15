@@ -1281,7 +1281,8 @@ func (f *Fpdf) AddFontFromReader(familyStr, styleStr string, r io.Reader) {
 // document will not be valid.
 //
 // The font can be either a standard one or a font added via the AddFont()
-// method. Standard fonts use the Windows encoding cp1252 (Western Europe).
+// method or AddFontFromReader() method. Standard fonts use the Windows
+// encoding cp1252 (Western Europe).
 //
 // The method can be called before the first page is created and the font is
 // kept from page to page. If you just wish to change the current font size, it
@@ -1290,10 +1291,10 @@ func (f *Fpdf) AddFontFromReader(familyStr, styleStr string, r io.Reader) {
 // Note: the font definition file must be accessible. An error is set if the
 // file cannot be read.
 //
-// familyStr specifies the font fammily. It can be either a name defined by
-// AddFont() or one of the standard families (case insensitive): "Courier" for
-// fixed-width, "Helvetica" or "Arial" for sans serif, "Times" for serif,
-// "Symbol" or "ZapfDingbats" for symbolic.
+// familyStr specifies the font family. It can be either a name defined by
+// AddFont(), AddFontFromReader() or one of the standard families (case
+// insensitive): "Courier" for fixed-width, "Helvetica" or "Arial" for sans
+// serif, "Times" for serif, "Symbol" or "ZapfDingbats" for symbolic.
 //
 // styleStr can be "B" (bold), "I" (italic), "U" (underscore) or any
 // combination. The default value (specified with an empty string) is regular.
@@ -2153,6 +2154,31 @@ func (f *Fpdf) SetXY(x, y float64) {
 	f.SetX(x)
 }
 
+// SetProtection applies certain constraints on the finished PDF document.
+//
+// actionFlag is a bitflag that controls various document operations.
+// CnProtectPrint allows the document to be printed. CnProtectModify allows a
+// document to be modified by a PDF editor. CnProtectCopy allows text and
+// images to be copied into the system clipboard. CnProtectAnnotForms allows
+// annotations and forms to be added by a PDF editor. These values can be
+// combined by or-ing them together, for example,
+// CnProtectCopy|CnProtectModify. This flag is advisory; not all PDF readers
+// implement the constraints that this argument attempts to control.
+//
+// userPassStr specifies the password that will need to be provided to view the
+// contents of the PDF. The permissions specified by actionFlag will apply.
+//
+// ownerPassStr specifies the password that will need to be provided to gain
+// full access to the document regardless of the actionFlag value. An empty
+// string for this argument will be replaced with a random value, effectively
+// prohibiting full access to the document.
+func (f *Fpdf) SetProtection(actionFlag byte, userPassStr, ownerPassStr string) {
+	if f.err != nil {
+		return
+	}
+	f.protect.setProtection(actionFlag, userPassStr, ownerPassStr)
+}
+
 // OutputAndClose sends the PDF document to the writer specified by w. This
 // method will close both f and w, even if an error is detected and no document
 // is produced.
@@ -2298,6 +2324,11 @@ func (f *Fpdf) escape(s string) string {
 
 // Format a text string
 func (f *Fpdf) textstring(s string) string {
+	if f.protect.encrypted {
+		b := []byte(s)
+		f.protect.rc4(uint32(f.n), &b)
+		s = string(b)
+	}
 	return "(" + f.escape(s) + ")"
 }
 
@@ -2590,6 +2621,9 @@ func (f *Fpdf) newobj() {
 
 func (f *Fpdf) putstream(b []byte) {
 	// dbg("putstream")
+	if f.protect.encrypted {
+		f.protect.rc4(uint32(f.n), &b)
+	}
 	f.out("stream")
 	f.out(string(b))
 	f.out("endstream")
@@ -2923,7 +2957,7 @@ func (f *Fpdf) putresourcedict() {
 	f.putxobjectdict()
 	f.out(">>")
 	count := len(f.blendList)
-	if count > 0 {
+	if count > 1 {
 		f.out("/ExtGState <<")
 		for j := 1; j < count; j++ {
 			f.outf("/GS%d %d 0 R", j, f.blendList[j].objNum)
@@ -2931,7 +2965,7 @@ func (f *Fpdf) putresourcedict() {
 		f.out(">>")
 	}
 	count = len(f.gradientList)
-	if count > 0 {
+	if count > 1 {
 		f.out("/Shading <<")
 		for j := 1; j < count; j++ {
 			f.outf("/Sh%d %d 0 R", j, f.gradientList[j].objNum)
@@ -2996,6 +3030,19 @@ func (f *Fpdf) putresources() {
 	f.putresourcedict()
 	f.out(">>")
 	f.out("endobj")
+	if f.protect.encrypted {
+		f.newobj()
+		f.protect.objNum = f.n
+		f.out("<<")
+		f.out("/Filter /Standard")
+		f.out("/V 1")
+		f.out("/R 2")
+		f.outf("/O (%s)", f.escape(string(f.protect.oValue)))
+		f.outf("/U (%s)", f.escape(string(f.protect.uValue)))
+		f.outf("/P %d", f.protect.pValue)
+		f.out(">>")
+		f.out("endobj")
+	}
 	return
 }
 
@@ -3058,6 +3105,10 @@ func (f *Fpdf) puttrailer() {
 	f.outf("/Size %d", f.n+1)
 	f.outf("/Root %d 0 R", f.n)
 	f.outf("/Info %d 0 R", f.n-1)
+	if f.protect.encrypted {
+		f.outf("/Encrypt %d 0 R", f.protect.objNum)
+		f.out("/ID [()()]")
+	}
 }
 
 func (f *Fpdf) putbookmarks() {

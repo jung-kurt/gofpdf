@@ -44,6 +44,8 @@ Features
 
 • Clipping
 
+• Document protection
+
 gofpdf has no dependencies other than the Go standard library. All tests pass
 on Linux, Mac and Windows platforms. Like FPDF version 1.7, from which gofpdf
 is derived, this package does not yet support UTF-8 fonts. However, support is
@@ -59,7 +61,8 @@ transparency script by Martin Hall-May. Support for gradients and clipping is
 adapted from FPDF scripts by Andreas Würmser. Support for outline bookmarks is
 adapted from Olivier Plathey by Manuel Cornes. Support for transformations is
 adapted from the FPDF transformation script by Moritz Wagner and Andreas
-Würmser. Lawrence Kesteloot provided code to allow an image's extent to be
+Würmser. PDF protection is adapted from the work of Klemen Vodopivec for the
+FPDF product. Lawrence Kesteloot provided code to allow an image's extent to be
 determined prior to placement. Support for vertical alignment within a cell was
 provided by Stefan Schroeder. Ivan Daniluk generalized the font and image
 loading code to use the Reader interface while maintaining backward
