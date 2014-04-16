@@ -1187,11 +1187,11 @@ func ExampleFpdf_tutorial23() {
 
 // This example demonstrates document protection.
 func ExampleFpdf_tutorial24() {
-	pdf := gofpdf.New("P", "mm", "A4", cnFontDir) // A4 210.0 x 297.0
+	pdf := gofpdf.New("P", "mm", "A4", cnFontDir)
 	pdf.SetProtection(gofpdf.CnProtectPrint, "123", "abc")
 	pdf.AddPage()
 	pdf.SetFont("Arial", "", 12)
-	pdf.Write(10, "You can print me but not copy my text.")
+	pdf.Write(10, "Password-protected.")
 	pdf.OutputAndClose(docWriter(pdf, 24))
 	// Output:
 	// Successfully generated pdf/tutorial24.pdf

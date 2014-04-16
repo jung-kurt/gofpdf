@@ -2172,6 +2172,8 @@ func (f *Fpdf) SetXY(x, y float64) {
 // full access to the document regardless of the actionFlag value. An empty
 // string for this argument will be replaced with a random value, effectively
 // prohibiting full access to the document.
+//
+// See tutorial 24 for an example of this function.
 func (f *Fpdf) SetProtection(actionFlag byte, userPassStr, ownerPassStr string) {
 	if f.err != nil {
 		return
