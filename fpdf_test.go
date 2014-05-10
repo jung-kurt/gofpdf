@@ -1131,7 +1131,8 @@ func ExampleFpdf_tutorial21() {
 }
 
 // This example demonstrates the use of characters in the high range of the
-// Windows-1252 code page (gofdpf default).
+// Windows-1252 code page (gofdpf default). See the following example (23) for
+// a way to do this automatically.
 func ExampleFpdf_tutorial22() {
 	pdf := gofpdf.New("P", "mm", "A4", cnFontDir) // A4 210.0 x 297.0
 	fontSize := 16.0
