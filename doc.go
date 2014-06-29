@@ -66,7 +66,8 @@ FPDF product. Lawrence Kesteloot provided code to allow an image's extent to be
 determined prior to placement. Support for vertical alignment within a cell was
 provided by Stefan Schroeder. Ivan Daniluk generalized the font and image
 loading code to use the Reader interface while maintaining backward
-compatibility. Bruno Michel has provided valuable assistance with the code.
+compatibility. Anthony Starks provided code for the Polygon function. Bruno
+Michel has provided valuable assistance with the code.
 
 The FPDF website is http://www.fpdf.org/.
 

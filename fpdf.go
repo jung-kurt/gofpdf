@@ -798,6 +798,31 @@ func (f *Fpdf) Ellipse(x, y, rx, ry, degRotate float64, styleStr string) {
 	f.Arc(x, y, rx, ry, degRotate, 0, 360, styleStr)
 }
 
+// Polygon draws a closed figure defined by a series of vertices specified by
+// points. The x and y fields of the points use the units established in New().
+// The last point in the slice will be implicitly joined to the first to close
+// the polygon.
+//
+// styleStr can be "F" for filled, "D" for outlined only, or "DF" or "FD" for
+// outlined and filled. An empty string will be replaced with "D". Drawing uses
+// the current draw color and line width centered on the ellipse's perimeter.
+// Filling uses the current fill color.
+//
+// See tutorial 25 for an example of this function.
+func (f *Fpdf) Polygon(points []PointType, styleStr string) {
+	if len(points) > 2 {
+		for j, pt := range points {
+			if j == 0 {
+				f.point(pt.X, pt.Y)
+			} else {
+				f.outf("%.5f %.5f l ", pt.X*f.k, (f.h-pt.Y)*f.k)
+			}
+		}
+		f.outf("%.5f %.5f l ", points[0].X*f.k, (f.h-points[0].Y)*f.k)
+		f.outf(fillDrawOp(styleStr))
+	}
+}
+
 // Outputs current point
 func (f *Fpdf) point(x, y float64) {
 	f.outf("%.2f %.2f m", x*f.k, (f.h-y)*f.k)
