@@ -104,6 +104,8 @@ type HTMLBasicType struct {
 
 // HTMLBasicNew returns an instance that facilitates writing basic HTML in the
 // specified PDF file.
+//
+// This function is demonstrated in tutorial 6.
 func (f *Fpdf) HTMLBasicNew() (html HTMLBasicType) {
 	html.pdf = f
 	html.Link.ClrR, html.Link.ClrG, html.Link.ClrB = 0, 0, 128
@@ -112,11 +114,12 @@ func (f *Fpdf) HTMLBasicNew() (html HTMLBasicType) {
 }
 
 // Write prints text from the current position using the currently selected
-// font. The text can be encoded with a basic subset of HTML that includes
-// hyperlinks and tags for italic (I), bold (B) and underscore (U) attributes.
-// When the right margin is reached a line break occurs and text continues from
-// the left margin. Upon method exit, the current position is left at the end
-// of the text.
+// font. See HTMLBasicNew() to create a receiver that is associated with the
+// PDF document instance. The text can be encoded with a basic subset of HTML
+// that includes hyperlinks and tags for italic (I), bold (B) and underscore
+// (U) attributes. When the right margin is reached a line break occurs and
+// text continues from the left margin. Upon method exit, the current position
+// is left at the end of the text.
 //
 // lineHt indicates the line height in the unit of measure specified in New().
 func (html *HTMLBasicType) Write(lineHt float64, htmlStr string) {
