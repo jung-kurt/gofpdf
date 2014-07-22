@@ -1712,7 +1712,7 @@ func (f *Fpdf) SplitLines(txt []byte, w float64) [][]byte {
 	// Function contributed by Bruno Michel
 	lines := [][]byte{}
 	cw := &f.currentFont.Cw
-	wmax := (w - 2*f.cMargin) * 1000 / f.fontSize
+	wmax := int(math.Ceil((w - 2*f.cMargin) * 1000 / f.fontSize))
 	s := bytes.Replace(txt, []byte("\r"), []byte{}, -1)
 	nb := len(s)
 	for nb > 0 && s[nb-1] == '\n' {
@@ -1722,10 +1722,10 @@ func (f *Fpdf) SplitLines(txt []byte, w float64) [][]byte {
 	sep := -1
 	i := 0
 	j := 0
-	l := 0.0
+	l := 0
 	for i < nb {
 		c := s[i]
-		l += float64(cw[c])
+		l += cw[c]
 		if c == ' ' || c == '\t' || c == '\n' {
 			sep = i
 		}
