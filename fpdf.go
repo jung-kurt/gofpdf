@@ -245,6 +245,26 @@ func (f *Fpdf) Error() error {
 	return f.err
 }
 
+// Return the current page's width and height. This is the paper's size. To
+// compute the size of the area being used, subtract the margins (see
+// GetMargins()).
+func (f *Fpdf) GetPageSize() (width, height float64) {
+	width = f.w
+	height = f.h
+	return
+}
+
+// Return the left, top, right, and bottom margins. The first three are set
+// with the SetMargins() method. The bottom margin is set with the
+// SetAutoPageBreak() method.
+func (f *Fpdf) GetMargins() (left, top, right, bottom float64) {
+	left = f.lMargin
+	top = f.tMargin
+	right = f.rMargin
+	bottom = f.bMargin
+	return
+}
+
 // SetMargins defines the left, top and right margins. By default, they equal 1
 // cm. Call this method to change them. If the value of the right margin is
 // less than zero, it is set to the same as the left margin.
