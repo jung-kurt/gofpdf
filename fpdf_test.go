@@ -1166,7 +1166,7 @@ func ExampleFpdf_tutorial22() {
 // This example demonstrates the conversion of UTF-8 strings to an 8-bit font
 // encoding.
 func ExampleFpdf_tutorial23() {
-	pdf := gofpdf.New("P", "mm", "A4", cnFontDir) // A4 210.0 x 297.0
+	pdf := gofpdf.New("P", "mm", "A4", "") // A4 210.0 x 297.0
 	fontSize := 16.0
 	pdf.SetFont("Helvetica", "", fontSize)
 	ht := pdf.PointConvert(fontSize)
@@ -1237,7 +1237,6 @@ func ExampleFpdf_tutorial25() {
 		x = gap + radius
 		for col := 0; col < colCount; col++ {
 			pts = vertices(row*colCount + col + 3)
-			// pdf.Circle(x, y, radius, "FD")
 			pdf.Polygon(pts, "FD")
 			x += advance
 		}
