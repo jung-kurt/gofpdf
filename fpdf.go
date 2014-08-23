@@ -200,7 +200,10 @@ func NewCustom(init *InitType) (f *Fpdf) {
 // "Letter", or "Legal". An empty string will be replaced with "A4".
 //
 // fontDirStr specifies the file system location in which font resources will
-// be found. An empty string is replaced with ".".
+// be found. An empty string is replaced with ".". This argument only needs to
+// reference an actual directory if a font other than one of the core
+// fonts is used. The core fonts are "courier", "helvetica" (also called
+// "arial"), "times", and "zapfdingbats" (also called "symbol").
 func New(orientationStr, unitStr, sizeStr, fontDirStr string) (f *Fpdf) {
 	return fpdfNew(orientationStr, unitStr, sizeStr, fontDirStr, SizeType{0, 0})
 }
@@ -1386,13 +1389,19 @@ func (f *Fpdf) SetFont(familyStr, styleStr string, size float64) {
 		}
 		_, ok = f.coreFonts[familyStr]
 		if ok {
-			if familyStr == "symbol" || familyStr == "zapfdingbats" {
+			if familyStr == "symbol" {
+				familyStr = "zapfdingbats"
+			}
+			if familyStr == "zapfdingbats" {
 				styleStr = ""
 			}
 			fontkey = familyStr + styleStr
 			_, ok = f.fonts[fontkey]
 			if !ok {
-				f.AddFont(familyStr, styleStr, "")
+				rdr := f.coreFontReader(familyStr, styleStr)
+				if f.err == nil {
+					f.AddFontFromReader(familyStr, styleStr, rdr)
+				}
 				if f.err != nil {
 					return
 				}

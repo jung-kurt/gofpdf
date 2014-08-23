@@ -119,9 +119,11 @@ func lorem() string {
 		"officia deserunt mollit anim id est laborum."
 }
 
-// Hello, world
+// Hello, world. Note that since only core fonts are used (in this case Arial,
+// a synonym for Helvetica), an empty string can be specified for the font
+// directory in the call to New().
 func ExampleFpdf_tutorial01() {
-	pdf := gofpdf.New("P", "mm", "A4", cnFontDir)
+	pdf := gofpdf.New("P", "mm", "A4", "")
 	pdf.AddPage()
 	pdf.SetFont("Arial", "B", 16)
 	pdf.Cell(40, 10, "Hello World!")
@@ -138,7 +140,7 @@ func ExampleFpdf_tutorial01() {
 
 // Header, footer and page-breaking
 func ExampleFpdf_tutorial02() {
-	pdf := gofpdf.New("P", "mm", "A4", cnFontDir)
+	pdf := gofpdf.New("P", "mm", "A4", "")
 	pdf.SetHeaderFunc(func() {
 		pdf.Image(imageFile("logo.png"), 10, 6, 30, 0, false, "", 0, "")
 		pdf.SetY(5)
@@ -165,7 +167,7 @@ func ExampleFpdf_tutorial02() {
 
 // Word-wrapping, line justification and page-breaking
 func ExampleFpdf_tutorial03() {
-	pdf := gofpdf.New("P", "mm", "A4", cnFontDir)
+	pdf := gofpdf.New("P", "mm", "A4", "")
 	titleStr := "20000 Leagues Under the Seas"
 	pdf.SetTitle(titleStr, false)
 	pdf.SetAuthor("Jules Verne", false)
@@ -238,7 +240,7 @@ func ExampleFpdf_tutorial03() {
 func ExampleFpdf_tutorial04() {
 	var y0 float64
 	var crrntCol int
-	pdf := gofpdf.New("P", "mm", "A4", cnFontDir)
+	pdf := gofpdf.New("P", "mm", "A4", "")
 	titleStr := "20000 Leagues Under the Seas"
 	pdf.SetTitle(titleStr, false)
 	pdf.SetAuthor("Jules Verne", false)
@@ -336,7 +338,7 @@ func ExampleFpdf_tutorial04() {
 
 // Various table styles
 func ExampleFpdf_tutorial05() {
-	pdf := gofpdf.New("P", "mm", "A4", cnFontDir)
+	pdf := gofpdf.New("P", "mm", "A4", "")
 	type countryType struct {
 		nameStr, capitalStr, areaStr, popStr string
 	}
@@ -457,7 +459,7 @@ func ExampleFpdf_tutorial05() {
 // This example demonstrates internal and external links with and without basic
 // HTML.
 func ExampleFpdf_tutorial06() {
-	pdf := gofpdf.New("P", "mm", "A4", cnFontDir)
+	pdf := gofpdf.New("P", "mm", "A4", "")
 	// First page: manual local link
 	pdf.AddPage()
 	pdf.SetFont("Helvetica", "", 20)
@@ -499,7 +501,7 @@ func ExampleFpdf_tutorial07() {
 
 // Various image types
 func ExampleFpdf_tutorial08() {
-	pdf := gofpdf.New("P", "mm", "A4", cnFontDir)
+	pdf := gofpdf.New("P", "mm", "A4", "")
 	pdf.AddPage()
 	pdf.SetFont("Arial", "", 11)
 	pdf.Image(imageFile("logo.png"), 10, 10, 30, 0, false, "", 0, "")
@@ -522,7 +524,7 @@ func ExampleFpdf_tutorial09() {
 	var y0 float64
 	var crrntCol int
 	loremStr := lorem()
-	pdf := gofpdf.New("L", "mm", "A4", cnFontDir)
+	pdf := gofpdf.New("L", "mm", "A4", "")
 	const (
 		pageWd = 297.0 // A4 210.0 x 297.0
 		margin = 10.0
@@ -599,7 +601,7 @@ func ExampleFpdf_tutorial11() {
 		thin  = 0.2
 		thick = 3.0
 	)
-	pdf := gofpdf.New("", "", "", cnFontDir)
+	pdf := gofpdf.New("", "", "", "")
 	pdf.SetFont("Helvetica", "", 12)
 	pdf.SetFillColor(200, 200, 220)
 	pdf.AddPage()
@@ -687,7 +689,7 @@ func ExampleFpdf_tutorial12() {
 	modeList := []string{"Normal", "Multiply", "Screen", "Overlay",
 		"Darken", "Lighten", "ColorDodge", "ColorBurn", "HardLight", "SoftLight",
 		"Difference", "Exclusion", "Hue", "Saturation", "Color", "Luminosity"}
-	pdf := gofpdf.New("", "", "", cnFontDir)
+	pdf := gofpdf.New("", "", "", "")
 	pdf.SetLineWidth(2)
 	pdf.SetAutoPageBreak(false, 0)
 	pdf.AddPage()
@@ -725,7 +727,7 @@ func ExampleFpdf_tutorial12() {
 
 // Gradients
 func ExampleFpdf_tutorial13() {
-	pdf := gofpdf.New("", "", "", cnFontDir)
+	pdf := gofpdf.New("", "", "", "")
 	pdf.SetFont("Helvetica", "", 12)
 	pdf.AddPage()
 	pdf.LinearGradient(0, 0, 210, 100, 250, 250, 255, 220, 220, 225, 0, 0, 0, .5)
@@ -744,7 +746,7 @@ func ExampleFpdf_tutorial13() {
 
 // Clipping examples
 func ExampleFpdf_tutorial14() {
-	pdf := gofpdf.New("", "", "", cnFontDir)
+	pdf := gofpdf.New("", "", "", "")
 	y := 10.0
 	pdf.AddPage()
 
@@ -835,7 +837,7 @@ func ExampleFpdf_tutorial15() {
 
 // Bookmark test
 func ExampleFpdf_tutorial16() {
-	pdf := gofpdf.New("P", "mm", "A4", cnFontDir)
+	pdf := gofpdf.New("P", "mm", "A4", "")
 	pdf.AddPage()
 	pdf.SetFont("Arial", "", 15)
 	pdf.Bookmark("Page 1", 0, 0)
@@ -862,7 +864,7 @@ func ExampleFpdf_tutorial17() {
 	)
 	var refX, refY float64
 	var refStr string
-	pdf := gofpdf.New("P", "mm", "A4", cnFontDir)
+	pdf := gofpdf.New("P", "mm", "A4", "")
 	pdf.AddPage()
 	color := func(val int) {
 		pdf.SetDrawColor(val, val, val)
@@ -989,7 +991,7 @@ func ExampleFpdf_tutorial18() {
 	var infoPtr *gofpdf.ImageInfoType
 	var fileStr string
 	var imgWd, imgHt, lf, tp float64
-	pdf := gofpdf.New("P", "mm", "A4", cnFontDir)
+	pdf := gofpdf.New("P", "mm", "A4", "")
 	pdf.AddPage()
 	pdf.SetMargins(10, 10, 10)
 	pdf.SetFont("Helvetica", "", 15)
@@ -1027,7 +1029,7 @@ func ExampleFpdf_tutorial19() {
 		fontPtSize = 18.0
 		wd         = 100.0
 	)
-	pdf := gofpdf.New("P", "mm", "A4", cnFontDir) // A4 210.0 x 297.0
+	pdf := gofpdf.New("P", "mm", "A4", "") // A4 210.0 x 297.0
 	pdf.SetFont("Times", "", fontPtSize)
 	_, lineHt := pdf.GetFontSize()
 	pdf.AddPage()
@@ -1060,7 +1062,7 @@ func ExampleFpdf_tutorial20() {
 		sig gofpdf.SVGBasicType
 		err error
 	)
-	pdf := gofpdf.New("P", "mm", "A4", cnFontDir) // A4 210.0 x 297.0
+	pdf := gofpdf.New("P", "mm", "A4", "") // A4 210.0 x 297.0
 	pdf.SetFont("Times", "", fontPtSize)
 	lineHt := pdf.PointConvert(fontPtSize)
 	pdf.AddPage()
@@ -1111,7 +1113,7 @@ func ExampleFpdf_tutorial21() {
 		recType{"BC", "bottom center"},
 		recType{"BR", "bottom right"},
 	}
-	pdf := gofpdf.New("P", "mm", "A4", cnFontDir) // A4 210.0 x 297.0
+	pdf := gofpdf.New("P", "mm", "A4", "") // A4 210.0 x 297.0
 	pdf.SetFont("Helvetica", "", 16)
 	linkStr := ""
 	for pageJ := 0; pageJ < 2; pageJ++ {
@@ -1135,7 +1137,7 @@ func ExampleFpdf_tutorial21() {
 // Windows-1252 code page (gofdpf default). See the following example (23) for
 // a way to do this automatically.
 func ExampleFpdf_tutorial22() {
-	pdf := gofpdf.New("P", "mm", "A4", cnFontDir) // A4 210.0 x 297.0
+	pdf := gofpdf.New("P", "mm", "A4", "") // A4 210.0 x 297.0
 	fontSize := 16.0
 	pdf.SetFont("Helvetica", "", fontSize)
 	ht := pdf.PointConvert(fontSize)
@@ -1189,7 +1191,7 @@ func ExampleFpdf_tutorial23() {
 
 // This example demonstrates document protection.
 func ExampleFpdf_tutorial24() {
-	pdf := gofpdf.New("P", "mm", "A4", cnFontDir)
+	pdf := gofpdf.New("P", "mm", "A4", "")
 	pdf.SetProtection(gofpdf.CnProtectPrint, "123", "abc")
 	pdf.AddPage()
 	pdf.SetFont("Arial", "", 12)
@@ -1218,7 +1220,7 @@ func ExampleFpdf_tutorial25() {
 		}
 		return
 	}
-	pdf := gofpdf.New("P", "mm", "A4", cnFontDir) // A4 210.0 x 297.0
+	pdf := gofpdf.New("P", "mm", "A4", "") // A4 210.0 x 297.0
 	pdf.AddPage()
 	pdf.SetFont("Helvetica", "", ptSize)
 	pdf.SetDrawColor(0, 80, 180)

@@ -4,3 +4,4 @@ pdf/*.pdf
 look
 open
 pdf.txt
+*.sublime*

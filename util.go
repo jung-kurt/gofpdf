@@ -26,6 +26,7 @@ import (
 	"math"
 	"os"
 	"path/filepath"
+	"strings"
 )
 
 func round(f float64) int {
@@ -183,7 +184,8 @@ func repClosure(m map[rune]byte) func(string) string {
 // map files are packaged with the gfpdf library in the font directory.
 //
 // An error occurs only if a line is read that does not conform to the expected
-// format.
+// format. In this case, the returned function is valid but does not perform
+// any rune translation.
 func UnicodeTranslator(r io.Reader) (f func(string) string, err error) {
 	m := make(map[rune]byte)
 	var uPos, cPos uint32
@@ -191,6 +193,7 @@ func UnicodeTranslator(r io.Reader) (f func(string) string, err error) {
 	sc := bufio.NewScanner(r)
 	for sc.Scan() {
 		lineStr = sc.Text()
+		lineStr = strings.TrimSpace(lineStr)
 		if len(lineStr) > 0 {
 			_, err = fmt.Sscanf(lineStr, "!%2X U+%4X %s", &cPos, &uPos, &nameStr)
 			if err == nil {
@@ -202,6 +205,10 @@ func UnicodeTranslator(r io.Reader) (f func(string) string, err error) {
 	}
 	if err == nil {
 		f = repClosure(m)
+	} else {
+		f = func(s string) string {
+			return s
+		}
 	}
 	return
 }
@@ -211,12 +218,19 @@ func UnicodeTranslator(r io.Reader) (f func(string) string, err error) {
 // specified code page. See UnicodeTranslator for more details.
 //
 // fileStr identifies a font descriptor file that maps glyph positions to names.
+//
+// If an error occurs reading the file, the returned function is valid but does
+// not perform any rune translation.
 func UnicodeTranslatorFromFile(fileStr string) (f func(string) string, err error) {
 	var fl *os.File
 	fl, err = os.Open(fileStr)
 	if err == nil {
 		f, err = UnicodeTranslator(fl)
 		fl.Close()
+	} else {
+		f = func(s string) string {
+			return s
+		}
 	}
 	return
 }
@@ -230,14 +244,24 @@ func UnicodeTranslatorFromFile(fileStr string) (f func(string) string, err error
 // plus the extension ".map". If cpStr is empty, it will be replaced with
 // "cp1252", the gofpdf code page default.
 //
+// If an error occurs reading the descriptor, the returned function is valid
+// but does not perform any rune translation.
+//
 // See tutorial 23 for an example of this function.
 func (f *Fpdf) UnicodeTranslatorFromDescriptor(cpStr string) (rep func(string) string) {
+	var str string
+	var ok bool
 	if f.err != nil {
 		return
 	}
 	if len(cpStr) == 0 {
 		cpStr = "cp1252"
 	}
-	rep, f.err = UnicodeTranslatorFromFile(filepath.Join(f.fontpath, cpStr) + ".map")
+	str, ok = embeddedMapList[cpStr]
+	if ok {
+		rep, f.err = UnicodeTranslator(strings.NewReader(str))
+	} else {
+		rep, f.err = UnicodeTranslatorFromFile(filepath.Join(f.fontpath, cpStr) + ".map")
+	}
 	return
 }
