@@ -135,6 +135,13 @@ Tutorials
 A side effect of running "go test" is the production of the tutorial PDFs.
 These can be found in the gofpdf/pdf directory after the tests complete.
 
+Please note that these tutorials run in the context of a test. In order run an
+example as a standalone application, you'll need to examine fpdf_test.go for
+some helper routines, for example docWriter and strDelimit. In particular,
+docWriter is used as an argument to OutputAndClose in order to reduce the
+boilerplate in each example. In practice, you may be better served by calling
+OutputFileAndClose().
+
 Nonstandard Fonts
 
 Nothing special is required to use the standard PDF fonts (courier, helvetica,
