@@ -173,6 +173,7 @@ func fpdfNew(orientationStr, unitStr, sizeStr, fontDirStr string, size SizeType)
 	f.gradientList = append(f.gradientList, gradientType{}) // gradientList[0] is unused
 	// Set default PDF version number
 	f.pdfVersion = "1.3"
+	f.layerInit()
 	return
 }
 
@@ -2346,6 +2347,7 @@ func (f *Fpdf) beginpage(orientationStr string, size SizeType) {
 }
 
 func (f *Fpdf) endpage() {
+	f.EndLayer()
 	f.state = 1
 }
 
@@ -3028,7 +3030,8 @@ func (f *Fpdf) putresourcedict() {
 		}
 		f.out(">>")
 	}
-
+	// Layers
+	f.layerPutResourceDict()
 }
 
 func (f *Fpdf) putBlendModes() {
@@ -3072,6 +3075,7 @@ func (f *Fpdf) putresources() {
 	if f.err != nil {
 		return
 	}
+	f.layerPutLayers()
 	f.putBlendModes()
 	f.putGradients()
 	f.putfonts()
@@ -3148,6 +3152,8 @@ func (f *Fpdf) putcatalog() {
 		f.outf("/Outlines %d 0 R", f.outlineRoot)
 		f.out("/PageMode /UseOutlines")
 	}
+	// Layers
+	f.layerPutCatalog()
 }
 
 func (f *Fpdf) putheader() {
@@ -3224,6 +3230,7 @@ func (f *Fpdf) enddoc() {
 	if f.err != nil {
 		return
 	}
+	f.layerEndDoc()
 	f.putheader()
 	f.putpages()
 	f.putresources()

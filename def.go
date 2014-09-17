@@ -197,6 +197,7 @@ type Fpdf struct {
 	transformNest    int                       // Number of active transformation contexts
 	err              error                     // Set if error occurs during life cycle of instance
 	protect          protectType               // document protection structure
+	layer            layerRecType              // manages optional layers in document
 	colorFlag        bool                      // indicates whether fill and text colors are different
 	color            struct {                  // Composite values of colors
 		draw, fill, text clrType

@@ -1246,3 +1246,42 @@ func ExampleFpdf_tutorial25() {
 	// Output:
 	// Successfully generated pdf/tutorial25.pdf
 }
+
+// This example demonstrates document layers. The initial visibility of a layer
+// is specified with the second parameter to AddLayer(). The layer list
+// displayed by the document reader allows layer visibility to be controlled
+// interactively.
+func ExampleFpdf_tutorial26() {
+
+	pdf := gofpdf.New("P", "mm", "A4", "")
+	pdf.AddPage()
+	pdf.SetFont("Arial", "", 15)
+	pdf.Write(8, "This line doesn't belong to any layer.\n")
+
+	// Define layers
+	l1 := pdf.AddLayer("Layer 1", true)
+	l2 := pdf.AddLayer("Layer 2", true)
+
+	// Open layer pane in PDF viewer
+	pdf.OpenLayerPane()
+
+	// First layer
+	pdf.BeginLayer(l1)
+	pdf.Write(8, "This line belongs to layer 1.\n")
+	pdf.EndLayer()
+
+	// Second layer
+	pdf.BeginLayer(l2)
+	pdf.Write(8, "This line belongs to layer 2.\n")
+	pdf.EndLayer()
+
+	// First layer again
+	pdf.BeginLayer(l1)
+	pdf.Write(8, "This line belongs to layer 1 again.\n")
+	pdf.EndLayer()
+
+	pdf.OutputAndClose(docWriter(pdf, 26))
+
+	// Output:
+	// Successfully generated pdf/tutorial26.pdf
+}
