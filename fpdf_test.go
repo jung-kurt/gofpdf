@@ -808,18 +808,18 @@ func ExampleFpdf_tutorial14() {
 func ExampleFpdf_tutorial15() {
 	pdf := gofpdf.NewCustom(&gofpdf.InitType{
 		UnitStr:    "in",
-		Size:       gofpdf.SizeType{6, 6},
+		Size:       gofpdf.SizeType{Wd: 6, Ht: 6},
 		FontDirStr: cnFontDir,
 	})
 	pdf.SetMargins(0.5, 1, 0.5)
 	pdf.SetFont("Times", "", 14)
-	pdf.AddPageFormat("L", gofpdf.SizeType{3, 12})
+	pdf.AddPageFormat("L", gofpdf.SizeType{Wd: 3, Ht: 12})
 	pdf.SetXY(0.5, 1.5)
 	pdf.CellFormat(11, 0.2, "12 in x 3 in", "", 0, "C", false, 0, "")
 	pdf.AddPage() // Default size established in NewCustom()
 	pdf.SetXY(0.5, 3)
 	pdf.CellFormat(5, 0.2, "6 in x 6 in", "", 0, "C", false, 0, "")
-	pdf.AddPageFormat("P", gofpdf.SizeType{3, 12})
+	pdf.AddPageFormat("P", gofpdf.SizeType{Wd: 3, Ht: 12})
 	pdf.SetXY(0.5, 6)
 	pdf.CellFormat(2, 0.2, "3 in x 12 in", "", 0, "C", false, 0, "")
 	for j := 0; j <= 3; j++ {
@@ -1216,7 +1216,7 @@ func ExampleFpdf_tutorial25() {
 		mlt := 2.0 * math.Pi / float64(count)
 		for j := 0; j < count; j++ {
 			pt.Y, pt.X = math.Sincos(float64(j) * mlt)
-			res = append(res, gofpdf.PointType{x + radius*pt.X, y + radius*pt.Y})
+			res = append(res, gofpdf.PointType{X: x + radius*pt.X, Y: y + radius*pt.Y})
 		}
 		return
 	}
