@@ -1302,7 +1302,7 @@ func (f *Fpdf) AddFontFromReader(familyStr, styleStr string, r io.Reader) {
 		n := -1
 		for j, str := range f.diffs {
 			if str == info.Diff {
-				n = j
+				n = j + 1
 				break
 			}
 		}
