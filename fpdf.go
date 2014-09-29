@@ -2021,8 +2021,17 @@ func (f *Fpdf) Ln(h float64) {
 // Supported JPEG formats are 24 bit, 32 bit and gray scale. Supported PNG
 // formats are 24 bit, indexed color, and 8 bit indexed gray scale. If a GIF
 // image is animated, only the first frame is rendered. Transparency is
-// supported. It is possible to put a link on the image. Remark: if an image is
-// used several times, only one copy is embedded in the file.
+// supported. It is possible to put a link on the image.
+//
+// imageNameStr may be the name of an image as registered with a call to either
+// RegisterImageReader() or RegisterImage(). In the first case, the image is
+// loaded using an io.Reader. This is generally useful when the image is
+// obtained from some other means than as a disk-based file. In the second
+// case, the image is loaded as a file. Alternatively, imageNameStr may
+// directly specify a sufficiently qualified filename.
+//
+// However the image is loaded, if it is used more than once only one copy is
+// embedded in the file.
 //
 // If x is negative, the current abscissa is used.
 //
@@ -2036,11 +2045,11 @@ func (f *Fpdf) Ln(h float64) {
 // If link refers to an internal page anchor (that is, it is non-zero; see
 // AddLink()), the image will be a clickable internal link. Otherwise, if
 // linkStr specifies a URL, the image will be a clickable external link.
-func (f *Fpdf) Image(fileStr string, x, y, w, h float64, flow bool, tp string, link int, linkStr string) {
+func (f *Fpdf) Image(imageNameStr string, x, y, w, h float64, flow bool, tp string, link int, linkStr string) {
 	if f.err != nil {
 		return
 	}
-	info := f.RegisterImage(fileStr, tp)
+	info := f.RegisterImage(imageNameStr, tp)
 	if f.err != nil {
 		return
 	}
