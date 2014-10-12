@@ -220,7 +220,8 @@ func (f *Fpdf) Err() bool {
 }
 
 // SetErrorf sets the internal Fpdf error with formatted text to halt PDF
-// generation; this may facilitate error handling by application.
+// generation; this may facilitate error handling by application. If an error
+// condition is already set, this call is ignored.
 //
 // See the documentation for printing in the standard fmt package for details
 // about fmtStr and args.
@@ -2012,48 +2013,27 @@ func (f *Fpdf) Ln(h float64) {
 	}
 }
 
-// Image puts a JPEG, PNG or GIF image in the current page. The size it will
-// take on the page can be specified in different ways. If both w and h are 0,
-// the image is rendered at 96 dpi. If either w or h is zero, it will be
-// calculated from the other dimension so that the aspect ratio is maintained.
-// If w and h are negative, their absolute values indicate their dpi extents.
-//
-// Supported JPEG formats are 24 bit, 32 bit and gray scale. Supported PNG
-// formats are 24 bit, indexed color, and 8 bit indexed gray scale. If a GIF
-// image is animated, only the first frame is rendered. Transparency is
-// supported. It is possible to put a link on the image.
-//
-// imageNameStr may be the name of an image as registered with a call to either
-// RegisterImageReader() or RegisterImage(). In the first case, the image is
-// loaded using an io.Reader. This is generally useful when the image is
-// obtained from some other means than as a disk-based file. In the second
-// case, the image is loaded as a file. Alternatively, imageNameStr may
-// directly specify a sufficiently qualified filename.
-//
-// However the image is loaded, if it is used more than once only one copy is
-// embedded in the file.
-//
-// If x is negative, the current abscissa is used.
-//
-// If flow is true, the current y value is advanced after placing the image and
-// a page break may be made if necessary.
-//
-// tp specifies the image format. Possible values are (case insensitive):
-// "JPG", "JPEG", "PNG" and "GIF". If not specified, the type is inferred from
-// the file extension.
-//
-// If link refers to an internal page anchor (that is, it is non-zero; see
-// AddLink()), the image will be a clickable internal link. Otherwise, if
-// linkStr specifies a URL, the image will be a clickable external link.
-func (f *Fpdf) Image(imageNameStr string, x, y, w, h float64, flow bool, tp string, link int, linkStr string) {
-	if f.err != nil {
-		return
+// ImageTypeFromMime returns the image type used in various image-related
+// functions (for example, Image()) that is associated with the specified MIME
+// type. For example, "jpg" is returned if mimeStr is "image/jpeg". An error is
+// set if the specified MIME type is not supported.
+func (f *Fpdf) ImageTypeFromMime(mimeStr string) (tp string) {
+	switch mimeStr {
+	case "image/png":
+		tp = "png"
+	case "image/jpg":
+		tp = "jpg"
+	case "image/jpeg":
+		tp = "jpg"
+	case "image/gif":
+		tp = "gif"
+	default:
+		f.SetErrorf("unsupported image type: %s", mimeStr)
 	}
-	info := f.RegisterImage(imageNameStr, tp)
-	if f.err != nil {
-		return
-	}
+	return
+}
 
+func (f *Fpdf) imageOut(info *ImageInfoType, x, y, w, h float64, flow bool, link int, linkStr string) {
 	// Automatic width and height calculation if needed
 	if w == 0 && h == 0 {
 		// Put image at 96 dpi
@@ -2095,6 +2075,50 @@ func (f *Fpdf) Image(imageNameStr string, x, y, w, h float64, flow bool, tp stri
 	if link > 0 || len(linkStr) > 0 {
 		f.newLink(x, y, w, h, link, linkStr)
 	}
+}
+
+// Image puts a JPEG, PNG or GIF image in the current page. The size it will
+// take on the page can be specified in different ways. If both w and h are 0,
+// the image is rendered at 96 dpi. If either w or h is zero, it will be
+// calculated from the other dimension so that the aspect ratio is maintained.
+// If w and h are negative, their absolute values indicate their dpi extents.
+//
+// Supported JPEG formats are 24 bit, 32 bit and gray scale. Supported PNG
+// formats are 24 bit, indexed color, and 8 bit indexed gray scale. If a GIF
+// image is animated, only the first frame is rendered. Transparency is
+// supported. It is possible to put a link on the image.
+//
+// imageNameStr may be the name of an image as registered with a call to either
+// RegisterImageReader() or RegisterImage(). In the first case, the image is
+// loaded using an io.Reader. This is generally useful when the image is
+// obtained from some other means than as a disk-based file. In the second
+// case, the image is loaded as a file. Alternatively, imageNameStr may
+// directly specify a sufficiently qualified filename.
+//
+// However the image is loaded, if it is used more than once only one copy is
+// embedded in the file.
+//
+// If x is negative, the current abscissa is used.
+//
+// If flow is true, the current y value is advanced after placing the image and
+// a page break may be made if necessary.
+//
+// tp specifies the image format. Possible values are (case insensitive):
+// "JPG", "JPEG", "PNG" and "GIF". If not specified, the type is inferred from
+// the file extension.
+//
+// If link refers to an internal page anchor (that is, it is non-zero; see
+// AddLink()), the image will be a clickable internal link. Otherwise, if
+// linkStr specifies a URL, the image will be a clickable external link.
+func (f *Fpdf) Image(imageNameStr string, x, y, w, h float64, flow bool, tp string, link int, linkStr string) {
+	if f.err != nil {
+		return
+	}
+	info := f.RegisterImage(imageNameStr, tp)
+	if f.err != nil {
+		return
+	}
+	f.imageOut(info, x, y, w, h, flow, link, linkStr)
 	return
 }
 
@@ -2104,17 +2128,23 @@ func (f *Fpdf) Image(imageNameStr string, x, y, w, h float64, flow bool, tp stri
 // case.
 //
 // See Image() for restrictions on the image and the "tp" parameters.
+//
+// See tutorial 27 for an example of how this function can be used to load an
+// image from the web.
 func (f *Fpdf) RegisterImageReader(imgName, tp string, r io.Reader) (info *ImageInfoType) {
 	// Thanks, Ivan Daniluk, for generalizing this code to use the Reader interface.
+	if f.err != nil {
+		return
+	}
 	info, ok := f.images[imgName]
 	if ok {
-		return info
+		return
 	}
 
 	// First use of this image, get info
 	if tp == "" {
 		f.err = fmt.Errorf("image type should be specified if reading from custom reader")
-		return info
+		return
 	}
 	tp = strings.ToLower(tp)
 	if tp == "jpeg" {
@@ -2136,7 +2166,7 @@ func (f *Fpdf) RegisterImageReader(imgName, tp string, r io.Reader) (info *Image
 	info.i = len(f.images) + 1
 	f.images[imgName] = info
 
-	return info
+	return
 }
 
 // RegisterImage registers an image, adding it to the PDF file but not adding
@@ -2149,7 +2179,7 @@ func (f *Fpdf) RegisterImageReader(imgName, tp string, r io.Reader) (info *Image
 func (f *Fpdf) RegisterImage(fileStr, tp string) (info *ImageInfoType) {
 	info, ok := f.images[fileStr]
 	if ok {
-		return info
+		return
 	}
 
 	file, err := os.Open(fileStr)
