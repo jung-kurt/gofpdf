@@ -644,13 +644,13 @@ func ExampleFpdf_tutorial11() {
 	y += 40.0
 	pdf.Text(10, y, "Curves (cubic)")
 	pdf.SetFillColor(220, 200, 220)
-	pdf.CurveCubic(10, y+30, 15, y-20, 40, y+30, 10, y+30, "D")
-	pdf.CurveCubic(45, y+30, 50, y-20, 75, y+30, 45, y+30, "F")
-	pdf.CurveCubic(80, y+30, 85, y-20, 110, y+30, 80, y+30, "FD")
+	pdf.CurveBezierCubic(10, y+30, 15, y-20, 10, y+30, 40, y+30, "D")
+	pdf.CurveBezierCubic(45, y+30, 50, y-20, 45, y+30, 75, y+30, "F")
+	pdf.CurveBezierCubic(80, y+30, 85, y-20, 80, y+30, 110, y+30, "FD")
 	pdf.SetLineWidth(thick)
-	pdf.CurveCubic(115, y+30, 120, y-20, 145, y+30, 115, y+30, "FD")
+	pdf.CurveBezierCubic(115, y+30, 120, y-20, 115, y+30, 145, y+30, "FD")
 	pdf.SetLineCapStyle("round")
-	pdf.CurveCubic(150, y+30, 155, y-20, 180, y+30, 150, y+30, "FD")
+	pdf.CurveBezierCubic(150, y+30, 155, y-20, 150, y+30, 180, y+30, "FD")
 	pdf.SetLineWidth(thin)
 	pdf.SetLineCapStyle("butt")
 
@@ -1325,5 +1325,90 @@ func ExampleFpdf_tutorial27() {
 	pdf.OutputAndClose(docWriter(pdf, 27))
 	// Output:
 	// Successfully generated pdf/tutorial27.pdf
+
+}
+
+// This example demonstrates the Beziergon function.
+func ExampleFpdf_tutorial28() {
+
+	const (
+		margin      = 10
+		wd          = 210
+		unit        = (wd - 2*margin) / 6
+		ht          = 297
+		fontSize    = 15
+		msgStr      = `Demonstration of Beziergon function`
+		coefficient = 0.6
+		delta       = coefficient * unit
+		ln          = fontSize * 25.4 / 72
+		offsetX     = (wd - 4*unit) / 2.0
+		offsetY     = offsetX + 2*ln
+	)
+
+	srcList := []gofpdf.PointType{
+		{X: 0, Y: 0},
+		{X: 1, Y: 0},
+		{X: 1, Y: 1},
+		{X: 2, Y: 1},
+		{X: 2, Y: 2},
+		{X: 3, Y: 2},
+		{X: 3, Y: 3},
+		{X: 4, Y: 3},
+		{X: 4, Y: 4},
+		{X: 1, Y: 4},
+		{X: 1, Y: 3},
+		{X: 0, Y: 3},
+	}
+
+	ctrlList := []gofpdf.PointType{
+		{X: 1, Y: -1},
+		{X: 1, Y: 1},
+		{X: 1, Y: 1},
+		{X: 1, Y: 1},
+		{X: 1, Y: 1},
+		{X: 1, Y: 1},
+		{X: 1, Y: 1},
+		{X: 1, Y: 1},
+		{X: -1, Y: 1},
+		{X: -1, Y: -1},
+		{X: -1, Y: -1},
+		{X: -1, Y: -1},
+	}
+
+	pdf := gofpdf.New("P", "mm", "A4", "")
+	pdf.AddPage()
+	pdf.SetFont("Helvetica", "", fontSize)
+	for j, src := range srcList {
+		srcList[j].X = offsetX + src.X*unit
+		srcList[j].Y = offsetY + src.Y*unit
+	}
+	for j, ctrl := range ctrlList {
+		ctrlList[j].X = ctrl.X * delta
+		ctrlList[j].Y = ctrl.Y * delta
+	}
+	jPrev := len(srcList) - 1
+	srcPrev := srcList[jPrev]
+	curveList := []gofpdf.PointType{srcPrev} // point [, control 0, control 1, point]*
+	control := func(x, y float64) {
+		curveList = append(curveList, gofpdf.PointType{X: x, Y: y})
+	}
+	for j, src := range srcList {
+		ctrl := ctrlList[jPrev]
+		control(srcPrev.X+ctrl.X, srcPrev.Y+ctrl.Y) // Control 0
+		ctrl = ctrlList[j]
+		control(src.X-ctrl.X, src.Y-ctrl.Y) // Control 1
+		curveList = append(curveList, src)  // Destination
+		jPrev = j
+		srcPrev = src
+	}
+	pdf.MultiCell(wd-margin-margin, ln, msgStr, "", "C", false)
+	pdf.SetDrawColor(224, 224, 224)
+	pdf.Polygon(srcList, "D")
+	pdf.SetDrawColor(64, 64, 128)
+	pdf.SetLineWidth(pdf.GetLineWidth() * 3)
+	pdf.Beziergon(curveList, "D")
+	pdf.OutputAndClose(docWriter(pdf, 28))
+	// Output:
+	// Successfully generated pdf/tutorial28.pdf
 
 }

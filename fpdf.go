@@ -673,7 +673,7 @@ func colorValue(r, g, b int, grayStr, fullStr string) (clr clrType) {
 
 // SetDrawColor defines the color used for all drawing operations (lines,
 // rectangles and cell borders). It is expressed in RGB components (0 - 255).
-// The method can be called before the first page is created and the value is
+// The method can be called before the first page is created. The value is
 // retained from page to page.
 func (f *Fpdf) SetDrawColor(r, g, b int) {
 	f.color.draw = colorValue(r, g, b, "G", "RG")
@@ -706,7 +706,7 @@ func (f *Fpdf) GetFillColor() (int, int, int) {
 
 // SetTextColor defines the color used for text. It is expressed in RGB
 // components (0 - 255). The method can be called before the first page is
-// created and the value is retained from page to page.
+// created. The value is retained from page to page.
 func (f *Fpdf) SetTextColor(r, g, b int) {
 	f.color.text = colorValue(r, g, b, "g", "rg")
 	f.colorFlag = f.color.fill.str != f.color.text.str
@@ -734,7 +734,7 @@ func (f *Fpdf) GetStringWidth(s string) float64 {
 }
 
 // SetLineWidth defines the line width. By default, the value equals 0.2 mm.
-// The method can be called before the first page is created and the value is
+// The method can be called before the first page is created. The value is
 // retained from page to page.
 func (f *Fpdf) SetLineWidth(width float64) {
 	f.lineWidth = width
@@ -743,9 +743,14 @@ func (f *Fpdf) SetLineWidth(width float64) {
 	}
 }
 
+// GetLineWidth returns the current line thickness.
+func (f *Fpdf) GetLineWidth() float64 {
+	return f.lineWidth
+}
+
 // SetLineCapStyle defines the line cap style. styleStr should be "butt",
 // "round" or "square". A square style projects from the end of the line. The
-// method can be called before the first page is created and the value is
+// method can be called before the first page is created. The value is
 // retained from page to page.
 func (f *Fpdf) SetLineCapStyle(styleStr string) {
 	var capStyle int
@@ -848,15 +853,50 @@ func (f *Fpdf) Polygon(points []PointType, styleStr string) {
 	}
 }
 
+// Beziergon draws a closed figure defined by a series of cubic Bézier curve
+// segments. The first point in the slice defines the starting point of the
+// figure. Each three following points p1, p2, p3 represent a curve segment to
+// the point p3 using p1 and p2 as the Bézier control points.
+//
+// The x and y fields of the points use the units established in New().
+//
+// styleStr can be "F" for filled, "D" for outlined only, or "DF" or "FD" for
+// outlined and filled. An empty string will be replaced with "D". Drawing uses
+// the current draw color and line width centered on the ellipse's perimeter.
+// Filling uses the current fill color.
+//
+// See tutorial 28 for an example of this function.
+func (f *Fpdf) Beziergon(points []PointType, styleStr string) {
+
+	// Thanks, Robert Lillack, for contributing this function.
+
+	if len(points) < 4 {
+		return
+	}
+	f.point(points[0].XY())
+
+	points = points[1:]
+	for len(points) >= 3 {
+		cx0, cy0 := points[0].XY()
+		cx1, cy1 := points[1].XY()
+		x1, y1 := points[2].XY()
+		f.curve(cx0, cy0, cx1, cy1, x1, y1)
+		points = points[3:]
+	}
+
+	f.outf(fillDrawOp(styleStr))
+}
+
 // Outputs current point
 func (f *Fpdf) point(x, y float64) {
 	f.outf("%.2f %.2f m", x*f.k, (f.h-y)*f.k)
 }
 
-// Outputs quadratic curve from current point
-func (f *Fpdf) curve(cx0, cy0, x1, y1, cx1, cy1 float64) {
-	f.outf("%.5f %.5f %.5f %.5f %.5f %.5f c", cx0*f.k, (f.h-cy0)*f.k, x1*f.k,
-		(f.h-y1)*f.k, cx1*f.k, (f.h-cy1)*f.k)
+// Outputs a single cubic Bézier curve segment from current point
+func (f *Fpdf) curve(cx0, cy0, cx1, cy1, x, y float64) {
+	// Thanks, Robert Lillack, for straightening this out
+	f.outf("%.5f %.5f %.5f %.5f %.5f %.5f c", cx0*f.k, (f.h-cy0)*f.k, cx1*f.k,
+		(f.h-cy1)*f.k, x*f.k, (f.h-y)*f.k)
 }
 
 // Curve draws a single-segment quadratic Bézier curve. The curve starts at
@@ -878,7 +918,17 @@ func (f *Fpdf) Curve(x0, y0, cx, cy, x1, y1 float64, styleStr string) {
 		fillDrawOp(styleStr))
 }
 
-// CurveCubic draws a single-segment cubic Bézier curve. The curve starts at
+// CurveCubic draws a single-segment cubic Bézier curve. This routine performs
+// the same function as CurveBezierCubic() but has a nonstandard argument order.
+// It is retained to preserve backward compatibility.
+func (f *Fpdf) CurveCubic(x0, y0, cx0, cy0, x1, y1, cx1, cy1 float64, styleStr string) {
+	// f.point(x0, y0)
+	// f.outf("%.5f %.5f %.5f %.5f %.5f %.5f c %s", cx0*f.k, (f.h-cy0)*f.k,
+	// cx1*f.k, (f.h-cy1)*f.k, x1*f.k, (f.h-y1)*f.k, fillDrawOp(styleStr))
+	f.CurveBezierCubic(x0, y0, cx0, cy0, cx1, cy1, x1, y1, styleStr)
+}
+
+// CurveBezierCubic draws a single-segment cubic Bézier curve. The curve starts at
 // the point (x0, y0) and ends at the point (x1, y1). The control points (cx0,
 // cy0) and (cx1, cy1) specify the curvature. At the start point, the curve is
 // tangent to the straight line between the start point and the control point
@@ -890,8 +940,11 @@ func (f *Fpdf) Curve(x0, y0, cx, cy, x1, y1 float64, styleStr string) {
 // the current draw color, line width, and cap style centered on the curve's
 // path. Filling uses the current fill color.
 //
+// This routine performs the same function as CurveCubic() but uses standard
+// argument order.
+//
 // See tutorials 11 and 20 for examples of this function.
-func (f *Fpdf) CurveCubic(x0, y0, cx0, cy0, x1, y1, cx1, cy1 float64, styleStr string) {
+func (f *Fpdf) CurveBezierCubic(x0, y0, cx0, cy0, cx1, cy1, x1, y1 float64, styleStr string) {
 	f.point(x0, y0)
 	f.outf("%.5f %.5f %.5f %.5f %.5f %.5f c %s", cx0*f.k, (f.h-cy0)*f.k,
 		cx1*f.k, (f.h-cy1)*f.k, x1*f.k, (f.h-y1)*f.k, fillDrawOp(styleStr))
