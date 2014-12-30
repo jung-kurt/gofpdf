@@ -242,6 +242,7 @@ func ExampleFpdf_tutorial04() {
 	var y0 float64
 	var crrntCol int
 	pdf := gofpdf.New("P", "mm", "A4", "")
+	pdf.SetDisplayMode("fullpage", "TwoColumnLeft")
 	titleStr := "20000 Leagues Under the Seas"
 	pdf.SetTitle(titleStr, false)
 	pdf.SetAuthor("Jules Verne", false)

@@ -354,20 +354,25 @@ func (f *Fpdf) SetAutoPageBreak(auto bool, margin float64) {
 	f.pageBreakTrigger = f.h - margin
 }
 
-// SetDisplayMode defines the way the document is to be displayed by the
-// viewer. The zoom level can be set: pages can be displayed entirely on
-// screen, occupy the full width of the window, use real size, be scaled by a
-// specific zooming factor or use viewer default (configured in the Preferences
-// menu of Adobe Reader). The page layout can be specified too: single at once,
-// continuous display, two columns or viewer default.
+// SetDisplayMode sets advisory display directives for the document viewer.
+// Pages can be displayed entirely on screen, occupy the full width of the
+// window, use real size, be scaled by a specific zooming factor or use viewer
+// default (configured in the Preferences menu of Adobe Reader). The page
+// layout can be specified so that pages are displayed individually or in
+// pairs.
 //
 // zoomStr can be "fullpage" to display the entire page on screen, "fullwidth"
 // to use maximum width of window, "real" to use real size (equivalent to 100%
 // zoom) or "default" to use viewer default mode.
 //
-// layoutStr can be "single" to display one page at once, "continuous" to
-// display pages continuously, "two" to display two pages on two columns, or
-// "default" to use viewer default mode.
+// layoutStr can be "single" (or "SinglePage") to display one page at once,
+// "continuous" (or "OneColumn") to display pages continuously, "two" (or
+// "TwoColumnLeft") to display two pages on two columns with odd-numbered pages
+// on the left, or "TwoColumnRight" to display two pages on two columns with
+// odd-numbered pages on the right, or "TwoPageLeft" to display pages two at a
+// time with odd-numbered pages on the left, or "TwoPageRight" to display pages
+// two at a time with odd-numbered pages on the right, or "default" to use
+// viewer default mode.
 func (f *Fpdf) SetDisplayMode(zoomStr, layoutStr string) {
 	if f.err != nil {
 		return
@@ -377,14 +382,14 @@ func (f *Fpdf) SetDisplayMode(zoomStr, layoutStr string) {
 	}
 	switch zoomStr {
 	case "fullpage", "fullwidth", "real", "default":
-		// || !is_string($zoom))
 		f.zoomMode = zoomStr
 	default:
 		f.err = fmt.Errorf("incorrect zoom display mode: %s", zoomStr)
 		return
 	}
 	switch layoutStr {
-	case "single", "continuous", "two", "default":
+	case "single", "continuous", "two", "default", "SinglePage", "OneColumn",
+		"TwoColumnLeft", "TwoColumnRight", "TwoPageLeft", "TwoPageRight":
 		f.layoutMode = layoutStr
 	default:
 		f.err = fmt.Errorf("incorrect layout display mode: %s", layoutStr)
@@ -3232,12 +3237,19 @@ func (f *Fpdf) putcatalog() {
 	// } 	else if !is_string($this->zoomMode))
 	// 		$this->out('/OpenAction [3 0 R /XYZ null null '.sprintf('%.2f',$this->zoomMode/100).']');
 	switch f.layoutMode {
-	case "single":
+	case "single", "SinglePage":
 		f.out("/PageLayout /SinglePage")
-	case "continuous":
+	case "continuous", "OneColumn":
 		f.out("/PageLayout /OneColumn")
-	case "two":
+	case "two", "TwoColumnLeft":
 		f.out("/PageLayout /TwoColumnLeft")
+	case "TwoColumnRight":
+		f.out("/PageLayout /TwoColumnRight")
+	case "TwoPageLeft", "TwoPageRight":
+		if f.pdfVersion < "1.5" {
+			f.pdfVersion = "1.5"
+		}
+		f.out("/PageLayout /" + f.layoutMode)
 	}
 	// Bookmarks
 	if len(f.outlines) > 0 {
