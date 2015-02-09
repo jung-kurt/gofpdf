@@ -2261,11 +2261,20 @@ func (f *Fpdf) RegisterImage(fileStr, tp string) (info *ImageInfoType) {
 }
 
 // GetXY returns the abscissa and ordinate of the current position.
+//
+// Note: the value returned for the abscissa will be affected by the current
+// cell margin. To account for this, you may need to either add the value
+// returned by GetCellMargin() to it or call SetCellMargin(0) to remove the
+// cell margin.
 func (f *Fpdf) GetXY() (float64, float64) {
 	return f.x, f.y
 }
 
 // GetX returns the abscissa of the current position.
+//
+// Note: the value returned will be affected by the current cell margin. To
+// account for this, you may need to either add the value returned by
+// GetCellMargin() to it or call SetCellMargin(0) to remove the cell margin.
 func (f *Fpdf) GetX() float64 {
 	return f.x
 }
