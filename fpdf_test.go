@@ -18,8 +18,8 @@ package gofpdf_test
 
 import (
 	"bufio"
-	"code.google.com/p/gofpdf"
 	"fmt"
+	"github.com/jung-kurt/gofpdf"
 	"io/ioutil"
 	"math"
 	"net/http"
@@ -1128,7 +1128,7 @@ func ExampleFpdf_tutorial21() {
 			pdf.CellFormat(170, 257, rec.txt, borderStr, 0, rec.align, false, 0, linkStr)
 			borderStr = ""
 		}
-		linkStr = "https://code.google.com/p/gofpdf/"
+		linkStr = "https://github.com/jung-kurt/gofpdf"
 	}
 	pdf.OutputAndClose(docWriter(pdf, 21))
 	// Output:
@@ -1297,7 +1297,7 @@ func ExampleFpdf_tutorial27() {
 		wd       = 210
 		ht       = 297
 		fontSize = 15
-		urlStr   = "https://code.google.com/p/gofpdf/logo?cct=1402750750"
+		urlStr   = "https://github.com/jung-kurt/gofpdf/blob/master/image/gofpdf.png?raw=true"
 		msgStr   = `Images from the web can be easily embedded when a PDF document is generated.`
 	)
 

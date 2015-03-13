@@ -83,11 +83,11 @@ Installation
 
 To install the package on your system, run
 
-	go get code.google.com/p/gofpdf
+	go get github.com/jung-kurt/gofpdf
 
 Later, to receive updates, run
 
-	go get -u code.google.com/p/gofpdf
+	go get -u github.com/jung-kurt/gofpdf
 
 Quick Start
 
