@@ -1,4 +1,4 @@
-![gofpdf](image/gofpdf.png?raw=true "gofpdf")
+![gofpdf](image/logo_gofpdf.jpg?raw=true "gofpdf")
 
 Package gofpdf implements a PDF document generator with high level support for
 text, drawing and images.
