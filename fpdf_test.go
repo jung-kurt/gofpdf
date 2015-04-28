@@ -1168,7 +1168,10 @@ func ExampleFpdf_tutorial22() {
 // This example demonstrates the conversion of UTF-8 strings to an 8-bit font
 // encoding.
 func ExampleFpdf_tutorial23() {
-	pdf := gofpdf.New("P", "mm", "A4", "") // A4 210.0 x 297.0
+	pdf := gofpdf.New("P", "mm", "A4", cnFontDir) // A4 210.0 x 297.0
+	// See documentation for details on how to generate fonts
+	pdf.AddFont("Helvetica-1251", "", "helvetica_1251.json")
+	pdf.AddFont("Helvetica-1253", "", "helvetica_1253.json")
 	fontSize := 16.0
 	pdf.SetFont("Helvetica", "", fontSize)
 	ht := pdf.PointConvert(fontSize)
@@ -1186,6 +1189,15 @@ func ExampleFpdf_tutorial23() {
 	write("Falsches Üben von Xylophonmusik quält jeden größeren Zwerg.")
 	write("Heizölrückstoßabdämpfung")
 	write("Forårsjævndøgn / Efterårsjævndøgn")
+
+	pdf.SetFont("Helvetica-1251", "", fontSize) // Name matches one specified in AddFont()
+	tr = pdf.UnicodeTranslatorFromDescriptor("cp1251")
+	write("Съешь же ещё этих мягких французских булок, да выпей чаю.")
+
+	pdf.SetFont("Helvetica-1253", "", fontSize)
+	tr = pdf.UnicodeTranslatorFromDescriptor("cp1253")
+	write("Θέλει αρετή και τόλμη η ελευθερία. (Ανδρέας Κάλβος)")
+
 	pdf.OutputAndClose(docWriter(pdf, 23))
 	// Output:
 	// Successfully generated pdf/tutorial23.pdf
