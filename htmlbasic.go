@@ -85,6 +85,8 @@ func HTMLBasicTokenize(htmlStr string) (list []HTMLBasicSegmentType) {
 			seg.Attr = nil
 			list = append(list, seg)
 		}
+	} else {
+		list = append(list, HTMLBasicSegmentType{Cat: 'T', Str: htmlStr, Attr: nil})
 	}
 	return
 }
