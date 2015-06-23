@@ -1425,3 +1425,21 @@ func ExampleFpdf_tutorial28() {
 	// Successfully generated pdf/tutorial28.pdf
 
 }
+
+// This example demonstrates the Path Drawing functions, such as:
+// MoveTo, LineTo, CurveTo, ..., ClosePath and DrawPath.
+func ExampleFpdf_tutorial29() {
+	pdf := gofpdf.New("P", "mm", "A4", "")
+	pdf.AddPage()
+	pdf.MoveTo(20, 20)
+	pdf.LineTo(190, 20)
+	pdf.CurveTo(190, 100, 105, 100)
+	pdf.CurveBezierCubicTo(20, 100, 105, 200, 20, 200)
+	pdf.ClosePath()
+	pdf.SetFillColor(200, 200, 200)
+	pdf.SetLineWidth(3)
+	pdf.DrawPath("DF")
+	pdf.OutputAndClose(docWriter(pdf, 29))
+	// Output:
+	// Successfully generated pdf/tutorial29.pdf
+}

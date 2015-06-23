@@ -3383,3 +3383,73 @@ func (f *Fpdf) enddoc() {
 	f.state = 3
 	return
 }
+
+// Path Drawing
+// Create a "path" by moving a virtual stylus around the page, then draw it or
+// fill it in. The main advantage of using the path drawing routines rather
+// than multiple Fpdf.Line is that PDF creates nice line joins at the angles,
+// rather than just overlaying the lines.
+//
+// MoveTo moves the stylus to (x, y) without drawing the path from the
+// previous point. Paths must start with a MoveTo to set the original stylus
+// location or the result is undefined.
+//
+// See tutorial 29 for an example of this function.
+func (f *Fpdf) MoveTo(x, y float64) {
+	f.point(x, y) // rename?
+}
+
+// LineTo creates a line from the current stylus location to (x, y), which
+// becomes the new stylus location. Note that this only creates the line in
+// the path; it does not actually draw the line on the page.
+//
+// See tutorial 29 for an example of this function.
+func (f *Fpdf) LineTo(x, y float64) {
+	f.outf("%.2f %.2f l", x*f.k, (f.h-y)*f.k)
+}
+
+// CurveTo creates a single-segment quadratic Bézier curve. The curve starts at
+// the current stylus location and ends at the point (x, y). The control point
+// (cx, cy) specifies the curvature. At the start point, the curve is tangent
+// to the straight line between the current stylus location and the control
+// point. At the end point, the curve is tangent to the straight line between
+// the end point and the control point.
+//
+// See tutorial 29 for an example of this function.
+func (f *Fpdf) CurveTo(cx, cy, x, y float64) {
+	f.outf("%.5f %.5f %.5f %.5f v", cx*f.k, (f.h-cy)*f.k, x*f.k, (f.h-y)*f.k)
+}
+
+// CurveBezierCubicTo creates a single-segment cubic Bézier curve. The curve
+// starts at the current stylus location and ends at the point (x, y). The
+// control points (cx0, cy0) and (cx1, cy1) specify the curvature. At the
+// current stylus, the curve is tangent to the straight line between the
+// current stylus location and the control point (cx0, cy0). At the end point,
+// the curve is tangent to the straight line between the end point and the
+// control point (cx1, cy1).
+//
+// See tutorial 29 for examples of this function.
+func (f *Fpdf) CurveBezierCubicTo(cx0, cy0, cx1, cy1, x, y float64) {
+	f.curve(cx0, cy0, cx1, cy1, x, y) // rename?
+}
+
+// ClosePath creates a line from the current location to the last MoveTo point
+// (if not the same) and mark the path as closed so the first and last lines
+// join nicely.
+//
+// See tutorial 29 for an example of this function.
+func (f *Fpdf) ClosePath() {
+	f.outf("h")
+}
+
+// DrawPath actually draws the path on the page.
+//
+// styleStr can be "F" for filled, "D" for outlined only, or "DF" or "FD" for
+// outlined and filled. An empty string will be replaced with "D". Drawing uses
+// the current draw color, line width, and cap style centered on the
+// path. Filling uses the current fill color.
+//
+// See tutorial 29 for an example of this function.
+func (f *Fpdf) DrawPath(styleStr string) {
+	f.outf(fillDrawOp(styleStr))
+}
