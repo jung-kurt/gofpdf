@@ -313,6 +313,14 @@ func (f *Fpdf) SetFontLocation(fontDirStr string) {
 	f.fontpath = fontDirStr
 }
 
+// SetFontLoader sets a loader used to load font files (.json and .z) from
+// arbitrary locations. If a font loader has been specified, Fpdf first tries
+// to load files using the font loader. If the loading files Fpdf tries to
+// load the font from the configured fonts directory (see SetFontLocation).
+func (f *Fpdf) SetFontLoader(loader FontLoader) {
+	f.fontLoader = loader
+}
+
 // SetHeaderFunc sets the function that lets the application render the page
 // header. The specified function is automatically called by AddPage() and
 // should not be called directly by the application. The implementation in Fpdf
@@ -1358,8 +1366,19 @@ func (f *Fpdf) AddFont(familyStr, styleStr, fileStr string) {
 	if fileStr == "" {
 		fileStr = strings.Replace(familyStr, " ", "", -1) + strings.ToLower(styleStr) + ".json"
 	}
-	fileStr = path.Join(f.fontpath, fileStr)
 
+	if f.fontLoader != nil {
+		reader, err := f.fontLoader.Open(fileStr)
+		if err == nil {
+			f.AddFontFromReader(familyStr, styleStr, reader)
+			if closer, ok := reader.(io.Closer); ok {
+				closer.Close()
+			}
+			return
+		}
+	}
+
+	fileStr = path.Join(f.fontpath, fileStr)
 	file, err := os.Open(fileStr)
 	if err != nil {
 		f.err = err
@@ -2971,7 +2990,7 @@ func (f *Fpdf) putfonts() {
 		f.newobj()
 		info.n = f.n
 		f.fontFiles[file] = info
-		font, err := ioutil.ReadFile(path.Join(f.fontpath, file))
+		font, err := f.loadFontFile(file)
 		if err != nil {
 			f.err = err
 			return
@@ -3069,6 +3088,20 @@ func (f *Fpdf) putfonts() {
 		}
 	}
 	return
+}
+
+func (f *Fpdf) loadFontFile(name string) ([]byte, error) {
+	if f.fontLoader != nil {
+		reader, err := f.fontLoader.Open(name)
+		if err == nil {
+			data, err := ioutil.ReadAll(reader)
+			if closer, ok := reader.(io.Closer); ok {
+				closer.Close()
+			}
+			return data, err
+		}
+	}
+	return ioutil.ReadFile(path.Join(f.fontpath, name))
 }
 
 func (f *Fpdf) putimages() {
