@@ -36,6 +36,7 @@ import (
 	"math"
 	"os"
 	"path"
+	"strconv"
 	"strings"
 	"time"
 )
@@ -565,6 +566,10 @@ func (f *Fpdf) AddPageFormat(orientationStr string, size SizeType) {
 	// Set line width
 	f.lineWidth = lw
 	f.outf("%.2f w", lw*f.k)
+	// Set dash pattern
+	if len(f.dashArray) > 0 {
+		f.outputDashPattern()
+	}
 	// 	Set font
 	if familyStr != "" {
 		f.SetFont(familyStr, style, fontsize)
@@ -773,6 +778,40 @@ func (f *Fpdf) SetLineCapStyle(styleStr string) {
 			f.outf("%d J", f.capStyle)
 		}
 	}
+}
+
+// SetDashPattern sets the dash pattern that is used to draw lines.
+// The dashArray elements are numbers that specify the lengths of alternating
+// dashes and gaps. The dash phase specifies the distance into the dash pattern
+// at which to start the dash. The dash pattern is retained from page to page.
+func (f *Fpdf) SetDashPattern(dashArray []float64, dashPhase float64) {
+	scaled := make([]float64, len(dashArray))
+	for i, value := range dashArray {
+		scaled[i] = value * f.k
+	}
+	dashPhase *= f.k
+	if !slicesEqual(scaled, f.dashArray) || dashPhase != f.dashPhase {
+		f.dashArray = scaled
+		f.dashPhase = dashPhase
+		if f.page > 0 {
+			f.outputDashPattern()
+		}
+	}
+}
+
+func (f *Fpdf) outputDashPattern() {
+	var buf bytes.Buffer
+	buf.WriteByte('[')
+	for i, value := range f.dashArray {
+		if i > 0 {
+			buf.WriteByte(' ')
+		}
+		buf.WriteString(strconv.FormatFloat(value, 'f', 2, 64))
+	}
+	buf.WriteString("] ")
+	buf.WriteString(strconv.FormatFloat(f.dashPhase, 'f', 2, 64))
+	buf.WriteString(" d")
+	f.outbuf(&buf)
 }
 
 // Line draws a line between points (x1, y1) and (x2, y2) using the current

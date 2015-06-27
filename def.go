@@ -195,6 +195,8 @@ type Fpdf struct {
 	fontDirStr       string                    // location of font definition files
 	capStyle         int                       // line cap style: butt 0, round 1, square 2
 	joinStyle        int                       // line segment join style: miter 0, round 1, bevel 2
+	dashArray        []float64                 // dash array
+	dashPhase        float64                   // dash phase
 	blendList        []blendModeType           // slice[idx] of alpha transparency modes, 1-based
 	blendMap         map[string]int            // map into blendList
 	gradientList     []gradientType            // slice[idx] of gradient records
