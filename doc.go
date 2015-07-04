@@ -71,7 +71,8 @@ Schroeder. Ivan Daniluk generalized the font and image loading code to use the
 Reader interface while maintaining backward compatibility. Anthony Starks
 provided code for the Polygon function. Robert Lillack provided the Beziergon
 function and corrected some naming issues with the internal curve function.
-Bruno Michel has provided valuable assistance with the code.
+Claudio Felber provided implementations for dashed line drawing and generalized
+font loading. Bruno Michel has provided valuable assistance with the code.
 
 The FPDF website is http://www.fpdf.org/.
 
