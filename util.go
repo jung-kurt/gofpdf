@@ -69,7 +69,7 @@ func bufferFromReader(r io.Reader) (b *bytes.Buffer, err error) {
 	return
 }
 
-// Returns true if the two specified integer slices are equal
+// Returns true if the two specified float slices are equal
 func slicesEqual(a, b []float64) bool {
 	if len(a) != len(b) {
 		return false
