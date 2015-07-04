@@ -313,10 +313,13 @@ func (f *Fpdf) SetFontLocation(fontDirStr string) {
 	f.fontpath = fontDirStr
 }
 
-// SetFontLoader sets a loader used to load font files (.json and .z) from
-// arbitrary locations. If a font loader has been specified, Fpdf first tries
-// to load files using the font loader. If the loading files Fpdf tries to
-// load the font from the configured fonts directory (see SetFontLocation).
+// SetFontLoader sets a loader used to read font files (.json and .z) from an
+// arbitrary source. If a font loader has been specified, it is used to load
+// the named font resources when AddFont() is called. If this operation fails,
+// an attempt is made to load the resources from the configured font directory
+// (see SetFontLocation()).
+//
+// See tutorial 29 for an example of this method.
 func (f *Fpdf) SetFontLoader(loader FontLoader) {
 	f.fontLoader = loader
 }

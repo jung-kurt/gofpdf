@@ -18,8 +18,10 @@ package gofpdf_test
 
 import (
 	"bufio"
+	"bytes"
 	"fmt"
 	"github.com/jung-kurt/gofpdf"
+	"io"
 	"io/ioutil"
 	"math"
 	"net/http"
@@ -99,6 +101,19 @@ func fontFile(fileStr string) string {
 
 func textFile(fileStr string) string {
 	return filepath.Join(cnTextDir, fileStr)
+}
+
+type fontResourceType struct {
+}
+
+func (f fontResourceType) Open(name string) (rdr io.Reader, err error) {
+	var buf []byte
+	buf, err = ioutil.ReadFile(fontFile(name))
+	if err == nil {
+		rdr = bytes.NewReader(buf)
+		fmt.Printf("Generalized font loader reading %s\n", name)
+	}
+	return
 }
 
 // Convert 'ABCDEFG' to, for example, 'A,BCD,EFG'
@@ -1426,4 +1441,20 @@ func ExampleFpdf_tutorial28() {
 	// Output:
 	// Successfully generated pdf/tutorial28.pdf
 
+}
+
+// Non-standard font using generalized font loader
+func ExampleFpdf_tutorial29() {
+	var fr fontResourceType
+	pdf := gofpdf.New("P", "mm", "A4", cnFontDir)
+	pdf.SetFontLoader(fr)
+	pdf.AddFont("Calligrapher", "", "calligra.json")
+	pdf.AddPage()
+	pdf.SetFont("Calligrapher", "", 35)
+	pdf.Cell(0, 10, "Enjoy new fonts with FPDF!")
+	pdf.OutputAndClose(docWriter(pdf, 29))
+	// Output:
+	// Generalized font loader reading calligra.json
+	// Generalized font loader reading calligra.z
+	// Successfully generated pdf/tutorial29.pdf
 }
