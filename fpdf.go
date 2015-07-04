@@ -574,6 +574,8 @@ func (f *Fpdf) AddPageFormat(orientationStr string, size SizeType) {
 	// 	Set line cap style to current value
 	// f.out("2 J")
 	f.outf("%d J", f.capStyle)
+	// 	Set line join style to current value
+	f.outf("%d j", f.joinStyle)
 	// Set line width
 	f.lineWidth = lw
 	f.outf("%.2f w", lw*f.k)
@@ -787,6 +789,27 @@ func (f *Fpdf) SetLineCapStyle(styleStr string) {
 		f.capStyle = capStyle
 		if f.page > 0 {
 			f.outf("%d J", f.capStyle)
+		}
+	}
+}
+
+// SetLineJoinStyle defines the line cap style. styleStr should be "miter",
+// "round" or "bevel". The method can be called before the first page
+// is created. The value is retained from page to page.
+func (f *Fpdf) SetLineJoinStyle(styleStr string) {
+	var joinStyle int
+	switch styleStr {
+	case "round":
+		joinStyle = 1
+	case "bevel":
+		joinStyle = 2
+	default:
+		joinStyle = 0
+	}
+	if joinStyle != f.joinStyle {
+		f.joinStyle = joinStyle
+		if f.page > 0 {
+			f.outf("%d j", f.joinStyle)
 		}
 	}
 }
