@@ -789,11 +789,11 @@ func (f *Fpdf) SetLineCapStyle(styleStr string) {
 }
 
 // SetDashPattern sets the dash pattern that is used to draw lines. The
-// dashArray elements are numbers, in units established in New(), that specify
-// the lengths of alternating dashes and gaps. The dash phase specifies the
-// distance into the dash pattern at which to start the dash. The dash pattern
-// is retained from page to page. Call this method with an empty array to
-// restore solid line drawing.
+// dashArray elements are numbers that specify the lengths, in units
+// established in New(), of alternating dashes and gaps. The dash phase
+// specifies the distance into the dash pattern at which to start the dash. The
+// dash pattern is retained from page to page. Call this method with an empty
+// array to restore solid line drawing.
 //
 // See tutorial 28 for an example of this function.
 func (f *Fpdf) SetDashPattern(dashArray []float64, dashPhase float64) {
