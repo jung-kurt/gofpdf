@@ -1415,8 +1415,10 @@ func ExampleFpdf_tutorial28() {
 		srcPrev = src
 	}
 	pdf.MultiCell(wd-margin-margin, ln, msgStr, "", "C", false)
-	pdf.SetDrawColor(224, 224, 224)
+	pdf.SetDashPattern([]float64{0.8, 0.8}, 0)
+	pdf.SetDrawColor(160, 160, 160)
 	pdf.Polygon(srcList, "D")
+	pdf.SetDashPattern([]float64{}, 0)
 	pdf.SetDrawColor(64, 64, 128)
 	pdf.SetLineWidth(pdf.GetLineWidth() * 3)
 	pdf.Beziergon(curveList, "D")

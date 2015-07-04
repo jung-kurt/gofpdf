@@ -18,6 +18,7 @@ package gofpdf
 
 import (
 	"bytes"
+	"io"
 )
 
 // Version of FPDF from which this package is derived
@@ -132,6 +133,15 @@ type InitType struct {
 	FontDirStr     string
 }
 
+// FontLoader is used to read fonts (JSON font specification and zlib compressed font binaries)
+// from arbitrary locations (e.g. files, zip files, embedded font resources).
+//
+// Open provides an io.Reader for the specified font file (.json or .z). The file name
+// does never include a path. Open returns an error if the specified file cannot be opened.
+type FontLoader interface {
+	Open(name string) (io.Reader, error)
+}
+
 // Fpdf is the principal structure for creating a single PDF document
 type Fpdf struct {
 	page             int                       // current page number
@@ -160,6 +170,7 @@ type Fpdf struct {
 	lasth            float64                   // height of last printed cell
 	lineWidth        float64                   // line width in user unit
 	fontpath         string                    // path containing fonts
+	fontLoader       FontLoader                // used to load font files from arbitrary locations
 	coreFonts        map[string]bool           // array of core font names
 	fonts            map[string]fontDefType    // array of used fonts
 	fontFiles        map[string]fontFileType   // array of font files
@@ -195,6 +206,8 @@ type Fpdf struct {
 	fontDirStr       string                    // location of font definition files
 	capStyle         int                       // line cap style: butt 0, round 1, square 2
 	joinStyle        int                       // line segment join style: miter 0, round 1, bevel 2
+	dashArray        []float64                 // dash array
+	dashPhase        float64                   // dash phase
 	blendList        []blendModeType           // slice[idx] of alpha transparency modes, 1-based
 	blendMap         map[string]int            // map into blendList
 	gradientList     []gradientType            // slice[idx] of gradient records

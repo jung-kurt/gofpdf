@@ -36,6 +36,7 @@ import (
 	"math"
 	"os"
 	"path"
+	"strconv"
 	"strings"
 	"time"
 )
@@ -312,6 +313,14 @@ func (f *Fpdf) SetFontLocation(fontDirStr string) {
 	f.fontpath = fontDirStr
 }
 
+// SetFontLoader sets a loader used to load font files (.json and .z) from
+// arbitrary locations. If a font loader has been specified, Fpdf first tries
+// to load files using the font loader. If the loading files Fpdf tries to
+// load the font from the configured fonts directory (see SetFontLocation).
+func (f *Fpdf) SetFontLoader(loader FontLoader) {
+	f.fontLoader = loader
+}
+
 // SetHeaderFunc sets the function that lets the application render the page
 // header. The specified function is automatically called by AddPage() and
 // should not be called directly by the application. The implementation in Fpdf
@@ -565,6 +574,10 @@ func (f *Fpdf) AddPageFormat(orientationStr string, size SizeType) {
 	// Set line width
 	f.lineWidth = lw
 	f.outf("%.2f w", lw*f.k)
+	// Set dash pattern
+	if len(f.dashArray) > 0 {
+		f.outputDashPattern()
+	}
 	// 	Set font
 	if familyStr != "" {
 		f.SetFont(familyStr, style, fontsize)
@@ -773,6 +786,44 @@ func (f *Fpdf) SetLineCapStyle(styleStr string) {
 			f.outf("%d J", f.capStyle)
 		}
 	}
+}
+
+// SetDashPattern sets the dash pattern that is used to draw lines. The
+// dashArray elements are numbers, in units established in New(), that specify
+// the lengths of alternating dashes and gaps. The dash phase specifies the
+// distance into the dash pattern at which to start the dash. The dash pattern
+// is retained from page to page. Call this method with an empty array to
+// restore solid line drawing.
+//
+// See tutorial 28 for an example of this function.
+func (f *Fpdf) SetDashPattern(dashArray []float64, dashPhase float64) {
+	scaled := make([]float64, len(dashArray))
+	for i, value := range dashArray {
+		scaled[i] = value * f.k
+	}
+	dashPhase *= f.k
+	if !slicesEqual(scaled, f.dashArray) || dashPhase != f.dashPhase {
+		f.dashArray = scaled
+		f.dashPhase = dashPhase
+		if f.page > 0 {
+			f.outputDashPattern()
+		}
+	}
+}
+
+func (f *Fpdf) outputDashPattern() {
+	var buf bytes.Buffer
+	buf.WriteByte('[')
+	for i, value := range f.dashArray {
+		if i > 0 {
+			buf.WriteByte(' ')
+		}
+		buf.WriteString(strconv.FormatFloat(value, 'f', 2, 64))
+	}
+	buf.WriteString("] ")
+	buf.WriteString(strconv.FormatFloat(f.dashPhase, 'f', 2, 64))
+	buf.WriteString(" d")
+	f.outbuf(&buf)
 }
 
 // Line draws a line between points (x1, y1) and (x2, y2) using the current
@@ -1319,8 +1370,19 @@ func (f *Fpdf) AddFont(familyStr, styleStr, fileStr string) {
 	if fileStr == "" {
 		fileStr = strings.Replace(familyStr, " ", "", -1) + strings.ToLower(styleStr) + ".json"
 	}
-	fileStr = path.Join(f.fontpath, fileStr)
 
+	if f.fontLoader != nil {
+		reader, err := f.fontLoader.Open(fileStr)
+		if err == nil {
+			f.AddFontFromReader(familyStr, styleStr, reader)
+			if closer, ok := reader.(io.Closer); ok {
+				closer.Close()
+			}
+			return
+		}
+	}
+
+	fileStr = path.Join(f.fontpath, fileStr)
 	file, err := os.Open(fileStr)
 	if err != nil {
 		f.err = err
@@ -2932,7 +2994,7 @@ func (f *Fpdf) putfonts() {
 		f.newobj()
 		info.n = f.n
 		f.fontFiles[file] = info
-		font, err := ioutil.ReadFile(path.Join(f.fontpath, file))
+		font, err := f.loadFontFile(file)
 		if err != nil {
 			f.err = err
 			return
@@ -3030,6 +3092,20 @@ func (f *Fpdf) putfonts() {
 		}
 	}
 	return
+}
+
+func (f *Fpdf) loadFontFile(name string) ([]byte, error) {
+	if f.fontLoader != nil {
+		reader, err := f.fontLoader.Open(name)
+		if err == nil {
+			data, err := ioutil.ReadAll(reader)
+			if closer, ok := reader.(io.Closer); ok {
+				closer.Close()
+			}
+			return data, err
+		}
+	}
+	return ioutil.ReadFile(path.Join(f.fontpath, name))
 }
 
 func (f *Fpdf) putimages() {

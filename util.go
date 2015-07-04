@@ -69,6 +69,19 @@ func bufferFromReader(r io.Reader) (b *bytes.Buffer, err error) {
 	return
 }
 
+// Returns true if the two specified integer slices are equal
+func slicesEqual(a, b []float64) bool {
+	if len(a) != len(b) {
+		return false
+	}
+	for i := range a {
+		if a[i] != b[i] {
+			return false
+		}
+	}
+	return true
+}
+
 // Returns a zlib-compressed copy of the specified byte array
 func sliceCompress(data []byte) []byte {
 	var buf bytes.Buffer
