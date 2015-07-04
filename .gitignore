@@ -7,3 +7,5 @@ pdf.txt
 font/Ubuntu-*
 *.0
 *.swp
+**/*.out
+**/*.test
