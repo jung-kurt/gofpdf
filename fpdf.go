@@ -858,14 +858,26 @@ func (f *Fpdf) Line(x1, y1, x2, y2 float64) {
 	f.outf("%.2f %.2f m %.2f %.2f l S", x1*f.k, (f.h-y1)*f.k, x2*f.k, (f.h-y2)*f.k)
 }
 
+// fillDrawOp corrects path painting operators
 func fillDrawOp(styleStr string) (opStr string) {
 	switch strings.ToUpper(styleStr) {
-	case "F":
-		opStr = "f"
-	case "FD", "DF":
-		opStr = "B"
-	default:
+	case "", "D":
+		// Stroke the path.
 		opStr = "S"
+	case "F":
+		// fill the path, using the nonzero winding number rule
+		opStr = "f"
+	case "F*":
+		// fill the path, using the even-odd rule
+		opStr = "f*"
+	case "FD", "DF":
+		// fill and then stroke the path, using the nonzero winding number rule
+		opStr = "B"
+	case "FD*", "DF*":
+		// fill and then stroke the path, using the even-odd rule
+		opStr = "B*"
+	default:
+		opStr = styleStr
 	}
 	return
 }
@@ -931,7 +943,7 @@ func (f *Fpdf) Polygon(points []PointType, styleStr string) {
 			}
 		}
 		f.outf("%.5f %.5f l ", points[0].X*f.k, (f.h-points[0].Y)*f.k)
-		f.outf(fillDrawOp(styleStr))
+		f.DrawPath(styleStr)
 	}
 }
 
@@ -966,7 +978,7 @@ func (f *Fpdf) Beziergon(points []PointType, styleStr string) {
 		points = points[3:]
 	}
 
-	f.outf(fillDrawOp(styleStr))
+	f.DrawPath(styleStr)
 }
 
 // Outputs current point
@@ -3507,8 +3519,18 @@ func (f *Fpdf) ClosePath() {
 // DrawPath actually draws the path on the page.
 //
 // styleStr can be "F" for filled, "D" for outlined only, or "DF" or "FD" for
-// outlined and filled. An empty string will be replaced with "D". Drawing uses
-// the current draw color, line width, and cap style centered on the
+// outlined and filled. An empty string will be replaced with "D".
+// Path-painting operators as defined in the PDF specification are also
+// allowed: "S" (Stroke the path), "s" (Close and stroke the path),
+// "f" (fill the path, using the nonzero winding number), "f*"
+// (Fill the path, using the even-odd rule), "B" (Fill and then stroke
+// the path, using the nonzero winding number rule), "B*" (Fill and
+// then stroke the path, using the even-odd rule), "b" (Close, fill,
+// and then stroke the path, using the nonzero winding number rule) and
+// "b*" (Close, fill, and then stroke the path, using the even-odd
+// rule).
+// Drawing uses the current draw color, line width, and cap style
+// centered on the
 // path. Filling uses the current fill color.
 //
 // See tutorial 30 for an example of this function.
