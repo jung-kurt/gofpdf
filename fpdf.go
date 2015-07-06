@@ -907,7 +907,7 @@ func (f *Fpdf) Circle(x, y, r float64, styleStr string) {
 //
 // See tutorial 11 for an example of this function.
 func (f *Fpdf) Ellipse(x, y, rx, ry, degRotate float64, styleStr string) {
-	f.Arc(x, y, rx, ry, degRotate, 0, 360, styleStr)
+	f.arc(x, y, rx, ry, degRotate, 0, 360, styleStr, false)
 }
 
 // Polygon draws a closed figure defined by a series of vertices specified by
@@ -1047,54 +1047,7 @@ func (f *Fpdf) CurveBezierCubic(x0, y0, cx0, cy0, cx1, cy1, x1, y1 float64, styl
 //
 // See tutorial 11 for an example of this function.
 func (f *Fpdf) Arc(x, y, rx, ry, degRotate, degStart, degEnd float64, styleStr string) {
-	x *= f.k
-	y = (f.h - y) * f.k
-	rx *= f.k
-	ry *= f.k
-	segments := int(degEnd-degStart) / 60
-	if segments < 2 {
-		segments = 2
-	}
-	angleStart := degStart * math.Pi / 180
-	angleEnd := degEnd * math.Pi / 180
-	angleTotal := angleEnd - angleStart
-	dt := angleTotal / float64(segments)
-	dtm := dt / 3
-	if degRotate != 0 {
-		a := -degRotate * math.Pi / 180
-		f.outf("q %.5f %.5f %.5f %.5f %.5f %.5f cm", math.Cos(a), -1*math.Sin(a),
-			math.Sin(a), math.Cos(a), x, y)
-		x = 0
-		y = 0
-	}
-	t := angleStart
-	a0 := x + rx*math.Cos(t)
-	b0 := y + ry*math.Sin(t)
-	c0 := -rx * math.Sin(t)
-	d0 := ry * math.Cos(t)
-	f.point(a0/f.k, f.h-(b0/f.k))
-	for j := 1; j <= segments; j++ {
-		// Draw this bit of the total curve
-		t = (float64(j) * dt) + angleStart
-		a1 := x + rx*math.Cos(t)
-		b1 := y + ry*math.Sin(t)
-		c1 := -rx * math.Sin(t)
-		d1 := ry * math.Cos(t)
-		f.curve((a0+(c0*dtm))/f.k,
-			f.h-((b0+(d0*dtm))/f.k),
-			(a1-(c1*dtm))/f.k,
-			f.h-((b1-(d1*dtm))/f.k),
-			a1/f.k,
-			f.h-(b1/f.k))
-		a0 = a1
-		b0 = b1
-		c0 = c1
-		d0 = d1
-	}
-	f.out(fillDrawOp(styleStr))
-	if degRotate != 0 {
-		f.out("Q")
-	}
+	f.arc(x, y, rx, ry, degRotate, degStart, degEnd, styleStr, false)
 }
 
 // SetAlpha sets the alpha blending channel. The blending effect applies to
@@ -3557,4 +3510,91 @@ func (f *Fpdf) ClosePath() {
 // See tutorial 30 for an example of this function.
 func (f *Fpdf) DrawPath(styleStr string) {
 	f.outf(fillDrawOp(styleStr))
+}
+
+// ArcTo draws an elliptical arc centered at point (x, y). rx and ry specify its
+// horizontal and vertical radii. If the start of the arc is not at
+// the current position, a connecting line will be drawn.
+//
+// degRotate specifies the angle that the arc will be rotated. degStart and
+// degEnd specify the starting and ending angle of the arc. All angles are
+// specified in degrees and measured counter-clockwise from the 3 o'clock
+// position.
+//
+// styleStr can be "F" for filled, "D" for outlined only, or "DF" or "FD" for
+// outlined and filled. An empty string will be replaced with "D". Drawing uses
+// the current draw color, line width, and cap style centered on the arc's
+// path. Filling uses the current fill color.
+//
+// See tutorial 30 for an example of this function.
+func (f *Fpdf) ArcTo(x, y, rx, ry, degRotate, degStart, degEnd float64) {
+	f.arc(x, y, rx, ry, degRotate, degStart, degEnd, "", true)
+}
+
+func (f *Fpdf) arc(x, y, rx, ry, degRotate, degStart, degEnd float64,
+	styleStr string, path bool) {
+	x *= f.k
+	y = (f.h - y) * f.k
+	rx *= f.k
+	ry *= f.k
+	segments := int(degEnd-degStart) / 60
+	if segments < 2 {
+		segments = 2
+	}
+	angleStart := degStart * math.Pi / 180
+	angleEnd := degEnd * math.Pi / 180
+	angleTotal := angleEnd - angleStart
+	dt := angleTotal / float64(segments)
+	dtm := dt / 3
+	if degRotate != 0 {
+		a := -degRotate * math.Pi / 180
+		f.outf("q %.5f %.5f %.5f %.5f %.5f %.5f cm",
+			math.Cos(a), -1*math.Sin(a),
+			math.Sin(a), math.Cos(a), x, y)
+		x = 0
+		y = 0
+	}
+	t := angleStart
+	a0 := x + rx*math.Cos(t)
+	b0 := y + ry*math.Sin(t)
+	c0 := -rx * math.Sin(t)
+	d0 := ry * math.Cos(t)
+	sx := a0 / f.k // start point of arc
+	sy := f.h - (b0 / f.k)
+	if path {
+		if f.x != sx || f.y != sy {
+			// Draw connecting line to start point
+			f.LineTo(sx, sy)
+		}
+	} else {
+		f.point(sx, sy)
+	}
+	for j := 1; j <= segments; j++ {
+		// Draw this bit of the total curve
+		t = (float64(j) * dt) + angleStart
+		a1 := x + rx*math.Cos(t)
+		b1 := y + ry*math.Sin(t)
+		c1 := -rx * math.Sin(t)
+		d1 := ry * math.Cos(t)
+		f.curve((a0+(c0*dtm))/f.k,
+			f.h-((b0+(d0*dtm))/f.k),
+			(a1-(c1*dtm))/f.k,
+			f.h-((b1-(d1*dtm))/f.k),
+			a1/f.k,
+			f.h-(b1/f.k))
+		a0 = a1
+		b0 = b1
+		c0 = c1
+		d0 = d1
+		if path {
+			f.x = a1 / f.k
+			f.y = f.h - (b1 / f.k)
+		}
+	}
+	if !path {
+		f.out(fillDrawOp(styleStr))
+	}
+	if degRotate != 0 {
+		f.out("Q")
+	}
 }
