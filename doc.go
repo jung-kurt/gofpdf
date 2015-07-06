@@ -72,9 +72,9 @@ Reader interface while maintaining backward compatibility. Anthony Starks
 provided code for the Polygon function. Robert Lillack provided the Beziergon
 function and corrected some naming issues with the internal curve function.
 Claudio Felber provided implementations for dashed line drawing and generalized
-font loading. Stani Michiels provided support for multi-segment path drawing with
-smooth line joins and line join styles. Bruno Michel has provided valuable
-assistance with the code.
+font loading. Stani Michiels provided support for multi-segment path drawing
+with smooth line joins, line join styles and enhanced fill modes. Bruno Michel
+has provided valuable assistance with the code.
 
 The FPDF website is http://www.fpdf.org/.
 
