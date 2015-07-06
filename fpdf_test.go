@@ -20,7 +20,6 @@ import (
 	"bufio"
 	"bytes"
 	"fmt"
-	"github.com/jung-kurt/gofpdf"
 	"io"
 	"io/ioutil"
 	"math"
@@ -28,6 +27,8 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+
+	"github.com/jung-kurt/gofpdf"
 )
 
 // Absolute path needed for gocov tool; relative OK for test
@@ -1465,7 +1466,8 @@ func ExampleFpdf_tutorial30() {
 	pdf := gofpdf.New("P", "mm", "A4", "")
 	pdf.AddPage()
 	pdf.MoveTo(20, 20)
-	pdf.LineTo(190, 20)
+	pdf.LineTo(170, 20)
+	pdf.ArcTo(170, 40, 20, 20, 0, 90, 0)
 	pdf.CurveTo(190, 100, 105, 100)
 	pdf.CurveBezierCubicTo(20, 100, 105, 200, 20, 200)
 	pdf.ClosePath()
@@ -1475,4 +1477,42 @@ func ExampleFpdf_tutorial30() {
 	pdf.OutputAndClose(docWriter(pdf, 30))
 	// Output:
 	// Successfully generated pdf/tutorial30.pdf
+}
+
+func ExampleFpdf_tutorial31() {
+	const offset = 75.0
+	pdf := gofpdf.New("L", "mm", "A4", "")
+	pdf.AddPage()
+	var draw = func(cap, join string, x0, y0, x1, y1 float64) {
+		// transform begin & end needed to isolate caps and joins
+		pdf.SetLineCapStyle(cap)
+		pdf.SetLineJoinStyle(join)
+
+		// Draw thick line
+		pdf.SetDrawColor(0x33, 0x33, 0x33)
+		pdf.SetLineWidth(30.0)
+		pdf.MoveTo(x0, y0)
+		pdf.LineTo((x0+x1)/2+offset, (y0+y1)/2)
+		pdf.LineTo(x1, y1)
+		pdf.DrawPath("D")
+
+		// Draw thin helping line
+		pdf.SetDrawColor(0xFF, 0x33, 0x33)
+		pdf.SetLineWidth(2.56)
+		pdf.MoveTo(x0, y0)
+		pdf.LineTo((x0+x1)/2+offset, (y0+y1)/2)
+		pdf.LineTo(x1, y1)
+		pdf.DrawPath("D")
+
+	}
+	x := 35.0
+	caps := []string{"butt", "square", "round"}
+	joins := []string{"bevel", "miter", "round"}
+	for i := range caps {
+		draw(caps[i], joins[i], x, 50, x, 160)
+		x += offset
+	}
+	pdf.OutputAndClose(docWriter(pdf, 31))
+	// Output:
+	// Successfully generated pdf/tutorial31.pdf
 }
