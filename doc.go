@@ -80,7 +80,8 @@ The FPDF website is http://www.fpdf.org/.
 
 License
 
-gofpdf is copyrighted by Kurt Jung and is released under the MIT License.
+gofpdf is released under the MIT License. It is copyrighted by Kurt Jung and
+the contributors acknowledged above.
 
 Installation
 
