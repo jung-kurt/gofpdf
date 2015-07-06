@@ -3487,15 +3487,17 @@ func (f *Fpdf) enddoc() {
 }
 
 // Path Drawing
-//
-// Create a "path" by moving a virtual stylus around the page, then draw it or
-// fill it in. The main advantage of using the path drawing routines rather
-// than multiple Fpdf.Line is that PDF creates nice line joins at the angles,
-// rather than just overlaying the lines.
 
-// MoveTo moves the stylus to (x, y) without drawing the path from the previous
-// point. Paths must start with a MoveTo to set the original stylus location or
-// the result is undefined.
+// MoveTo moves the stylus to (x, y) without drawing the path from the
+// previous point. Paths must start with a MoveTo to set the original
+// stylus location or the result is undefined.
+//
+// Create a "path" by moving a virtual stylus around the page (with
+// MoveTo, LineTo, CurveTo, CurveBezierCubicTo, ArcTo & ClosePath)
+// then draw it or  fill it in (with DrawPath). The main advantage of
+// using the path drawing routines rather than multiple Fpdf.Line is
+// that PDF creates nice line joins at the angles, rather than just
+// overlaying the lines.
 //
 // See tutorial 30 for an example of this function.
 func (f *Fpdf) MoveTo(x, y float64) {
