@@ -3454,7 +3454,8 @@ func (f *Fpdf) enddoc() {
 //
 // See tutorial 30 for an example of this function.
 func (f *Fpdf) MoveTo(x, y float64) {
-	f.point(x, y) // rename?
+	f.point(x, y)
+	f.x, f.y = x, y
 }
 
 // LineTo creates a line from the current stylus location to (x, y), which
@@ -3464,6 +3465,7 @@ func (f *Fpdf) MoveTo(x, y float64) {
 // See tutorial 30 for an example of this function.
 func (f *Fpdf) LineTo(x, y float64) {
 	f.outf("%.2f %.2f l", x*f.k, (f.h-y)*f.k)
+	f.x, f.y = x, y
 }
 
 // CurveTo creates a single-segment quadratic Bézier curve. The curve starts at
@@ -3476,6 +3478,7 @@ func (f *Fpdf) LineTo(x, y float64) {
 // See tutorial 30 for an example of this function.
 func (f *Fpdf) CurveTo(cx, cy, x, y float64) {
 	f.outf("%.5f %.5f %.5f %.5f v", cx*f.k, (f.h-cy)*f.k, x*f.k, (f.h-y)*f.k)
+	f.x, f.y = x, y
 }
 
 // CurveBezierCubicTo creates a single-segment cubic Bézier curve. The curve
@@ -3488,7 +3491,8 @@ func (f *Fpdf) CurveTo(cx, cy, x, y float64) {
 //
 // See tutorial 30 for examples of this function.
 func (f *Fpdf) CurveBezierCubicTo(cx0, cy0, cx1, cy1, x, y float64) {
-	f.curve(cx0, cy0, cx1, cy1, x, y) // rename?
+	f.curve(cx0, cy0, cx1, cy1, x, y)
+	f.x, f.y = x, y
 }
 
 // ClosePath creates a line from the current location to the last MoveTo point
