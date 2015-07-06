@@ -20,7 +20,6 @@ import (
 	"bufio"
 	"bytes"
 	"fmt"
-	"github.com/jung-kurt/gofpdf"
 	"io"
 	"io/ioutil"
 	"math"
@@ -28,6 +27,8 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+
+	"github.com/jung-kurt/gofpdf"
 )
 
 // Absolute path needed for gocov tool; relative OK for test
@@ -1465,7 +1466,8 @@ func ExampleFpdf_tutorial30() {
 	pdf := gofpdf.New("P", "mm", "A4", "")
 	pdf.AddPage()
 	pdf.MoveTo(20, 20)
-	pdf.LineTo(190, 20)
+	pdf.LineTo(170, 20)
+	pdf.ArcTo(170, 40, 20, 20, 0, 90, 0)
 	pdf.CurveTo(190, 100, 105, 100)
 	pdf.CurveBezierCubicTo(20, 100, 105, 200, 20, 200)
 	pdf.ClosePath()
