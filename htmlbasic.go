@@ -106,8 +106,6 @@ type HTMLBasicType struct {
 
 // HTMLBasicNew returns an instance that facilitates writing basic HTML in the
 // specified PDF file.
-//
-// This function is demonstrated in tutorial 6.
 func (f *Fpdf) HTMLBasicNew() (html HTMLBasicType) {
 	html.pdf = f
 	html.Link.ClrR, html.Link.ClrG, html.Link.ClrB = 0, 0, 128

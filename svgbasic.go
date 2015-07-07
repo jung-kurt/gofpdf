@@ -199,8 +199,7 @@ func SVGBasicParse(buf []byte) (sig SVGBasicType, err error) {
 }
 
 // SVGBasicFileParse parses a simple scalable vector graphics (SVG) file into a
-// basic descriptor. See SVGBasicParse for additional comments and tutorial 20
-// for an example of this function.
+// basic descriptor. The SVGBasicWrite() example demonstrates this method.
 func SVGBasicFileParse(svgFileStr string) (sig SVGBasicType, err error) {
 	var buf []byte
 	buf, err = ioutil.ReadFile(svgFileStr)

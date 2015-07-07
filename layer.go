@@ -42,8 +42,6 @@ func (f *Fpdf) layerInit() {
 // display in the layer list. visible specifies whether the layer will be
 // initially visible. The return value is an integer ID that is used in a call
 // to BeginLayer().
-//
-// Layers are demonstrated in tutorial 26.
 func (f *Fpdf) AddLayer(name string, visible bool) (layerID int) {
 	layerID = len(f.layer.list)
 	f.layer.list = append(f.layer.list, layerType{name: name, visible: visible})

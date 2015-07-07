@@ -95,15 +95,15 @@ Later, to receive updates, run
 
 Quick Start
 
-The following Go code generates a simple PDF.
+The following Go code generates a simple PDF and writes it to standard output.
 
-	pdf := gofpdf.New("P", "mm", "A4", "../font")
+	pdf := gofpdf.New("P", "mm", "A4", "")
 	pdf.AddPage()
 	pdf.SetFont("Arial", "B", 16)
 	pdf.Cell(40, 10, "Hello, world")
 	pdf.Output(os.Stdout)
 
-See the tutorials in the fpdf_test.go file (shown as examples in this
+See the functions in the fpdf_test.go file (shown as examples in this
 documentation) for more advanced PDF examples.
 
 Errors
@@ -138,17 +138,14 @@ that are passed to them; in these cases additional methods have been exported
 to provide similar functionality. Font definition files are produced in JSON
 rather than PHP.
 
-Tutorials
+Example PDFs
 
-A side effect of running "go test" is the production of the tutorial PDFs.
-These can be found in the gofpdf/pdf directory after the tests complete.
+A side effect of running "go test" is the production of a number of example
+PDFs. These can be found in the gofpdf/pdf directory after the tests complete.
 
-Please note that these tutorials run in the context of a test. In order run an
+Please note that these examples run in the context of a test. In order run an
 example as a standalone application, you'll need to examine fpdf_test.go for
-some helper routines, for example docWriter and strDelimit. In particular,
-docWriter is used as an argument to OutputAndClose in order to reduce the
-boilerplate in each example. In practice, you may be better served by calling
-OutputFileAndClose().
+some helper routines, for example exampleFilename and summary.
 
 Nonstandard Fonts
 
@@ -166,9 +163,9 @@ the font subdirectory and run the command as in the following example.
 	./makefont --embed --enc=../font/cp1252.map --dst=../font ../font/calligra.ttf
 
 In your PDF generation code, call AddFont() to load the font and, as with the
-standard fonts, SetFont() to begin using it. See tutorial 7 for an example.
-Good sources of free, open-source fonts include http://www.google.com/fonts/
-and http://dejavu-fonts.org/.
+standard fonts, SetFont() to begin using it. Most examples, including the
+package example, demonstrate this method. Good sources of free, open-source
+fonts include http://www.google.com/fonts/ and http://dejavu-fonts.org/.
 
 Roadmap
 

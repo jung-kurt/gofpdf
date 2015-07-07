@@ -180,8 +180,8 @@ func fpdfNew(orientationStr, unitStr, sizeStr, fontDirStr string, size SizeType)
 
 // NewCustom returns a pointer to a new Fpdf instance. Its methods are
 // subsequently called to produce a single PDF document. NewCustom() is an
-// alternative to New() that provides additional customization. This function
-// is demonstrated in tutorial 15.
+// alternative to New() that provides additional customization. The PageSize()
+// example demonstrates this method.
 func NewCustom(init *InitType) (f *Fpdf) {
 	return fpdfNew(init.OrientationStr, init.UnitStr, init.SizeStr, init.FontDirStr, init.Size)
 }
@@ -318,8 +318,6 @@ func (f *Fpdf) SetFontLocation(fontDirStr string) {
 // the named font resources when AddFont() is called. If this operation fails,
 // an attempt is made to load the resources from the configured font directory
 // (see SetFontLocation()).
-//
-// See tutorial 29 for an example of this method.
 func (f *Fpdf) SetFontLoader(loader FontLoader) {
 	f.fontLoader = loader
 }
@@ -472,7 +470,7 @@ func (f *Fpdf) SetCreator(creatorStr string, isUTF8 bool) {
 
 // AliasNbPages defines an alias for the total number of pages. It will be
 // substituted as the document is closed. An empty string is replaced with the
-// string "{nb}". This method is demonstrated in tutorial 2.
+// string "{nb}".
 //
 // See the example for AddPage() for a demonstration of this method.
 func (f *Fpdf) AliasNbPages(aliasStr string) {
@@ -528,7 +526,7 @@ func (f *Fpdf) Close() {
 // established in New(). These return values are followed by the unit of
 // measure itself. If pageNum is zero or otherwise out of bounds, it returns
 // the default page size, that is, the size of the page that would be added by
-// AddPage(). This function is demonstrated in tutorial 15.
+// AddPage().
 func (f *Fpdf) PageSize(pageNum int) (wd, ht float64, unitStr string) {
 	sz, ok := f.pageSizes[pageNum]
 	if ok {
@@ -546,7 +544,7 @@ func (f *Fpdf) PageSize(pageNum int) (wd, ht float64, unitStr string) {
 //
 // size specifies the size of the new page in the units established in New().
 //
-// This function is demonstrated in tutorial 15.
+// The PageSize() example demonstrates this method.
 func (f *Fpdf) AddPageFormat(orientationStr string, size SizeType) {
 	if f.err != nil {
 		return
@@ -829,7 +827,7 @@ func (f *Fpdf) SetLineJoinStyle(styleStr string) {
 // dash pattern is retained from page to page. Call this method with an empty
 // array to restore solid line drawing.
 //
-// See tutorial 28 for an example of this function.
+// The Beziergon() example demonstrates this method.
 func (f *Fpdf) SetDashPattern(dashArray []float64, dashPhase float64) {
 	scaled := make([]float64, len(dashArray))
 	for i, value := range dashArray {
@@ -908,8 +906,6 @@ func (f *Fpdf) Rect(x, y, w, h float64, styleStr string) {
 // outlined and filled. An empty string will be replaced with "D". Drawing uses
 // the current draw color and line width centered on the circle's perimeter.
 // Filling uses the current fill color.
-//
-// See tutorial 11 for an example of this function.
 func (f *Fpdf) Circle(x, y, r float64, styleStr string) {
 	f.Ellipse(x, y, r, r, 0, styleStr)
 }
@@ -925,7 +921,7 @@ func (f *Fpdf) Circle(x, y, r float64, styleStr string) {
 // the current draw color and line width centered on the ellipse's perimeter.
 // Filling uses the current fill color.
 //
-// See tutorial 11 for an example of this function.
+// The Circle() example demonstrates this method.
 func (f *Fpdf) Ellipse(x, y, rx, ry, degRotate float64, styleStr string) {
 	f.arc(x, y, rx, ry, degRotate, 0, 360, styleStr, false)
 }
@@ -939,8 +935,6 @@ func (f *Fpdf) Ellipse(x, y, rx, ry, degRotate float64, styleStr string) {
 // outlined and filled. An empty string will be replaced with "D". Drawing uses
 // the current draw color and line width centered on the ellipse's perimeter.
 // Filling uses the current fill color.
-//
-// See tutorial 25 for an example of this function.
 func (f *Fpdf) Polygon(points []PointType, styleStr string) {
 	if len(points) > 2 {
 		for j, pt := range points {
@@ -966,8 +960,6 @@ func (f *Fpdf) Polygon(points []PointType, styleStr string) {
 // outlined and filled. An empty string will be replaced with "D". Drawing uses
 // the current draw color and line width centered on the ellipse's perimeter.
 // Filling uses the current fill color.
-//
-// See tutorial 28 for an example of this function.
 func (f *Fpdf) Beziergon(points []PointType, styleStr string) {
 
 	// Thanks, Robert Lillack, for contributing this function.
@@ -1013,7 +1005,7 @@ func (f *Fpdf) curve(cx0, cy0, cx1, cy1, x, y float64) {
 // the current draw color, line width, and cap style centered on the curve's
 // path. Filling uses the current fill color.
 //
-// See tutorial 11 for an example of this function.
+// The Circle() example demonstrates this method.
 func (f *Fpdf) Curve(x0, y0, cx, cy, x1, y1 float64, styleStr string) {
 	f.point(x0, y0)
 	f.outf("%.5f %.5f %.5f %.5f v %s", cx*f.k, (f.h-cy)*f.k, x1*f.k, (f.h-y1)*f.k,
@@ -1045,7 +1037,7 @@ func (f *Fpdf) CurveCubic(x0, y0, cx0, cy0, x1, y1, cx1, cy1 float64, styleStr s
 // This routine performs the same function as CurveCubic() but uses standard
 // argument order.
 //
-// See tutorial 11 for examples of this function.
+// The Circle() example demonstrates this method.
 func (f *Fpdf) CurveBezierCubic(x0, y0, cx0, cy0, cx1, cy1, x1, y1 float64, styleStr string) {
 	f.point(x0, y0)
 	f.outf("%.5f %.5f %.5f %.5f %.5f %.5f c %s", cx0*f.k, (f.h-cy0)*f.k,
@@ -1065,7 +1057,7 @@ func (f *Fpdf) CurveBezierCubic(x0, y0, cx0, cy0, cx1, cy1, x1, y1 float64, styl
 // the current draw color, line width, and cap style centered on the arc's
 // path. Filling uses the current fill color.
 //
-// See tutorial 11 for an example of this function.
+// The Circle() example demonstrates this method.
 func (f *Fpdf) Arc(x, y, rx, ry, degRotate, degStart, degEnd float64, styleStr string) {
 	f.arc(x, y, rx, ry, degRotate, degStart, degEnd, styleStr, false)
 }
@@ -1083,8 +1075,6 @@ func (f *Fpdf) Arc(x, y, rx, ry, degRotate, degStart, degEnd float64, styleStr s
 //
 // To reset normal rendering after applying a blending mode, call this method
 // with alpha set to 1.0 and blendModeStr set to "Normal".
-//
-// See tutorial 12 for an example of this function, including samples of each blending mode.
 func (f *Fpdf) SetAlpha(alpha float64, blendModeStr string) {
 	if f.err != nil {
 		return
@@ -1153,8 +1143,6 @@ func (f *Fpdf) gradient(tp int, r1, g1, b1 int, r2, g2, b2 int, x1, y1 float64, 
 // anchored on the rectangle edge. Color 1 is used up to the origin of the
 // vector and color 2 is used beyond the vector's end point. Between the points
 // the colors are gradually blended.
-//
-// See tutorial 13 for an example of this function.
 func (f *Fpdf) LinearGradient(x, y, w, h float64, r1, g1, b1 int, r2, g2, b2 int, x1, y1, x2, y2 float64) {
 	f.gradientClipStart(x, y, w, h)
 	f.gradient(2, r1, g1, b1, r2, g2, b2, x1, y1, x2, y2, 0)
@@ -1178,7 +1166,7 @@ func (f *Fpdf) LinearGradient(x, y, w, h float64, r1, g1, b1 int, r2, g2, b2 int
 // center do not necessarily have to coincide, but the origin must be within
 // the circle to avoid rendering problems.
 //
-// See tutorial 13 for an example of this function.
+// The LinearGradient() example demonstrates this method.
 func (f *Fpdf) RadialGradient(x, y, w, h float64, r1, g1, b1 int, r2, g2, b2 int, x1, y1, x2, y2, r float64) {
 	f.gradientClipStart(x, y, w, h)
 	f.gradient(3, r1, g1, b1, r2, g2, b2, x1, y1, x2, y2, r)
@@ -1193,7 +1181,7 @@ func (f *Fpdf) RadialGradient(x, y, w, h float64, r1, g1, b1 int, r2, g2, b2 int
 // Image(), LinearGradient(), etc) will be clipped by the specified rectangle.
 // Call ClipEnd() to restore unclipped operations.
 //
-// See tutorial 14 for an example of this function.
+// This ClipText() example demonstrates this method.
 func (f *Fpdf) ClipRect(x, y, w, h float64, outline bool) {
 	f.clipNest++
 	f.outf("q %.2f %.2f %.2f %.2f re W %s", x*f.k, (f.h-y)*f.k, w*f.k, -h*f.k, strIf(outline, "S", "n"))
@@ -1207,8 +1195,6 @@ func (f *Fpdf) ClipRect(x, y, w, h float64, outline bool) {
 // will be shown. After calling this method, all rendering operations (for
 // example, Image(), LinearGradient(), etc) will be clipped. Call ClipEnd() to
 // restore unclipped operations.
-//
-// See tutorial 14 for an example of this function.
 func (f *Fpdf) ClipText(x, y float64, txtStr string, outline bool) {
 	f.clipNest++
 	f.outf("q BT %.5f %.5f Td %d Tr (%s) Tj ET", x*f.k, (f.h-y)*f.k, intIf(outline, 5, 7), f.escape(txtStr))
@@ -1229,7 +1215,7 @@ func (f *Fpdf) clipArc(x1, y1, x2, y2, x3, y3 float64) {
 // LinearGradient(), etc) will be clipped by the specified rectangle. Call
 // ClipEnd() to restore unclipped operations.
 //
-// See tutorial 14 for an example of this function.
+// This ClipText() example demonstrates this method.
 func (f *Fpdf) ClipRoundedRect(x, y, w, h, r float64, outline bool) {
 	f.clipNest++
 	k := f.k
@@ -1263,7 +1249,7 @@ func (f *Fpdf) ClipRoundedRect(x, y, w, h, r float64, outline bool) {
 // Image(), LinearGradient(), etc) will be clipped by the specified ellipse.
 // Call ClipEnd() to restore unclipped operations.
 //
-// See tutorial 14 for an example of this function.
+// This ClipText() example demonstrates this method.
 func (f *Fpdf) ClipEllipse(x, y, rx, ry float64, outline bool) {
 	f.clipNest++
 	lx := (4.0 / 3.0) * rx * (math.Sqrt2 - 1)
@@ -1297,7 +1283,7 @@ func (f *Fpdf) ClipEllipse(x, y, rx, ry float64, outline bool) {
 // operations (for example, Image(), LinearGradient(), etc) will be clipped by
 // the specified circle. Call ClipEnd() to restore unclipped operations.
 //
-// See tutorial 14 for an example of this function.
+// The ClipText() example demonstrates this method.
 func (f *Fpdf) ClipCircle(x, y, r float64, outline bool) {
 	f.ClipEllipse(x, y, r, r, outline)
 }
@@ -1312,7 +1298,7 @@ func (f *Fpdf) ClipCircle(x, y, r float64, outline bool) {
 // LinearGradient(), etc) will be clipped by the specified polygon. Call
 // ClipEnd() to restore unclipped operations.
 //
-// See tutorial 14 for an example of this function.
+// The ClipText() example demonstrates this method.
 func (f *Fpdf) ClipPolygon(points []PointType, outline bool) {
 	f.clipNest++
 	var s fmtBuffer
@@ -1331,7 +1317,7 @@ func (f *Fpdf) ClipPolygon(points []PointType, outline bool) {
 // ClipPolygon(). Clipping operations can be nested. The document cannot be
 // successfully output while a clipping operation is active.
 //
-// See tutorial 14 for an example of this function.
+// The ClipText() example demonstrates this method.
 func (f *Fpdf) ClipEnd() {
 	if f.err == nil {
 		if f.clipNest > 0 {
@@ -1363,8 +1349,6 @@ func (f *Fpdf) ClipEnd() {
 // fileStr specifies the base name with ".json" extension of the font
 // definition file to be added. The file will be loaded from the font directory
 // specified in the call to New() or SetFontLocation().
-//
-// See tutorial 7 for an example of this function.
 func (f *Fpdf) AddFont(familyStr, styleStr, fileStr string) {
 	if fileStr == "" {
 		fileStr = strings.Replace(familyStr, " ", "", -1) + strings.ToLower(styleStr) + ".json"
@@ -1615,8 +1599,6 @@ func (f *Fpdf) LinkString(x, y, w, h float64, linkStr string) {
 // the outline; 0 is the top level, 1 is just below, and so on. y specifies the
 // vertical position of the bookmark destination in the current page; -1
 // indicates the current position.
-//
-// See tutorial 16 for an bookmark example.
 func (f *Fpdf) Bookmark(txtStr string, level int, y float64) {
 	if y == -1 {
 		y = f.y
@@ -1690,8 +1672,6 @@ func (f *Fpdf) SetAcceptPageBreakFunc(fnc func() bool) {
 //
 // linkStr is a target URL or empty for no external link. A non--zero value for
 // link takes precedence over linkStr.
-//
-// See tutorial 21 for a demonstration of text alignment within a cell.
 func (f *Fpdf) CellFormat(w, h float64, txtStr string, borderStr string, ln int, alignStr string, fill bool, link int, linkStr string) {
 	// dbg("CellFormat. h = %.2f, borderStr = %s", h, borderStr)
 	if f.err != nil {
@@ -1836,8 +1816,6 @@ func (f *Fpdf) Cellf(w, h float64, fmtStr string, args ...interface{}) {
 //
 // You can use MultiCell if you want to print a text on several lines in a
 // simple way.
-//
-// See tutorial 19 for an example of this function.
 func (f *Fpdf) SplitLines(txt []byte, w float64) [][]byte {
 	// Function contributed by Bruno Michel
 	lines := [][]byte{}
@@ -2249,9 +2227,6 @@ func (f *Fpdf) Image(imageNameStr string, x, y, w, h float64, flow bool, tp stri
 // case.
 //
 // See Image() for restrictions on the image and the "tp" parameters.
-//
-// See tutorial 27 for an example of how this function can be used to load an
-// image from the web.
 func (f *Fpdf) RegisterImageReader(imgName, tp string, r io.Reader) (info *ImageInfoType) {
 	// Thanks, Ivan Daniluk, for generalizing this code to use the Reader interface.
 	if f.err != nil {
@@ -2295,8 +2270,6 @@ func (f *Fpdf) RegisterImageReader(imgName, tp string, r io.Reader) (info *Image
 // page. Note that Image() calls this function, so this function is only
 // necessary if you need information about the image before placing it. See
 // Image() for restrictions on the image and the "tp" parameters.
-//
-// See tutorial 18 for an example of this function.
 func (f *Fpdf) RegisterImage(fileStr, tp string) (info *ImageInfoType) {
 	info, ok := f.images[fileStr]
 	if ok {
@@ -2396,8 +2369,6 @@ func (f *Fpdf) SetXY(x, y float64) {
 // full access to the document regardless of the actionFlag value. An empty
 // string for this argument will be replaced with a random value, effectively
 // prohibiting full access to the document.
-//
-// See tutorial 24 for an example of this function.
 func (f *Fpdf) SetProtection(actionFlag byte, userPassStr, ownerPassStr string) {
 	if f.err != nil {
 		return
@@ -2418,7 +2389,7 @@ func (f *Fpdf) OutputAndClose(w io.WriteCloser) error {
 // writes the PDF document to it. This method will close f and the newly
 // written file, even if an error is detected and no document is produced.
 //
-// This function is demonstrated in tutorial 1.
+// Most examples demonstrate the use of this method.
 func (f *Fpdf) OutputFileAndClose(fileStr string) error {
 	if f.err == nil {
 		pdfFile, err := os.Create(fileStr)
@@ -3473,8 +3444,6 @@ func (f *Fpdf) enddoc() {
 // using the path drawing routines rather than multiple Fpdf.Line is
 // that PDF creates nice line joins at the angles, rather than just
 // overlaying the lines.
-//
-// See tutorial 30 for an example of this function.
 func (f *Fpdf) MoveTo(x, y float64) {
 	f.point(x, y)
 	f.x, f.y = x, y
@@ -3484,7 +3453,7 @@ func (f *Fpdf) MoveTo(x, y float64) {
 // becomes the new stylus location. Note that this only creates the line in
 // the path; it does not actually draw the line on the page.
 //
-// See tutorial 30 for an example of this function.
+// The MoveTo() example demonstrates this method.
 func (f *Fpdf) LineTo(x, y float64) {
 	f.outf("%.2f %.2f l", x*f.k, (f.h-y)*f.k)
 	f.x, f.y = x, y
@@ -3497,7 +3466,7 @@ func (f *Fpdf) LineTo(x, y float64) {
 // point. At the end point, the curve is tangent to the straight line between
 // the end point and the control point.
 //
-// See tutorial 30 for an example of this function.
+// The MoveTo() example demonstrates this method.
 func (f *Fpdf) CurveTo(cx, cy, x, y float64) {
 	f.outf("%.5f %.5f %.5f %.5f v", cx*f.k, (f.h-cy)*f.k, x*f.k, (f.h-y)*f.k)
 	f.x, f.y = x, y
@@ -3511,7 +3480,7 @@ func (f *Fpdf) CurveTo(cx, cy, x, y float64) {
 // the curve is tangent to the straight line between the end point and the
 // control point (cx1, cy1).
 //
-// See tutorial 30 for examples of this function.
+// The MoveTo() example demonstrates this method.
 func (f *Fpdf) CurveBezierCubicTo(cx0, cy0, cx1, cy1, x, y float64) {
 	f.curve(cx0, cy0, cx1, cy1, x, y)
 	f.x, f.y = x, y
@@ -3521,7 +3490,7 @@ func (f *Fpdf) CurveBezierCubicTo(cx0, cy0, cx1, cy1, x, y float64) {
 // (if not the same) and mark the path as closed so the first and last lines
 // join nicely.
 //
-// See tutorial 30 for an example of this function.
+// The MoveTo() example demonstrates this method.
 func (f *Fpdf) ClosePath() {
 	f.outf("h")
 }
@@ -3543,7 +3512,7 @@ func (f *Fpdf) ClosePath() {
 // centered on the
 // path. Filling uses the current fill color.
 //
-// See tutorial 30 for an example of this function.
+// The MoveTo() example demonstrates this method.
 func (f *Fpdf) DrawPath(styleStr string) {
 	f.outf(fillDrawOp(styleStr))
 }
@@ -3562,7 +3531,7 @@ func (f *Fpdf) DrawPath(styleStr string) {
 // the current draw color, line width, and cap style centered on the arc's
 // path. Filling uses the current fill color.
 //
-// See tutorial 30 for an example of this function.
+// The MoveTo() example demonstrates this method.
 func (f *Fpdf) ArcTo(x, y, rx, ry, degRotate, degStart, degEnd float64) {
 	f.arc(x, y, rx, ry, degRotate, degStart, degEnd, "", true)
 }

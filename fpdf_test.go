@@ -41,57 +41,17 @@ const (
 	cnExampleDir = cnGofpdfDir + "/pdf"
 )
 
-type nullWriter struct {
+func init() {
+	cleanup()
 }
 
-func (nw *nullWriter) Write(p []byte) (n int, err error) {
-	n = len(p)
-	return
-}
-
-func (nw *nullWriter) Close() (err error) {
-	return
-}
-
-type pdfWriter struct {
-	pdf *gofpdf.Fpdf
-	fl  *os.File
-	idx int
-}
-
-func (pw *pdfWriter) Write(p []byte) (n int, err error) {
-	if pw.pdf.Ok() {
-		return pw.fl.Write(p)
-	}
-	return
-}
-
-func (pw *pdfWriter) Close() (err error) {
-	if pw.fl != nil {
-		pw.fl.Close()
-		pw.fl = nil
-	}
-	if pw.pdf.Ok() {
-		fmt.Printf("Successfully generated pdf/tutorial%02d.pdf\n", pw.idx)
-	} else {
-		fmt.Printf("%s\n", pw.pdf.Error())
-	}
-	return
-}
-
-func docWriter(pdf *gofpdf.Fpdf, idx int) *pdfWriter {
-	pw := new(pdfWriter)
-	pw.pdf = pdf
-	pw.idx = idx
-	if pdf.Ok() {
-		var err error
-		fileStr := fmt.Sprintf("%s/pdf/tutorial%02d.pdf", cnGofpdfDir, idx)
-		pw.fl, err = os.Create(fileStr)
-		if err != nil {
-			pdf.SetErrorf("Error opening output file %s", fileStr)
+func cleanup() {
+	filepath.Walk(cnExampleDir, func(path string, info os.FileInfo, err error) (reterr error) {
+		if path[len(path)-4:] == ".pdf" {
+			os.Remove(path)
 		}
-	}
-	return pw
+		return
+	})
 }
 
 func imageFile(fileStr string) string {
@@ -381,8 +341,8 @@ func ExampleFpdf_SetLeftMargin() {
 	// Successfully generated pdf/multicolumn.pdf
 }
 
-// Various table styles
-func ExampleFpdf_tutorial05() {
+// This example demonstrates various table styles.
+func ExampleFpdf_CellFormat_1() {
 	pdf := gofpdf.New("P", "mm", "A4", "")
 	type countryType struct {
 		nameStr, capitalStr, areaStr, popStr string
@@ -496,14 +456,16 @@ func ExampleFpdf_tutorial05() {
 	improvedTable()
 	pdf.AddPage()
 	fancyTable()
-	pdf.OutputAndClose(docWriter(pdf, 5))
+	fileStr := exampleFilename("tables")
+	err := pdf.OutputFileAndClose(fileStr)
+	summary(err, fileStr)
 	// Output:
-	// Successfully generated pdf/tutorial05.pdf
+	// Successfully generated pdf/tables.pdf
 }
 
 // This example demonstrates internal and external links with and without basic
 // HTML.
-func ExampleFpdf_tutorial06() {
+func ExampleFpdf_HTMLBasicNew() {
 	pdf := gofpdf.New("P", "mm", "A4", "")
 	// First page: manual local link
 	pdf.AddPage()
@@ -527,25 +489,29 @@ func ExampleFpdf_tutorial06() {
 		`<a href="http://www.fpdf.org">www.fpdf.org</a>, or on an image: click on the logo.`
 	html := pdf.HTMLBasicNew()
 	html.Write(lineHt, htmlStr)
-	pdf.OutputAndClose(docWriter(pdf, 6))
+	fileStr := exampleFilename("html")
+	err := pdf.OutputFileAndClose(fileStr)
+	summary(err, fileStr)
 	// Output:
-	// Successfully generated pdf/tutorial06.pdf
+	// Successfully generated pdf/html.pdf
 }
 
-// Non-standard font
-func ExampleFpdf_tutorial07() {
+// This example demonstrates the use of a non-standard font.
+func ExampleFpdf_AddFont() {
 	pdf := gofpdf.New("P", "mm", "A4", cnFontDir)
 	pdf.AddFont("Calligrapher", "", "calligra.json")
 	pdf.AddPage()
 	pdf.SetFont("Calligrapher", "", 35)
 	pdf.Cell(0, 10, "Enjoy new fonts with FPDF!")
-	pdf.OutputAndClose(docWriter(pdf, 7))
+	fileStr := exampleFilename("font")
+	err := pdf.OutputFileAndClose(fileStr)
+	summary(err, fileStr)
 	// Output:
-	// Successfully generated pdf/tutorial07.pdf
+	// Successfully generated pdf/font.pdf
 }
 
-// Various image types
-func ExampleFpdf_tutorial08() {
+// This example demonstrates how images are included in documents.
+func ExampleFpdf_Image() {
 	pdf := gofpdf.New("P", "mm", "A4", "")
 	pdf.AddPage()
 	pdf.SetFont("Arial", "", 11)
@@ -559,13 +525,15 @@ func ExampleFpdf_tutorial08() {
 	pdf.Text(50, 110, "logo-rgb.png")
 	pdf.Image(imageFile("logo.jpg"), 10, 130, 30, 0, false, "", 0, "")
 	pdf.Text(50, 140, "logo.jpg")
-	pdf.OutputAndClose(docWriter(pdf, 8))
+	fileStr := exampleFilename("image")
+	err := pdf.OutputFileAndClose(fileStr)
+	summary(err, fileStr)
 	// Output:
-	// Successfully generated pdf/tutorial08.pdf
+	// Successfully generated pdf/image.pdf
 }
 
-// Landscape mode with logos
-func ExampleFpdf_tutorial09() {
+// This examples demonstrates Landscape mode with images.
+func ExampleFpdf_SetAcceptPageBreakFunc() {
 	var y0 float64
 	var crrntCol int
 	loremStr := lorem()
@@ -616,13 +584,15 @@ func ExampleFpdf_tutorial09() {
 		pdf.MultiCell(colWd, 5, loremStr, "", "", false)
 		pdf.Ln(-1)
 	}
-	pdf.OutputAndClose(docWriter(pdf, 9))
+	fileStr := exampleFilename("landscape")
+	err := pdf.OutputFileAndClose(fileStr)
+	summary(err, fileStr)
 	// Output:
-	// Successfully generated pdf/tutorial09.pdf
+	// Successfully generated pdf/landscape.pdf
 }
 
-// Test the corner cases as reported by the gocov tool
-func ExampleFpdf_tutorial10() {
+// This examples tests corner cases as reported by the gocov tool.
+func ExampleFpdf_SetKeywords() {
 	gofpdf.MakeFont(fontFile("calligra.ttf"), fontFile("cp1252.map"), cnFontDir, nil, true)
 	pdf := gofpdf.New("", "", "", "")
 	pdf.SetFontLocation(cnFontDir)
@@ -635,13 +605,15 @@ func ExampleFpdf_tutorial10() {
 	pdf.AddPage()
 	pdf.SetFont("Calligrapher", "", 16)
 	pdf.Writef(5, "\x95 %s \x95", pdf)
-	pdf.OutputAndClose(docWriter(pdf, 10))
+	fileStr := exampleFilename("keywords")
+	err := pdf.OutputFileAndClose(fileStr)
+	summary(err, fileStr)
 	// Output:
-	// Successfully generated pdf/tutorial10.pdf
+	// Successfully generated pdf/keywords.pdf
 }
 
-// Geometric figures
-func ExampleFpdf_tutorial11() {
+// This example demonstrates the construction of various geometric figures,
+func ExampleFpdf_Circle() {
 	const (
 		thin  = 0.2
 		thick = 3.0
@@ -716,13 +688,15 @@ func ExampleFpdf_tutorial11() {
 	pdf.SetLineWidth(thin)
 	pdf.SetLineCapStyle("butt")
 
-	pdf.OutputAndClose(docWriter(pdf, 11))
+	fileStr := exampleFilename("figures")
+	err := pdf.OutputFileAndClose(fileStr)
+	summary(err, fileStr)
 	// Output:
-	// Successfully generated pdf/tutorial11.pdf
+	// Successfully generated pdf/figures.pdf
 }
 
-// Transparency
-func ExampleFpdf_tutorial12() {
+// This example demonstrates alpha transparency.
+func ExampleFpdf_SetAlpha() {
 	const (
 		gapX  = 10.0
 		gapY  = 9.0
@@ -765,13 +739,15 @@ func ExampleFpdf_tutorial12() {
 		}
 		y += rectH + gapY
 	}
-	pdf.OutputAndClose(docWriter(pdf, 12))
+	fileStr := exampleFilename("transparency")
+	err := pdf.OutputFileAndClose(fileStr)
+	summary(err, fileStr)
 	// Output:
-	// Successfully generated pdf/tutorial12.pdf
+	// Successfully generated pdf/transparency.pdf
 }
 
-// Gradients
-func ExampleFpdf_tutorial13() {
+// This example deomstrates various gradients.
+func ExampleFpdf_LinearGradient() {
 	pdf := gofpdf.New("", "", "", "")
 	pdf.SetFont("Helvetica", "", 12)
 	pdf.AddPage()
@@ -784,13 +760,15 @@ func ExampleFpdf_tutorial13() {
 	pdf.Rect(20, 120, 75, 75, "D")
 	pdf.RadialGradient(115, 120, 75, 75, 220, 220, 250, 80, 80, 220, 0.25, 0.75, 0.75, 0.75, 0.75)
 	pdf.Rect(115, 120, 75, 75, "D")
-	pdf.OutputAndClose(docWriter(pdf, 13))
+	fileStr := exampleFilename("gradient")
+	err := pdf.OutputFileAndClose(fileStr)
+	summary(err, fileStr)
 	// Output:
-	// Successfully generated pdf/tutorial13.pdf
+	// Successfully generated pdf/gradient.pdf
 }
 
-// Clipping examples
-func ExampleFpdf_tutorial14() {
+// This example demonstrates clipping.
+func ExampleFpdf_ClipText() {
 	pdf := gofpdf.New("", "", "", "")
 	y := 10.0
 	pdf.AddPage()
@@ -844,13 +822,15 @@ func ExampleFpdf_tutorial14() {
 	pdf.MultiCell(130, 5, lorem(), "", "", false)
 	pdf.ClipEnd()
 
-	pdf.OutputAndClose(docWriter(pdf, 14))
+	fileStr := exampleFilename("clip")
+	err := pdf.OutputFileAndClose(fileStr)
+	summary(err, fileStr)
 	// Output:
-	// Successfully generated pdf/tutorial14.pdf
+	// Successfully generated pdf/clip.pdf
 }
 
-// Page size example
-func ExampleFpdf_tutorial15() {
+// This example generates a PDF document with various page sizes.
+func ExampleFpdf_PageSize() {
 	pdf := gofpdf.NewCustom(&gofpdf.InitType{
 		UnitStr:    "in",
 		Size:       gofpdf.SizeType{Wd: 6, Ht: 6},
@@ -871,17 +851,19 @@ func ExampleFpdf_tutorial15() {
 		wd, ht, u := pdf.PageSize(j)
 		fmt.Printf("%d: %6.2f %s, %6.2f %s\n", j, wd, u, ht, u)
 	}
-	pdf.OutputAndClose(docWriter(pdf, 15))
+	fileStr := exampleFilename("pagesize")
+	err := pdf.OutputFileAndClose(fileStr)
+	summary(err, fileStr)
 	// Output:
 	// 0:   6.00 in,   6.00 in
 	// 1:  12.00 in,   3.00 in
 	// 2:   6.00 in,   6.00 in
 	// 3:   3.00 in,  12.00 in
-	// Successfully generated pdf/tutorial15.pdf
+	// Successfully generated pdf/pagesize.pdf
 }
 
-// Bookmark test
-func ExampleFpdf_tutorial16() {
+// This example demonstrates the Bookmark method.
+func ExampleFpdf_Bookmark() {
 	pdf := gofpdf.New("P", "mm", "A4", "")
 	pdf.AddPage()
 	pdf.SetFont("Arial", "", 15)
@@ -895,14 +877,16 @@ func ExampleFpdf_tutorial16() {
 	pdf.Bookmark("Page 2", 0, 0)
 	pdf.Bookmark("Paragraph 3", 1, -1)
 	pdf.Cell(0, 6, "Paragraph 3")
-	pdf.OutputAndClose(docWriter(pdf, 16))
+	fileStr := exampleFilename("bookmark")
+	err := pdf.OutputFileAndClose(fileStr)
+	summary(err, fileStr)
 	// Output:
-	// Successfully generated pdf/tutorial16.pdf
+	// Successfully generated pdf/bookmark.pdf
 }
 
-// Transformation test adapted from an example script by Moritz Wagner and
-// Andreas Würmser.
-func ExampleFpdf_tutorial17() {
+// This example demonstrates various transformations. It is adapted from an
+// example script by Moritz Wagner and Andreas Würmser.
+func ExampleFpdf_TransformBegin() {
 	const (
 		light = 200
 		dark  = 0
@@ -1014,13 +998,15 @@ func ExampleFpdf_tutorial17() {
 	refDupe()
 	pdf.TransformEnd()
 
-	pdf.OutputAndClose(docWriter(pdf, 17))
+	fileStr := exampleFilename("transform")
+	err := pdf.OutputFileAndClose(fileStr)
+	summary(err, fileStr)
 	// Output:
-	// Successfully generated pdf/tutorial17.pdf
+	// Successfully generated pdf/transform.pdf
 }
 
-// Example to demonstrate Lawrence Kesteloot's image registration code.
-func ExampleFpdf_tutorial18() {
+// This example demonstrates Lawrence Kesteloot's image registration code.
+func ExampleFpdf_RegisterImage() {
 	const (
 		margin = 10
 		wd     = 210
@@ -1034,15 +1020,15 @@ func ExampleFpdf_tutorial18() {
 		"logo-progressive.jpg",
 	}
 	var infoPtr *gofpdf.ImageInfoType
-	var fileStr string
+	var imageFileStr string
 	var imgWd, imgHt, lf, tp float64
 	pdf := gofpdf.New("P", "mm", "A4", "")
 	pdf.AddPage()
 	pdf.SetMargins(10, 10, 10)
 	pdf.SetFont("Helvetica", "", 15)
 	for j, str := range fileList {
-		fileStr = imageFile(str)
-		infoPtr = pdf.RegisterImage(fileStr, "")
+		imageFileStr = imageFile(str)
+		infoPtr = pdf.RegisterImage(imageFileStr, "")
 		imgWd, imgHt = infoPtr.Extent()
 		switch j {
 		case 0:
@@ -1061,15 +1047,17 @@ func ExampleFpdf_tutorial18() {
 			lf = wd - imgWd - margin
 			tp = ht - imgHt - margin
 		}
-		pdf.Image(fileStr, lf, tp, imgWd, imgHt, false, "", 0, "")
+		pdf.Image(imageFileStr, lf, tp, imgWd, imgHt, false, "", 0, "")
 	}
-	pdf.OutputAndClose(docWriter(pdf, 18))
+	fileStr := exampleFilename("registerimage")
+	err := pdf.OutputFileAndClose(fileStr)
+	summary(err, fileStr)
 	// Output:
-	// Successfully generated pdf/tutorial18.pdf
+	// Successfully generated pdf/registerimage.pdf
 }
 
-// Example to demonstrate Bruno Michel's line splitting function.
-func ExampleFpdf_tutorial19() {
+// This example demonstrates Bruno Michel's line splitting function.
+func ExampleFpdf_SplitLines() {
 	const (
 		fontPtSize = 18.0
 		wd         = 100.0
@@ -1090,14 +1078,16 @@ func ExampleFpdf_tutorial19() {
 	for _, line := range lines {
 		pdf.CellFormat(190.0, lineHt, string(line), "", 1, "C", false, 0, "")
 	}
-	pdf.OutputAndClose(docWriter(pdf, 19))
+	fileStr := exampleFilename("splitlines")
+	err := pdf.OutputFileAndClose(fileStr)
+	summary(err, fileStr)
 	// Output:
-	// Successfully generated pdf/tutorial19.pdf
+	// Successfully generated pdf/splitlines.pdf
 }
 
 // This example demonstrates how to render a simple path-only SVG image of the
 // type generated by the jSignature web control.
-func ExampleFpdf_tutorial20() {
+func ExampleFpdf_SVGBasicWrite() {
 	const (
 		fontPtSize = 16.0
 		wd         = 100.0
@@ -1136,14 +1126,16 @@ func ExampleFpdf_tutorial20() {
 	} else {
 		pdf.SetError(err)
 	}
-	pdf.OutputAndClose(docWriter(pdf, 20))
+	fileStr := exampleFilename("svg")
+	err = pdf.OutputFileAndClose(fileStr)
+	summary(err, fileStr)
 	// Output:
-	// Successfully generated pdf/tutorial20.pdf
+	// Successfully generated pdf/svg.pdf
 }
 
 // This example demonstrates Stefan Schroeder's code to control vertical
 // alignment.
-func ExampleFpdf_tutorial21() {
+func ExampleFpdf_CellFormat_2() {
 	type recType struct {
 		align, txt string
 	}
@@ -1173,15 +1165,17 @@ func ExampleFpdf_tutorial21() {
 		}
 		linkStr = "https://github.com/jung-kurt/gofpdf"
 	}
-	pdf.OutputAndClose(docWriter(pdf, 21))
+	fileStr := exampleFilename("align")
+	err := pdf.OutputFileAndClose(fileStr)
+	summary(err, fileStr)
 	// Output:
-	// Successfully generated pdf/tutorial21.pdf
+	// Successfully generated pdf/align.pdf
 }
 
 // This example demonstrates the use of characters in the high range of the
-// Windows-1252 code page (gofdpf default). See the following example (23) for
-// a way to do this automatically.
-func ExampleFpdf_tutorial22() {
+// Windows-1252 code page (gofdpf default). See the example for CellFormat (4)
+// for a way to do this automatically.
+func ExampleFpdf_CellFormat_3() {
 	pdf := gofpdf.New("P", "mm", "A4", "") // A4 210.0 x 297.0
 	fontSize := 16.0
 	pdf.SetFont("Helvetica", "", fontSize)
@@ -1203,14 +1197,16 @@ func ExampleFpdf_tutorial22() {
 	write("Falsches \xdcben von Xylophonmusik qu\xe4lt jeden gr\xf6\xdferen Zwerg.")
 	write("Heiz\xf6lr\xfccksto\xdfabd\xe4mpfung")
 	write("For\xe5rsj\xe6vnd\xf8gn / Efter\xe5rsj\xe6vnd\xf8gn")
-	pdf.OutputAndClose(docWriter(pdf, 22))
+	fileStr := exampleFilename("codepageescape")
+	err := pdf.OutputFileAndClose(fileStr)
+	summary(err, fileStr)
 	// Output:
-	// Successfully generated pdf/tutorial22.pdf
+	// Successfully generated pdf/codepageescape.pdf
 }
 
-// This example demonstrates the conversion of UTF-8 strings to an 8-bit font
-// encoding.
-func ExampleFpdf_tutorial23() {
+// This example demonstrates the automatic conversion of UTF-8 strings to an
+// 8-bit font encoding.
+func ExampleFpdf_CellFormat_4() {
 	pdf := gofpdf.New("P", "mm", "A4", cnFontDir) // A4 210.0 x 297.0
 	// See documentation for details on how to generate fonts
 	pdf.AddFont("Helvetica-1251", "", "helvetica_1251.json")
@@ -1241,26 +1237,30 @@ func ExampleFpdf_tutorial23() {
 	tr = pdf.UnicodeTranslatorFromDescriptor("cp1253")
 	write("Θέλει αρετή και τόλμη η ελευθερία. (Ανδρέας Κάλβος)")
 
-	pdf.OutputAndClose(docWriter(pdf, 23))
+	fileStr := exampleFilename("codepage")
+	err := pdf.OutputFileAndClose(fileStr)
+	summary(err, fileStr)
 	// Output:
-	// Successfully generated pdf/tutorial23.pdf
+	// Successfully generated pdf/codepage.pdf
 }
 
-// This example demonstrates document protection.
-func ExampleFpdf_tutorial24() {
+// This example demonstrates password protection for documents.
+func ExampleFpdf_SetProtection() {
 	pdf := gofpdf.New("P", "mm", "A4", "")
 	pdf.SetProtection(gofpdf.CnProtectPrint, "123", "abc")
 	pdf.AddPage()
 	pdf.SetFont("Arial", "", 12)
 	pdf.Write(10, "Password-protected.")
-	pdf.OutputAndClose(docWriter(pdf, 24))
+	fileStr := exampleFilename("protection")
+	err := pdf.OutputFileAndClose(fileStr)
+	summary(err, fileStr)
 	// Output:
-	// Successfully generated pdf/tutorial24.pdf
+	// Successfully generated pdf/protection.pdf
 }
 
 // This example displays equilateral polygons in a demonstration of the Polygon
 // function.
-func ExampleFpdf_tutorial25() {
+func ExampleFpdf_Polygon() {
 	const rowCount = 5
 	const colCount = 4
 	const ptSize = 36
@@ -1299,16 +1299,18 @@ func ExampleFpdf_tutorial25() {
 		}
 		y += advance
 	}
-	pdf.OutputAndClose(docWriter(pdf, 25))
+	fileStr := exampleFilename("polygon")
+	err := pdf.OutputFileAndClose(fileStr)
+	summary(err, fileStr)
 	// Output:
-	// Successfully generated pdf/tutorial25.pdf
+	// Successfully generated pdf/polygon.pdf
 }
 
 // This example demonstrates document layers. The initial visibility of a layer
 // is specified with the second parameter to AddLayer(). The layer list
 // displayed by the document reader allows layer visibility to be controlled
 // interactively.
-func ExampleFpdf_tutorial26() {
+func ExampleFpdf_AddLayer() {
 
 	pdf := gofpdf.New("P", "mm", "A4", "")
 	pdf.AddPage()
@@ -1337,15 +1339,17 @@ func ExampleFpdf_tutorial26() {
 	pdf.Write(8, "This line belongs to layer 1 again.\n")
 	pdf.EndLayer()
 
-	pdf.OutputAndClose(docWriter(pdf, 26))
+	fileStr := exampleFilename("layer")
+	err := pdf.OutputFileAndClose(fileStr)
+	summary(err, fileStr)
 	// Output:
-	// Successfully generated pdf/tutorial26.pdf
+	// Successfully generated pdf/layer.pdf
 
 }
 
 // This example demonstrates the use of an image that is retrieved from a web
 // server.
-func ExampleFpdf_tutorial27() {
+func ExampleFpdf_RegisterImageReader() {
 
 	const (
 		margin   = 10
@@ -1378,14 +1382,16 @@ func ExampleFpdf_tutorial27() {
 	} else {
 		pdf.SetError(err)
 	}
-	pdf.OutputAndClose(docWriter(pdf, 27))
+	fileStr := exampleFilename("imagemime")
+	err = pdf.OutputFileAndClose(fileStr)
+	summary(err, fileStr)
 	// Output:
-	// Successfully generated pdf/tutorial27.pdf
+	// Successfully generated pdf/imagemime.pdf
 
 }
 
 // This example demonstrates the Beziergon function.
-func ExampleFpdf_tutorial28() {
+func ExampleFpdf_Beziergon() {
 
 	const (
 		margin      = 10
@@ -1465,31 +1471,37 @@ func ExampleFpdf_tutorial28() {
 	pdf.SetDrawColor(64, 64, 128)
 	pdf.SetLineWidth(pdf.GetLineWidth() * 3)
 	pdf.Beziergon(curveList, "D")
-	pdf.OutputAndClose(docWriter(pdf, 28))
+	fileStr := exampleFilename("beziergon")
+	err := pdf.OutputFileAndClose(fileStr)
+	summary(err, fileStr)
 	// Output:
-	// Successfully generated pdf/tutorial28.pdf
+	// Successfully generated pdf/beziergon.pdf
 
 }
 
-// Non-standard font using generalized font loader
-func ExampleFpdf_tutorial29() {
+// This example demonstrates loading a non-standard font using a generalized
+// font loader. fontResourceType implements the FontLoader interface and is
+// defined locally in the test source code.
+func ExampleFpdf_SetFontLoader() {
 	var fr fontResourceType
-	pdf := gofpdf.New("P", "mm", "A4", cnFontDir)
+	pdf := gofpdf.New("P", "mm", "A4", "")
 	pdf.SetFontLoader(fr)
 	pdf.AddFont("Calligrapher", "", "calligra.json")
 	pdf.AddPage()
 	pdf.SetFont("Calligrapher", "", 35)
 	pdf.Cell(0, 10, "Load fonts from any source")
-	pdf.OutputAndClose(docWriter(pdf, 29))
+	fileStr := exampleFilename("fontload")
+	err := pdf.OutputFileAndClose(fileStr)
+	summary(err, fileStr)
 	// Output:
 	// Generalized font loader reading calligra.json
 	// Generalized font loader reading calligra.z
-	// Successfully generated pdf/tutorial29.pdf
+	// Successfully generated pdf/fontload.pdf
 }
 
 // This example demonstrates the Path Drawing functions, such as: MoveTo,
 // LineTo, CurveTo, ..., ClosePath and DrawPath.
-func ExampleFpdf_tutorial30() {
+func ExampleFpdf_MoveTo() {
 	pdf := gofpdf.New("P", "mm", "A4", "")
 	pdf.AddPage()
 	pdf.MoveTo(20, 20)
@@ -1501,12 +1513,15 @@ func ExampleFpdf_tutorial30() {
 	pdf.SetFillColor(200, 200, 200)
 	pdf.SetLineWidth(3)
 	pdf.DrawPath("DF")
-	pdf.OutputAndClose(docWriter(pdf, 30))
+	fileStr := exampleFilename("path")
+	err := pdf.OutputFileAndClose(fileStr)
+	summary(err, fileStr)
 	// Output:
-	// Successfully generated pdf/tutorial30.pdf
+	// Successfully generated pdf/path.pdf
 }
 
-func ExampleFpdf_tutorial31() {
+// This example demonstrates various line cap and line join styles.
+func ExampleFpdf_SetLineJoinStyle() {
 	const offset = 75.0
 	pdf := gofpdf.New("L", "mm", "A4", "")
 	pdf.AddPage()
@@ -1539,14 +1554,15 @@ func ExampleFpdf_tutorial31() {
 		draw(caps[i], joins[i], x, 50, x, 160)
 		x += offset
 	}
-	pdf.OutputAndClose(docWriter(pdf, 31))
+	fileStr := exampleFilename("joinstyle")
+	err := pdf.OutputFileAndClose(fileStr)
+	summary(err, fileStr)
 	// Output:
-	// Successfully generated pdf/tutorial31.pdf
+	// Successfully generated pdf/joinstyle.pdf
 }
 
-// This example demonstrates the Path Drawing functions, such as: MoveTo,
-// LineTo, CurveTo, ..., ClosePath and DrawPath.
-func ExampleFpdf_tutorial32() {
+// This example demonstrates various fill modes.
+func ExampleFpdf_DrawPath() {
 	pdf := gofpdf.New("P", "mm", "A4", "")
 	pdf.SetDrawColor(0xff, 0x00, 0x00)
 	pdf.SetFillColor(0x99, 0x99, 0x99)
@@ -1614,7 +1630,9 @@ func ExampleFpdf_tutorial32() {
 	pdf.DrawPath("B*")
 	pdf.Text(115, 290, "B* (even odd)")
 
-	pdf.OutputAndClose(docWriter(pdf, 32))
+	fileStr := exampleFilename("fill")
+	err := pdf.OutputFileAndClose(fileStr)
+	summary(err, fileStr)
 	// Output:
-	// Successfully generated pdf/tutorial32.pdf
+	// Successfully generated pdf/fill.pdf
 }
