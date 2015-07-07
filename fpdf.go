@@ -330,6 +330,8 @@ func (f *Fpdf) SetFontLoader(loader FontLoader) {
 // is empty, so you have to provide an appropriate function if you want page
 // headers. fnc will typically be a closure that has access to the Fpdf
 // instance and other document generation variables.
+//
+// This method is demonstrated in the example for AddPage().
 func (f *Fpdf) SetHeaderFunc(fnc func()) {
 	f.headerFnc = fnc
 }
@@ -340,6 +342,8 @@ func (f *Fpdf) SetHeaderFunc(fnc func()) {
 // implementation in Fpdf is empty, so you have to provide an appropriate
 // function if you want page footers. fnc will typically be a closure that has
 // access to the Fpdf instance and other document generation variables.
+//
+// This method is demonstrated in the example for AddPage().
 func (f *Fpdf) SetFooterFunc(fnc func()) {
 	f.footerFnc = fnc
 }
@@ -469,6 +473,8 @@ func (f *Fpdf) SetCreator(creatorStr string, isUTF8 bool) {
 // AliasNbPages defines an alias for the total number of pages. It will be
 // substituted as the document is closed. An empty string is replaced with the
 // string "{nb}". This method is demonstrated in tutorial 2.
+//
+// See the example for AddPage() for a demonstration of this method.
 func (f *Fpdf) AliasNbPages(aliasStr string) {
 	if aliasStr == "" {
 		aliasStr = "{nb}"
@@ -657,6 +663,8 @@ func (f *Fpdf) AddPage() {
 }
 
 // PageNo returns the current page number.
+//
+// See the example for AddPage() for a demonstration of this method.
 func (f *Fpdf) PageNo() int {
 	return f.page
 }
@@ -1640,8 +1648,8 @@ func (f *Fpdf) Text(x, y float64, txtStr string) {
 // mode selected by SetAutoPageBreak. The function provided should not be
 // called by the application.
 //
-// See tutorial 4 for an example of how this function can be used to manage
-// multiple columns.
+// See the example for SetLeftMargin() to see how this function can be used to
+// manage multiple columns.
 func (f *Fpdf) SetAcceptPageBreakFunc(fnc func() bool) {
 	f.acceptPageBreak = fnc
 }
@@ -2115,6 +2123,8 @@ func (f *Fpdf) WriteLinkID(h float64, displayStr string, linkID int) {
 // Ln performs a line break. The current abscissa goes back to the left margin
 // and the ordinate increases by the amount passed in parameter. A negative
 // value of h indicates the height of the last printed cell.
+//
+// This method is demonstrated in the example for MultiCell.
 func (f *Fpdf) Ln(h float64) {
 	f.x = f.lMargin
 	if h < 0 {

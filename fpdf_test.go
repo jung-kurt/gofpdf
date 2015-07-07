@@ -34,10 +34,11 @@ import (
 
 // Absolute path needed for gocov tool; relative OK for test
 const (
-	cnGofpdfDir = "."
-	cnFontDir   = cnGofpdfDir + "/font"
-	cnImgDir    = cnGofpdfDir + "/image"
-	cnTextDir   = cnGofpdfDir + "/text"
+	cnGofpdfDir  = "."
+	cnFontDir    = cnGofpdfDir + "/font"
+	cnImgDir     = cnGofpdfDir + "/image"
+	cnTextDir    = cnGofpdfDir + "/text"
+	cnExampleDir = cnGofpdfDir + "/pdf"
 )
 
 type nullWriter struct {
@@ -105,6 +106,10 @@ func textFile(fileStr string) string {
 	return filepath.Join(cnTextDir, fileStr)
 }
 
+func exampleFile(fileStr string) string {
+	return filepath.Join(cnExampleDir, fileStr)
+}
+
 type fontResourceType struct {
 }
 
@@ -137,27 +142,37 @@ func lorem() string {
 		"officia deserunt mollit anim id est laborum."
 }
 
-// Hello, world. Note that since only core fonts are used (in this case Arial,
-// a synonym for Helvetica), an empty string can be specified for the font
-// directory in the call to New().
-func ExampleFpdf_tutorial01() {
+func exampleFilename(baseStr string) string {
+	return filepath.Join(cnExampleDir, baseStr+".pdf")
+}
+
+func summary(err error, fileStr string) {
+	if err == nil {
+		fmt.Printf("Successfully generated %s\n", fileStr)
+	} else {
+		fmt.Println(err)
+	}
+}
+
+// This example demonstrates the generation of a simple PDF document. Note that
+// since only core fonts are used (in this case Arial, a synonym for
+// Helvetica), an empty string can be specified for the font directory in the
+// call to New(). Note also that the exampleFilename and summary functions are
+// local to the test file and are not part of the gofpdf library.
+func Example() {
 	pdf := gofpdf.New("P", "mm", "A4", "")
 	pdf.AddPage()
 	pdf.SetFont("Arial", "B", 16)
 	pdf.Cell(40, 10, "Hello World!")
-	fileStr := filepath.Join(cnGofpdfDir, "pdf/tutorial01.pdf")
+	fileStr := exampleFilename("basic")
 	err := pdf.OutputFileAndClose(fileStr)
-	if err == nil {
-		fmt.Println("Successfully generated pdf/tutorial01.pdf")
-	} else {
-		fmt.Println(err)
-	}
+	summary(err, fileStr)
 	// Output:
-	// Successfully generated pdf/tutorial01.pdf
+	// Successfully generated pdf/basic.pdf
 }
 
-// Header, footer and page-breaking
-func ExampleFpdf_tutorial02() {
+// This example demonsrates the generation of headers, footers and page breaks.
+func ExampleFpdf_AddPage() {
 	pdf := gofpdf.New("P", "mm", "A4", "")
 	pdf.SetHeaderFunc(func() {
 		pdf.Image(imageFile("logo.png"), 10, 6, 30, 0, false, "", 0, "")
@@ -178,13 +193,16 @@ func ExampleFpdf_tutorial02() {
 	for j := 1; j <= 40; j++ {
 		pdf.CellFormat(0, 10, fmt.Sprintf("Printing line number %d", j), "", 1, "", false, 0, "")
 	}
-	pdf.OutputAndClose(docWriter(pdf, 2))
+	fileStr := exampleFilename("addpage")
+	err := pdf.OutputFileAndClose(fileStr)
+	summary(err, fileStr)
 	// Output:
-	// Successfully generated pdf/tutorial02.pdf
+	// Successfully generated pdf/addpage.pdf
 }
 
-// Word-wrapping, line justification and page-breaking
-func ExampleFpdf_tutorial03() {
+// This example demonstrates word-wrapping, line justification and
+// page-breaking.
+func ExampleFpdf_MultiCell() {
 	pdf := gofpdf.New("P", "mm", "A4", "")
 	titleStr := "20000 Leagues Under the Seas"
 	pdf.SetTitle(titleStr, false)
@@ -249,13 +267,16 @@ func ExampleFpdf_tutorial03() {
 	}
 	printChapter(1, "A RUNAWAY REEF", textFile("20k_c1.txt"))
 	printChapter(2, "THE PROS AND CONS", textFile("20k_c2.txt"))
-	pdf.OutputAndClose(docWriter(pdf, 3))
+	fileStr := exampleFilename("multicell")
+	err := pdf.OutputFileAndClose(fileStr)
+	summary(err, fileStr)
 	// Output:
-	// Successfully generated pdf/tutorial03.pdf
+	// Successfully generated pdf/multicell.pdf
 }
 
-// Multiple column layout
-func ExampleFpdf_tutorial04() {
+// This example demonstrates the generation of a PDF document that has multiple
+// columns. This is accomplished with the SetLeftMargin() and Cell() methods.
+func ExampleFpdf_SetLeftMargin() {
 	var y0 float64
 	var crrntCol int
 	pdf := gofpdf.New("P", "mm", "A4", "")
@@ -350,9 +371,11 @@ func ExampleFpdf_tutorial04() {
 	})
 	printChapter(1, "A RUNAWAY REEF", textFile("20k_c1.txt"))
 	printChapter(2, "THE PROS AND CONS", textFile("20k_c2.txt"))
-	pdf.OutputAndClose(docWriter(pdf, 4))
+	fileStr := exampleFilename("multicolumn")
+	err := pdf.OutputFileAndClose(fileStr)
+	summary(err, fileStr)
 	// Output:
-	// Successfully generated pdf/tutorial04.pdf
+	// Successfully generated pdf/multicolumn.pdf
 }
 
 // Various table styles
