@@ -158,7 +158,10 @@ func summary(err error, fileStr string) {
 // since only core fonts are used (in this case Arial, a synonym for
 // Helvetica), an empty string can be specified for the font directory in the
 // call to New(). Note also that the exampleFilename and summary functions are
-// local to the test file and are not part of the gofpdf library.
+// local to the test file and are not part of the gofpdf library. If an error
+// occurs at some point during the construction of the document, subsequent
+// method calls exit immediately and the error is finally retreived with the
+// output call where it can be handled by the application.
 func Example() {
 	pdf := gofpdf.New("P", "mm", "A4", "")
 	pdf.AddPage()
