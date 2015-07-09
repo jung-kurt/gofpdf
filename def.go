@@ -76,8 +76,21 @@ type ImageInfoType struct {
 // value expressed in the unit of measure specified in New(). Since font
 // management in Fpdf uses points, this method can help with line height
 // calculations and other methods that require user units.
-func (f *Fpdf) PointConvert(pt float64) float64 {
+func (f *Fpdf) PointConvert(pt float64) (u float64) {
 	return pt / f.k
+}
+
+// PointToUnitConvert is an alias for PointConvert.
+func (f *Fpdf) PointToUnitConvert(pt float64) (u float64) {
+	return pt / f.k
+}
+
+// UnitToPointConvert returns the value of u, expressed in the unit of measure
+// specified in New(), as a value expressed in points (1/72 inch). Since font
+// management in Fpdf uses points, this method can help with setting font sizes
+// based on the sizes of other non-font page elements.
+func (f *Fpdf) UnitToPointConvert(u float64) (pt float64) {
+	return u * f.k
 }
 
 // Extent returns the width and height of the image in the units of the Fpdf

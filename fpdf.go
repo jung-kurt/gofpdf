@@ -1528,13 +1528,27 @@ func (f *Fpdf) SetFont(familyStr, styleStr string, size float64) {
 	return
 }
 
-// SetFontSize defines the size of the current font in points.
+// SetFontSize defines the size of the current font. Size is specified in
+// points (1/ 72 inch). See also SetFontUnitSize().
 func (f *Fpdf) SetFontSize(size float64) {
 	if f.fontSizePt == size {
 		return
 	}
 	f.fontSizePt = size
 	f.fontSize = size / f.k
+	if f.page > 0 {
+		f.outf("BT /F%d %.2f Tf ET", f.currentFont.I, f.fontSizePt)
+	}
+}
+
+// SetFontUnitSize defines the size of the current font. Size is specified in
+// the unit of measure specified in New(). See also SetFontSize().
+func (f *Fpdf) SetFontSize(size float64) {
+	if f.fontSize == size {
+		return
+	}
+	f.fontSizePt = size * f.k
+	f.fontSize = size
 	if f.page > 0 {
 		f.outf("BT /F%d %.2f Tf ET", f.currentFont.I, f.fontSizePt)
 	}
@@ -2847,6 +2861,22 @@ func (f *Fpdf) outbuf(b *bytes.Buffer) {
 		f.buffer.ReadFrom(b)
 		f.buffer.WriteString("\n")
 	}
+}
+
+// RawWriteStr writes a string directly to the PDF generation buffer. This is a
+// low-level function that is not required for normal PDF construction. An
+// understanding of the PDF specification is needed to use this method
+// correctly.
+func (f *Fpdf) RawWriteStr(str string) {
+	f.out(str)
+}
+
+// RawWriteBuf writes the contents of the specified buffer directly to the PDF
+// generation buffer. This is a low-level function that is not required for
+// normal PDF construction. An understanding of the PDF specification is needed
+// to use this method correctly.
+func (f *Fpdf) RawWriteBuf(buf *bytes.Buffer) {
+	f.outbuf(buf)
 }
 
 // Add a formatted line to the document
