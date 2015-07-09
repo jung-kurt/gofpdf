@@ -156,11 +156,11 @@ func ExampleFpdf_AddPage() {
 	for j := 1; j <= 40; j++ {
 		pdf.CellFormat(0, 10, fmt.Sprintf("Printing line number %d", j), "", 1, "", false, 0, "")
 	}
-	fileStr := exampleFilename("addpage")
+	fileStr := exampleFilename("Fpdf_AddPage")
 	err := pdf.OutputFileAndClose(fileStr)
 	summary(err, fileStr)
 	// Output:
-	// Successfully generated pdf/addpage.pdf
+	// Successfully generated pdf/Fpdf_AddPage.pdf
 }
 
 // This example demonstrates word-wrapping, line justification and
@@ -230,11 +230,11 @@ func ExampleFpdf_MultiCell() {
 	}
 	printChapter(1, "A RUNAWAY REEF", textFile("20k_c1.txt"))
 	printChapter(2, "THE PROS AND CONS", textFile("20k_c2.txt"))
-	fileStr := exampleFilename("multicell")
+	fileStr := exampleFilename("Fpdf_MultiCell")
 	err := pdf.OutputFileAndClose(fileStr)
 	summary(err, fileStr)
 	// Output:
-	// Successfully generated pdf/multicell.pdf
+	// Successfully generated pdf/Fpdf_MultiCell.pdf
 }
 
 // This example demonstrates the generation of a PDF document that has multiple
@@ -334,11 +334,11 @@ func ExampleFpdf_SetLeftMargin() {
 	})
 	printChapter(1, "A RUNAWAY REEF", textFile("20k_c1.txt"))
 	printChapter(2, "THE PROS AND CONS", textFile("20k_c2.txt"))
-	fileStr := exampleFilename("multicolumn")
+	fileStr := exampleFilename("Fpdf_SetLeftMargin_multicolumn")
 	err := pdf.OutputFileAndClose(fileStr)
 	summary(err, fileStr)
 	// Output:
-	// Successfully generated pdf/multicolumn.pdf
+	// Successfully generated pdf/Fpdf_SetLeftMargin_multicolumn.pdf
 }
 
 // This example demonstrates various table styles.
@@ -456,11 +456,11 @@ func ExampleFpdf_CellFormat_1() {
 	improvedTable()
 	pdf.AddPage()
 	fancyTable()
-	fileStr := exampleFilename("tables")
+	fileStr := exampleFilename("Fpdf_CellFormat_1_tables")
 	err := pdf.OutputFileAndClose(fileStr)
 	summary(err, fileStr)
 	// Output:
-	// Successfully generated pdf/tables.pdf
+	// Successfully generated pdf/Fpdf_CellFormat_1_tables.pdf
 }
 
 // This example demonstrates internal and external links with and without basic
@@ -489,11 +489,11 @@ func ExampleFpdf_HTMLBasicNew() {
 		`<a href="http://www.fpdf.org">www.fpdf.org</a>, or on an image: click on the logo.`
 	html := pdf.HTMLBasicNew()
 	html.Write(lineHt, htmlStr)
-	fileStr := exampleFilename("html")
+	fileStr := exampleFilename("Fpdf_HTMLBasicNew")
 	err := pdf.OutputFileAndClose(fileStr)
 	summary(err, fileStr)
 	// Output:
-	// Successfully generated pdf/html.pdf
+	// Successfully generated pdf/Fpdf_HTMLBasicNew.pdf
 }
 
 // This example demonstrates the use of a non-standard font.
@@ -503,11 +503,11 @@ func ExampleFpdf_AddFont() {
 	pdf.AddPage()
 	pdf.SetFont("Calligrapher", "", 35)
 	pdf.Cell(0, 10, "Enjoy new fonts with FPDF!")
-	fileStr := exampleFilename("font")
+	fileStr := exampleFilename("Fpdf_AddFont")
 	err := pdf.OutputFileAndClose(fileStr)
 	summary(err, fileStr)
 	// Output:
-	// Successfully generated pdf/font.pdf
+	// Successfully generated pdf/Fpdf_AddFont.pdf
 }
 
 // This example demonstrates how images are included in documents.
@@ -525,11 +525,11 @@ func ExampleFpdf_Image() {
 	pdf.Text(50, 110, "logo-rgb.png")
 	pdf.Image(imageFile("logo.jpg"), 10, 130, 30, 0, false, "", 0, "")
 	pdf.Text(50, 140, "logo.jpg")
-	fileStr := exampleFilename("image")
+	fileStr := exampleFilename("Fpdf_Image")
 	err := pdf.OutputFileAndClose(fileStr)
 	summary(err, fileStr)
 	// Output:
-	// Successfully generated pdf/image.pdf
+	// Successfully generated pdf/Fpdf_Image.pdf
 }
 
 // This examples demonstrates Landscape mode with images.
@@ -584,11 +584,11 @@ func ExampleFpdf_SetAcceptPageBreakFunc() {
 		pdf.MultiCell(colWd, 5, loremStr, "", "", false)
 		pdf.Ln(-1)
 	}
-	fileStr := exampleFilename("landscape")
+	fileStr := exampleFilename("Fpdf_SetAcceptPageBreakFunc_landscape")
 	err := pdf.OutputFileAndClose(fileStr)
 	summary(err, fileStr)
 	// Output:
-	// Successfully generated pdf/landscape.pdf
+	// Successfully generated pdf/Fpdf_SetAcceptPageBreakFunc_landscape.pdf
 }
 
 // This examples tests corner cases as reported by the gocov tool.
@@ -605,11 +605,11 @@ func ExampleFpdf_SetKeywords() {
 	pdf.AddPage()
 	pdf.SetFont("Calligrapher", "", 16)
 	pdf.Writef(5, "\x95 %s \x95", pdf)
-	fileStr := exampleFilename("keywords")
+	fileStr := exampleFilename("Fpdf_SetKeywords")
 	err := pdf.OutputFileAndClose(fileStr)
 	summary(err, fileStr)
 	// Output:
-	// Successfully generated pdf/keywords.pdf
+	// Successfully generated pdf/Fpdf_SetKeywords.pdf
 }
 
 // This example demonstrates the construction of various geometric figures,
@@ -688,11 +688,11 @@ func ExampleFpdf_Circle() {
 	pdf.SetLineWidth(thin)
 	pdf.SetLineCapStyle("butt")
 
-	fileStr := exampleFilename("figures")
+	fileStr := exampleFilename("Fpdf_Circle_figures")
 	err := pdf.OutputFileAndClose(fileStr)
 	summary(err, fileStr)
 	// Output:
-	// Successfully generated pdf/figures.pdf
+	// Successfully generated pdf/Fpdf_Circle_figures.pdf
 }
 
 // This example demonstrates alpha transparency.
@@ -739,11 +739,11 @@ func ExampleFpdf_SetAlpha() {
 		}
 		y += rectH + gapY
 	}
-	fileStr := exampleFilename("transparency")
+	fileStr := exampleFilename("Fpdf_SetAlpha_transparency")
 	err := pdf.OutputFileAndClose(fileStr)
 	summary(err, fileStr)
 	// Output:
-	// Successfully generated pdf/transparency.pdf
+	// Successfully generated pdf/Fpdf_SetAlpha_transparency.pdf
 }
 
 // This example deomstrates various gradients.
@@ -760,11 +760,11 @@ func ExampleFpdf_LinearGradient() {
 	pdf.Rect(20, 120, 75, 75, "D")
 	pdf.RadialGradient(115, 120, 75, 75, 220, 220, 250, 80, 80, 220, 0.25, 0.75, 0.75, 0.75, 0.75)
 	pdf.Rect(115, 120, 75, 75, "D")
-	fileStr := exampleFilename("gradient")
+	fileStr := exampleFilename("Fpdf_LinearGradient_gradient")
 	err := pdf.OutputFileAndClose(fileStr)
 	summary(err, fileStr)
 	// Output:
-	// Successfully generated pdf/gradient.pdf
+	// Successfully generated pdf/Fpdf_LinearGradient_gradient.pdf
 }
 
 // This example demonstrates clipping.
@@ -822,11 +822,11 @@ func ExampleFpdf_ClipText() {
 	pdf.MultiCell(130, 5, lorem(), "", "", false)
 	pdf.ClipEnd()
 
-	fileStr := exampleFilename("clip")
+	fileStr := exampleFilename("Fpdf_ClipText")
 	err := pdf.OutputFileAndClose(fileStr)
 	summary(err, fileStr)
 	// Output:
-	// Successfully generated pdf/clip.pdf
+	// Successfully generated pdf/Fpdf_ClipText.pdf
 }
 
 // This example generates a PDF document with various page sizes.
@@ -851,7 +851,7 @@ func ExampleFpdf_PageSize() {
 		wd, ht, u := pdf.PageSize(j)
 		fmt.Printf("%d: %6.2f %s, %6.2f %s\n", j, wd, u, ht, u)
 	}
-	fileStr := exampleFilename("pagesize")
+	fileStr := exampleFilename("Fpdf_PageSize")
 	err := pdf.OutputFileAndClose(fileStr)
 	summary(err, fileStr)
 	// Output:
@@ -859,7 +859,7 @@ func ExampleFpdf_PageSize() {
 	// 1:  12.00 in,   3.00 in
 	// 2:   6.00 in,   6.00 in
 	// 3:   3.00 in,  12.00 in
-	// Successfully generated pdf/pagesize.pdf
+	// Successfully generated pdf/Fpdf_PageSize.pdf
 }
 
 // This example demonstrates the Bookmark method.
@@ -877,11 +877,11 @@ func ExampleFpdf_Bookmark() {
 	pdf.Bookmark("Page 2", 0, 0)
 	pdf.Bookmark("Paragraph 3", 1, -1)
 	pdf.Cell(0, 6, "Paragraph 3")
-	fileStr := exampleFilename("bookmark")
+	fileStr := exampleFilename("Fpdf_Bookmark")
 	err := pdf.OutputFileAndClose(fileStr)
 	summary(err, fileStr)
 	// Output:
-	// Successfully generated pdf/bookmark.pdf
+	// Successfully generated pdf/Fpdf_Bookmark.pdf
 }
 
 // This example demonstrates various transformations. It is adapted from an
@@ -998,11 +998,11 @@ func ExampleFpdf_TransformBegin() {
 	refDupe()
 	pdf.TransformEnd()
 
-	fileStr := exampleFilename("transform")
+	fileStr := exampleFilename("Fpdf_TransformBegin")
 	err := pdf.OutputFileAndClose(fileStr)
 	summary(err, fileStr)
 	// Output:
-	// Successfully generated pdf/transform.pdf
+	// Successfully generated pdf/Fpdf_TransformBegin.pdf
 }
 
 // This example demonstrates Lawrence Kesteloot's image registration code.
@@ -1049,11 +1049,11 @@ func ExampleFpdf_RegisterImage() {
 		}
 		pdf.Image(imageFileStr, lf, tp, imgWd, imgHt, false, "", 0, "")
 	}
-	fileStr := exampleFilename("registerimage")
+	fileStr := exampleFilename("Fpdf_RegisterImage")
 	err := pdf.OutputFileAndClose(fileStr)
 	summary(err, fileStr)
 	// Output:
-	// Successfully generated pdf/registerimage.pdf
+	// Successfully generated pdf/Fpdf_RegisterImage.pdf
 }
 
 // This example demonstrates Bruno Michel's line splitting function.
@@ -1078,11 +1078,11 @@ func ExampleFpdf_SplitLines() {
 	for _, line := range lines {
 		pdf.CellFormat(190.0, lineHt, string(line), "", 1, "C", false, 0, "")
 	}
-	fileStr := exampleFilename("splitlines")
+	fileStr := exampleFilename("Fpdf_Splitlines")
 	err := pdf.OutputFileAndClose(fileStr)
 	summary(err, fileStr)
 	// Output:
-	// Successfully generated pdf/splitlines.pdf
+	// Successfully generated pdf/Fpdf_Splitlines.pdf
 }
 
 // This example demonstrates how to render a simple path-only SVG image of the
@@ -1126,11 +1126,11 @@ func ExampleFpdf_SVGBasicWrite() {
 	} else {
 		pdf.SetError(err)
 	}
-	fileStr := exampleFilename("svg")
+	fileStr := exampleFilename("Fpdf_SVGBasicWrite")
 	err = pdf.OutputFileAndClose(fileStr)
 	summary(err, fileStr)
 	// Output:
-	// Successfully generated pdf/svg.pdf
+	// Successfully generated pdf/Fpdf_SVGBasicWrite.pdf
 }
 
 // This example demonstrates Stefan Schroeder's code to control vertical
@@ -1165,11 +1165,11 @@ func ExampleFpdf_CellFormat_2() {
 		}
 		linkStr = "https://github.com/jung-kurt/gofpdf"
 	}
-	fileStr := exampleFilename("align")
+	fileStr := exampleFilename("Fpdf_CellFormat_2_align")
 	err := pdf.OutputFileAndClose(fileStr)
 	summary(err, fileStr)
 	// Output:
-	// Successfully generated pdf/align.pdf
+	// Successfully generated pdf/Fpdf_CellFormat_2_align.pdf
 }
 
 // This example demonstrates the use of characters in the high range of the
@@ -1197,11 +1197,11 @@ func ExampleFpdf_CellFormat_3() {
 	write("Falsches \xdcben von Xylophonmusik qu\xe4lt jeden gr\xf6\xdferen Zwerg.")
 	write("Heiz\xf6lr\xfccksto\xdfabd\xe4mpfung")
 	write("For\xe5rsj\xe6vnd\xf8gn / Efter\xe5rsj\xe6vnd\xf8gn")
-	fileStr := exampleFilename("codepageescape")
+	fileStr := exampleFilename("Fpdf_CellFormat_3_codepageescape")
 	err := pdf.OutputFileAndClose(fileStr)
 	summary(err, fileStr)
 	// Output:
-	// Successfully generated pdf/codepageescape.pdf
+	// Successfully generated pdf/Fpdf_CellFormat_3_codepageescape.pdf
 }
 
 // This example demonstrates the automatic conversion of UTF-8 strings to an
@@ -1237,11 +1237,11 @@ func ExampleFpdf_CellFormat_4() {
 	tr = pdf.UnicodeTranslatorFromDescriptor("cp1253")
 	write("Θέλει αρετή και τόλμη η ελευθερία. (Ανδρέας Κάλβος)")
 
-	fileStr := exampleFilename("codepage")
+	fileStr := exampleFilename("Fpdf_CellFormat_4_codepage")
 	err := pdf.OutputFileAndClose(fileStr)
 	summary(err, fileStr)
 	// Output:
-	// Successfully generated pdf/codepage.pdf
+	// Successfully generated pdf/Fpdf_CellFormat_4_codepage.pdf
 }
 
 // This example demonstrates password protection for documents.
@@ -1251,11 +1251,11 @@ func ExampleFpdf_SetProtection() {
 	pdf.AddPage()
 	pdf.SetFont("Arial", "", 12)
 	pdf.Write(10, "Password-protected.")
-	fileStr := exampleFilename("protection")
+	fileStr := exampleFilename("Fpdf_SetProtection")
 	err := pdf.OutputFileAndClose(fileStr)
 	summary(err, fileStr)
 	// Output:
-	// Successfully generated pdf/protection.pdf
+	// Successfully generated pdf/Fpdf_SetProtection.pdf
 }
 
 // This example displays equilateral polygons in a demonstration of the Polygon
@@ -1299,11 +1299,11 @@ func ExampleFpdf_Polygon() {
 		}
 		y += advance
 	}
-	fileStr := exampleFilename("polygon")
+	fileStr := exampleFilename("Fpdf_Polygon")
 	err := pdf.OutputFileAndClose(fileStr)
 	summary(err, fileStr)
 	// Output:
-	// Successfully generated pdf/polygon.pdf
+	// Successfully generated pdf/Fpdf_Polygon.pdf
 }
 
 // This example demonstrates document layers. The initial visibility of a layer
@@ -1339,12 +1339,11 @@ func ExampleFpdf_AddLayer() {
 	pdf.Write(8, "This line belongs to layer 1 again.\n")
 	pdf.EndLayer()
 
-	fileStr := exampleFilename("layer")
+	fileStr := exampleFilename("Fpdf_AddLayer")
 	err := pdf.OutputFileAndClose(fileStr)
 	summary(err, fileStr)
 	// Output:
-	// Successfully generated pdf/layer.pdf
-
+	// Successfully generated pdf/Fpdf_AddLayer.pdf
 }
 
 // This example demonstrates the use of an image that is retrieved from a web
@@ -1382,11 +1381,11 @@ func ExampleFpdf_RegisterImageReader() {
 	} else {
 		pdf.SetError(err)
 	}
-	fileStr := exampleFilename("imagemime")
+	fileStr := exampleFilename("Fpdf_RegisterImageReader_url")
 	err = pdf.OutputFileAndClose(fileStr)
 	summary(err, fileStr)
 	// Output:
-	// Successfully generated pdf/imagemime.pdf
+	// Successfully generated pdf/Fpdf_RegisterImageReader_url.pdf
 
 }
 
@@ -1471,11 +1470,11 @@ func ExampleFpdf_Beziergon() {
 	pdf.SetDrawColor(64, 64, 128)
 	pdf.SetLineWidth(pdf.GetLineWidth() * 3)
 	pdf.Beziergon(curveList, "D")
-	fileStr := exampleFilename("beziergon")
+	fileStr := exampleFilename("Fpdf_Beziergon")
 	err := pdf.OutputFileAndClose(fileStr)
 	summary(err, fileStr)
 	// Output:
-	// Successfully generated pdf/beziergon.pdf
+	// Successfully generated pdf/Fpdf_Beziergon.pdf
 
 }
 
@@ -1490,13 +1489,13 @@ func ExampleFpdf_SetFontLoader() {
 	pdf.AddPage()
 	pdf.SetFont("Calligrapher", "", 35)
 	pdf.Cell(0, 10, "Load fonts from any source")
-	fileStr := exampleFilename("fontload")
+	fileStr := exampleFilename("Fpdf_SetFontLoader")
 	err := pdf.OutputFileAndClose(fileStr)
 	summary(err, fileStr)
 	// Output:
 	// Generalized font loader reading calligra.json
 	// Generalized font loader reading calligra.z
-	// Successfully generated pdf/fontload.pdf
+	// Successfully generated pdf/Fpdf_SetFontLoader.pdf
 }
 
 // This example demonstrates the Path Drawing functions, such as: MoveTo,
@@ -1513,11 +1512,11 @@ func ExampleFpdf_MoveTo() {
 	pdf.SetFillColor(200, 200, 200)
 	pdf.SetLineWidth(3)
 	pdf.DrawPath("DF")
-	fileStr := exampleFilename("path")
+	fileStr := exampleFilename("Fpdf_MoveTo_path")
 	err := pdf.OutputFileAndClose(fileStr)
 	summary(err, fileStr)
 	// Output:
-	// Successfully generated pdf/path.pdf
+	// Successfully generated pdf/Fpdf_MoveTo_path.pdf
 }
 
 // This example demonstrates various line cap and line join styles.
@@ -1554,11 +1553,11 @@ func ExampleFpdf_SetLineJoinStyle() {
 		draw(caps[i], joins[i], x, 50, x, 160)
 		x += offset
 	}
-	fileStr := exampleFilename("joinstyle")
+	fileStr := exampleFilename("Fpdf_SetLineJoinStyle_caps")
 	err := pdf.OutputFileAndClose(fileStr)
 	summary(err, fileStr)
 	// Output:
-	// Successfully generated pdf/joinstyle.pdf
+	// Successfully generated pdf/Fpdf_SetLineJoinStyle_caps.pdf
 }
 
 // This example demonstrates various fill modes.
@@ -1630,9 +1629,9 @@ func ExampleFpdf_DrawPath() {
 	pdf.DrawPath("B*")
 	pdf.Text(115, 290, "B* (even odd)")
 
-	fileStr := exampleFilename("fill")
+	fileStr := exampleFilename("Fpdf_DrawPath_fill")
 	err := pdf.OutputFileAndClose(fileStr)
 	summary(err, fileStr)
 	// Output:
-	// Successfully generated pdf/fill.pdf
+	// Successfully generated pdf/Fpdf_DrawPath_fill.pdf
 }
