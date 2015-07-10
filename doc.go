@@ -53,8 +53,6 @@ on Linux, Mac and Windows platforms. Like FPDF version 1.7, from which gofpdf
 is derived, this package does not yet support UTF-8 fonts. However, support is
 provided to translate UTF-8 runes to code page encodings.
 
-The FPDF website is http://www.fpdf.org/.
-
 Installation
 
 To install the package on your system, run
@@ -153,25 +151,26 @@ the contributors acknowledged below.
 Acknowledgments
 
 This package's code and documentation are closely derived from the FPDF library
-created by Olivier Plathey, and a number of font and image resources are copied
-directly from it. Drawing support is adapted from the FPDF geometric figures
-script by David Hernández Sanz. Transparency support is adapted from the FPDF
-transparency script by Martin Hall-May. Support for gradients and clipping is
-adapted from FPDF scripts by Andreas Würmser. Support for outline bookmarks is
-adapted from Olivier Plathey by Manuel Cornes. Layer support is adapted from
-Olivier Plathey. Support for transformations is adapted from the FPDF
-transformation script by Moritz Wagner and Andreas Würmser. PDF protection is
-adapted from the work of Klemen Vodopivec for the FPDF product. Lawrence
-Kesteloot provided code to allow an image's extent to be determined prior to
-placement. Support for vertical alignment within a cell was provided by Stefan
-Schroeder. Ivan Daniluk generalized the font and image loading code to use the
-Reader interface while maintaining backward compatibility. Anthony Starks
-provided code for the Polygon function. Robert Lillack provided the Beziergon
-function and corrected some naming issues with the internal curve function.
-Claudio Felber provided implementations for dashed line drawing and generalized
-font loading. Stani Michiels provided support for multi-segment path drawing
-with smooth line joins, line join styles and enhanced fill modes. Bruno Michel
-has provided valuable assistance with the code.
+(http://www.fpdf.org/) created by Olivier Plathey, and a number of font and
+image resources are copied directly from it. Drawing support is adapted from
+the FPDF geometric figures script by David Hernández Sanz. Transparency
+support is adapted from the FPDF transparency script by Martin Hall-May.
+Support for gradients and clipping is adapted from FPDF scripts by Andreas
+Würmser. Support for outline bookmarks is adapted from Olivier Plathey by
+Manuel Cornes. Layer support is adapted from Olivier Plathey. Support for
+transformations is adapted from the FPDF transformation script by Moritz Wagner
+and Andreas Würmser. PDF protection is adapted from the work of Klemen
+Vodopivec for the FPDF product. Lawrence Kesteloot provided code to allow an
+image's extent to be determined prior to placement. Support for vertical
+alignment within a cell was provided by Stefan Schroeder. Ivan Daniluk
+generalized the font and image loading code to use the Reader interface while
+maintaining backward compatibility. Anthony Starks provided code for the
+Polygon function. Robert Lillack provided the Beziergon function and corrected
+some naming issues with the internal curve function. Claudio Felber provided
+implementations for dashed line drawing and generalized font loading. Stani
+Michiels provided support for multi-segment path drawing with smooth line
+joins, line join styles and enhanced fill modes. Bruno Michel has provided
+valuable assistance with the code.
 
 Roadmap
 
