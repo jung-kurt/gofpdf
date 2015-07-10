@@ -126,13 +126,13 @@ package example, demonstrate this method. Good sources of free, open-source
 fonts include http://www.google.com/fonts/ and http://dejavu-fonts.org/.
 
 ##Related Packages
-The draw2d package (http://godoc.org/github.com/llgcode/draw2d) is a two
-dimensional vector graphics library that can generate output in different
-forms. It uses gofpdf for its document production.
+The draw2d package (https://github.com/llgcode/draw2d) is a two dimensional
+vector graphics library that can generate output in different forms. It uses
+gofpdf for its document production mode.
 
 ##License
 gofpdf is released under the MIT License. It is copyrighted by Kurt Jung and
-the contributors acknowledged above.
+the contributors acknowledged below.
 
 ##Acknowledgments
 This package's code and documentation are closely derived from the FPDF library
