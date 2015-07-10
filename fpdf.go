@@ -1543,7 +1543,7 @@ func (f *Fpdf) SetFontSize(size float64) {
 
 // SetFontUnitSize defines the size of the current font. Size is specified in
 // the unit of measure specified in New(). See also SetFontSize().
-func (f *Fpdf) SetFontSize(size float64) {
+func (f *Fpdf) SetFontUnitSize(size float64) {
 	if f.fontSize == size {
 		return
 	}
