@@ -53,35 +53,7 @@ on Linux, Mac and Windows platforms. Like FPDF version 1.7, from which gofpdf
 is derived, this package does not yet support UTF-8 fonts. However, support is
 provided to translate UTF-8 runes to code page encodings.
 
-Acknowledgments
-
-This package's code and documentation are closely derived from the FPDF library
-created by Olivier Plathey, and a number of font and image resources are copied
-directly from it. Drawing support is adapted from the FPDF geometric figures
-script by David Hernández Sanz. Transparency support is adapted from the FPDF
-transparency script by Martin Hall-May. Support for gradients and clipping is
-adapted from FPDF scripts by Andreas Würmser. Support for outline bookmarks is
-adapted from Olivier Plathey by Manuel Cornes. Layer support is adapted from
-Olivier Plathey. Support for transformations is adapted from the FPDF
-transformation script by Moritz Wagner and Andreas Würmser. PDF protection is
-adapted from the work of Klemen Vodopivec for the FPDF product. Lawrence
-Kesteloot provided code to allow an image's extent to be determined prior to
-placement. Support for vertical alignment within a cell was provided by Stefan
-Schroeder. Ivan Daniluk generalized the font and image loading code to use the
-Reader interface while maintaining backward compatibility. Anthony Starks
-provided code for the Polygon function. Robert Lillack provided the Beziergon
-function and corrected some naming issues with the internal curve function.
-Claudio Felber provided implementations for dashed line drawing and generalized
-font loading. Stani Michiels provided support for multi-segment path drawing
-with smooth line joins, line join styles and enhanced fill modes. Bruno Michel
-has provided valuable assistance with the code.
-
 The FPDF website is http://www.fpdf.org/.
-
-License
-
-gofpdf is released under the MIT License. It is copyrighted by Kurt Jung and
-the contributors acknowledged above.
 
 Installation
 
@@ -166,6 +138,40 @@ In your PDF generation code, call AddFont() to load the font and, as with the
 standard fonts, SetFont() to begin using it. Most examples, including the
 package example, demonstrate this method. Good sources of free, open-source
 fonts include http://www.google.com/fonts/ and http://dejavu-fonts.org/.
+
+Related Packages
+
+The draw2d package (https://github.com/llgcode/draw2d) is a two dimensional
+vector graphics library that can generate output in different forms. It uses
+gofpdf for its document production.
+
+License
+
+gofpdf is released under the MIT License. It is copyrighted by Kurt Jung and
+the contributors acknowledged above.
+
+Acknowledgments
+
+This package's code and documentation are closely derived from the FPDF library
+created by Olivier Plathey, and a number of font and image resources are copied
+directly from it. Drawing support is adapted from the FPDF geometric figures
+script by David Hernández Sanz. Transparency support is adapted from the FPDF
+transparency script by Martin Hall-May. Support for gradients and clipping is
+adapted from FPDF scripts by Andreas Würmser. Support for outline bookmarks is
+adapted from Olivier Plathey by Manuel Cornes. Layer support is adapted from
+Olivier Plathey. Support for transformations is adapted from the FPDF
+transformation script by Moritz Wagner and Andreas Würmser. PDF protection is
+adapted from the work of Klemen Vodopivec for the FPDF product. Lawrence
+Kesteloot provided code to allow an image's extent to be determined prior to
+placement. Support for vertical alignment within a cell was provided by Stefan
+Schroeder. Ivan Daniluk generalized the font and image loading code to use the
+Reader interface while maintaining backward compatibility. Anthony Starks
+provided code for the Polygon function. Robert Lillack provided the Beziergon
+function and corrected some naming issues with the internal curve function.
+Claudio Felber provided implementations for dashed line drawing and generalized
+font loading. Stani Michiels provided support for multi-segment path drawing
+with smooth line joins, line join styles and enhanced fill modes. Bruno Michel
+has provided valuable assistance with the code.
 
 Roadmap
 
