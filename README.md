@@ -51,14 +51,14 @@ go get -u github.com/jung-kurt/gofpdf
 ```
 
 ##Quick Start
-The following Go code generates a simple PDF and writes it to standard output.
+The following Go code generates a simple PDF file.
 
 ```
 pdf := gofpdf.New("P", "mm", "A4", "")
 pdf.AddPage()
 pdf.SetFont("Arial", "B", 16)
 pdf.Cell(40, 10, "Hello, world")
-pdf.Output(os.Stdout)
+err := pdf.OutputFileAndClose("hello.pdf")
 ```
 
 See the functions in the fpdf_test.go file (shown as examples in this
