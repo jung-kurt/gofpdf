@@ -46,12 +46,13 @@ func init() {
 }
 
 func cleanup() {
-	filepath.Walk(cnExampleDir, func(path string, info os.FileInfo, err error) (reterr error) {
-		if path[len(path)-4:] == ".pdf" {
-			os.Remove(path)
-		}
-		return
-	})
+	filepath.Walk(cnExampleDir,
+		func(path string, info os.FileInfo, err error) (reterr error) {
+			if path[len(path)-4:] == ".pdf" {
+				os.Remove(path)
+			}
+			return
+		})
 }
 
 func imageFile(fileStr string) string {
@@ -148,13 +149,15 @@ func ExampleFpdf_AddPage() {
 	pdf.SetFooterFunc(func() {
 		pdf.SetY(-15)
 		pdf.SetFont("Arial", "I", 8)
-		pdf.CellFormat(0, 10, fmt.Sprintf("Page %d/{nb}", pdf.PageNo()), "", 0, "C", false, 0, "")
+		pdf.CellFormat(0, 10, fmt.Sprintf("Page %d/{nb}", pdf.PageNo()),
+			"", 0, "C", false, 0, "")
 	})
 	pdf.AliasNbPages("")
 	pdf.AddPage()
 	pdf.SetFont("Times", "", 12)
 	for j := 1; j <= 40; j++ {
-		pdf.CellFormat(0, 10, fmt.Sprintf("Printing line number %d", j), "", 1, "", false, 0, "")
+		pdf.CellFormat(0, 10, fmt.Sprintf("Printing line number %d", j),
+			"", 1, "", false, 0, "")
 	}
 	fileStr := exampleFilename("Fpdf_AddPage")
 	err := pdf.OutputFileAndClose(fileStr)
@@ -195,7 +198,8 @@ func ExampleFpdf_MultiCell() {
 		// Text color in gray
 		pdf.SetTextColor(128, 128, 128)
 		// Page number
-		pdf.CellFormat(0, 10, fmt.Sprintf("Page %d", pdf.PageNo()), "", 0, "C", false, 0, "")
+		pdf.CellFormat(0, 10, fmt.Sprintf("Page %d", pdf.PageNo()),
+			"", 0, "C", false, 0, "")
 	})
 	chapterTitle := func(chapNum int, titleStr string) {
 		// 	// Arial 12
@@ -203,7 +207,8 @@ func ExampleFpdf_MultiCell() {
 		// Background color
 		pdf.SetFillColor(200, 220, 255)
 		// Title
-		pdf.CellFormat(0, 6, fmt.Sprintf("Chapter %d : %s", chapNum, titleStr), "", 1, "L", true, 0, "")
+		pdf.CellFormat(0, 6, fmt.Sprintf("Chapter %d : %s", chapNum, titleStr),
+			"", 1, "L", true, 0, "")
 		// Line break
 		pdf.Ln(4)
 	}
@@ -260,7 +265,8 @@ func ExampleFpdf_SetLeftMargin() {
 		// Background color
 		pdf.SetFillColor(200, 220, 255)
 		// Title
-		pdf.CellFormat(0, 6, fmt.Sprintf("Chapter %d : %s", chapNum, titleStr), "", 1, "L", true, 0, "")
+		pdf.CellFormat(0, 6, fmt.Sprintf("Chapter %d : %s", chapNum, titleStr),
+			"", 1, "L", true, 0, "")
 		// Line break
 		pdf.Ln(4)
 		y0 = pdf.GetY()
@@ -330,7 +336,8 @@ func ExampleFpdf_SetLeftMargin() {
 		// Text color in gray
 		pdf.SetTextColor(128, 128, 128)
 		// Page number
-		pdf.CellFormat(0, 10, fmt.Sprintf("Page %d", pdf.PageNo()), "", 0, "C", false, 0, "")
+		pdf.CellFormat(0, 10, fmt.Sprintf("Page %d", pdf.PageNo()),
+			"", 0, "C", false, 0, "")
 	})
 	printChapter(1, "A RUNAWAY REEF", textFile("20k_c1.txt"))
 	printChapter(2, "THE PROS AND CONS", textFile("20k_c2.txt"))
@@ -408,8 +415,10 @@ func ExampleFpdf_CellFormat_1() {
 		for _, c := range countryList {
 			pdf.CellFormat(w[0], 6, c.nameStr, "LR", 0, "", false, 0, "")
 			pdf.CellFormat(w[1], 6, c.capitalStr, "LR", 0, "", false, 0, "")
-			pdf.CellFormat(w[2], 6, strDelimit(c.areaStr, ",", 3), "LR", 0, "R", false, 0, "")
-			pdf.CellFormat(w[3], 6, strDelimit(c.popStr, ",", 3), "LR", 0, "R", false, 0, "")
+			pdf.CellFormat(w[2], 6, strDelimit(c.areaStr, ",", 3),
+				"LR", 0, "R", false, 0, "")
+			pdf.CellFormat(w[3], 6, strDelimit(c.popStr, ",", 3),
+				"LR", 0, "R", false, 0, "")
 			pdf.Ln(-1)
 		}
 		pdf.CellFormat(wSum, 0, "", "T", 0, "", false, 0, "")
@@ -441,8 +450,10 @@ func ExampleFpdf_CellFormat_1() {
 		for _, c := range countryList {
 			pdf.CellFormat(w[0], 6, c.nameStr, "LR", 0, "", fill, 0, "")
 			pdf.CellFormat(w[1], 6, c.capitalStr, "LR", 0, "", fill, 0, "")
-			pdf.CellFormat(w[2], 6, strDelimit(c.areaStr, ",", 3), "LR", 0, "R", fill, 0, "")
-			pdf.CellFormat(w[3], 6, strDelimit(c.popStr, ",", 3), "LR", 0, "R", fill, 0, "")
+			pdf.CellFormat(w[2], 6, strDelimit(c.areaStr, ",", 3),
+				"LR", 0, "R", fill, 0, "")
+			pdf.CellFormat(w[3], 6, strDelimit(c.popStr, ",", 3),
+				"LR", 0, "R", fill, 0, "")
 			pdf.Ln(-1)
 			fill = !fill
 		}
@@ -579,7 +590,8 @@ func ExampleFpdf_SetAcceptPageBreakFunc() {
 		if j == 1 {
 			pdf.Image(imageFile("fpdf.png"), -1, 0, colWd, 0, true, "", 0, "")
 		} else if j == 5 {
-			pdf.Image(imageFile("golang-gopher.png"), -1, 0, colWd, 0, true, "", 0, "")
+			pdf.Image(imageFile("golang-gopher.png"),
+				-1, 0, colWd, 0, true, "", 0, "")
 		}
 		pdf.MultiCell(colWd, 5, loremStr, "", "", false)
 		pdf.Ln(-1)
@@ -593,7 +605,8 @@ func ExampleFpdf_SetAcceptPageBreakFunc() {
 
 // This examples tests corner cases as reported by the gocov tool.
 func ExampleFpdf_SetKeywords() {
-	gofpdf.MakeFont(fontFile("calligra.ttf"), fontFile("cp1252.map"), cnFontDir, nil, true)
+	gofpdf.MakeFont(fontFile("calligra.ttf"), fontFile("cp1252.map"),
+		cnFontDir, nil, true)
 	pdf := gofpdf.New("", "", "", "")
 	pdf.SetFontLocation(cnFontDir)
 	pdf.SetTitle("世界", true)
@@ -732,7 +745,8 @@ func ExampleFpdf_SetAlpha() {
 			pdf.SetXY(x, y+2)
 			pdf.CellFormat(rectW, rectH, "A", "", 0, "C", false, 0, "")
 			pdf.SetAlpha(0.5, modeList[j])
-			pdf.Image(imageFile("golang-gopher.png"), x-gapX, y, rectW+2*gapX, 0, false, "", 0, "")
+			pdf.Image(imageFile("golang-gopher.png"),
+				x-gapX, y, rectW+2*gapX, 0, false, "", 0, "")
 			pdf.SetAlpha(1.0, "Normal")
 			x += rectW + gapX
 			j++
@@ -756,9 +770,11 @@ func ExampleFpdf_LinearGradient() {
 	pdf.Rect(20, 25, 75, 75, "D")
 	pdf.LinearGradient(115, 25, 75, 75, 220, 220, 250, 80, 80, 220, 0, 0, 1, 1)
 	pdf.Rect(115, 25, 75, 75, "D")
-	pdf.RadialGradient(20, 120, 75, 75, 220, 220, 250, 80, 80, 220, 0.25, 0.75, 0.25, 0.75, 1)
+	pdf.RadialGradient(20, 120, 75, 75, 220, 220, 250, 80, 80, 220,
+		0.25, 0.75, 0.25, 0.75, 1)
 	pdf.Rect(20, 120, 75, 75, "D")
-	pdf.RadialGradient(115, 120, 75, 75, 220, 220, 250, 80, 80, 220, 0.25, 0.75, 0.75, 0.75, 0.75)
+	pdf.RadialGradient(115, 120, 75, 75, 220, 220, 250, 80, 80, 220,
+		0.25, 0.75, 0.75, 0.75, 0.75)
 	pdf.Rect(115, 120, 75, 75, "D")
 	fileStr := exampleFilename("Fpdf_LinearGradient_gradient")
 	err := pdf.OutputFileAndClose(fileStr)
@@ -776,7 +792,8 @@ func ExampleFpdf_ClipText() {
 	pdf.SetFont("Helvetica", "", 24)
 	pdf.SetXY(0, y)
 	pdf.ClipText(10, y+12, "Clipping examples", false)
-	pdf.RadialGradient(10, y, 100, 20, 128, 128, 160, 32, 32, 48, 0.25, 0.5, 0.25, 0.5, 0.2)
+	pdf.RadialGradient(10, y, 100, 20, 128, 128, 160, 32, 32, 48,
+		0.25, 0.5, 0.25, 0.5, 0.2)
 	pdf.ClipEnd()
 
 	y += 12
@@ -784,7 +801,8 @@ func ExampleFpdf_ClipText() {
 	pdf.SetDrawColor(64, 80, 80)
 	pdf.SetLineWidth(.5)
 	pdf.ClipText(10, y+40, pdf.String(), true)
-	pdf.RadialGradient(10, y, 200, 50, 220, 220, 250, 80, 80, 220, 0.25, 0.5, 0.25, 0.5, 1)
+	pdf.RadialGradient(10, y, 200, 50, 220, 220, 250, 80, 80, 220,
+		0.25, 0.5, 0.25, 0.5, 1)
 	pdf.ClipEnd()
 
 	y += 55
@@ -792,10 +810,12 @@ func ExampleFpdf_ClipText() {
 	pdf.SetFillColor(255, 255, 255)
 	pdf.Rect(10, y, 105, 20, "F")
 	pdf.ClipCircle(40, y+10, 15, false)
-	pdf.RadialGradient(25, y, 30, 30, 220, 250, 220, 40, 60, 40, 0.3, 0.85, 0.3, 0.85, 0.5)
+	pdf.RadialGradient(25, y, 30, 30, 220, 250, 220, 40, 60, 40, 0.3,
+		0.85, 0.3, 0.85, 0.5)
 	pdf.ClipEnd()
 	pdf.ClipEllipse(80, y+10, 20, 15, false)
-	pdf.RadialGradient(60, y, 40, 30, 250, 220, 220, 60, 40, 40, 0.3, 0.85, 0.3, 0.85, 0.5)
+	pdf.RadialGradient(60, y, 40, 30, 250, 220, 220, 60, 40, 40, 0.3,
+		0.85, 0.3, 0.85, 0.5)
 	pdf.ClipEnd()
 	pdf.ClipEnd()
 
@@ -805,18 +825,22 @@ func ExampleFpdf_ClipText() {
 	pdf.ClipEnd()
 
 	pdf.ClipCircle(60, y+10, 10, true)
-	pdf.RadialGradient(50, y, 20, 20, 220, 220, 250, 40, 40, 60, 0.3, 0.7, 0.3, 0.7, 0.5)
+	pdf.RadialGradient(50, y, 20, 20, 220, 220, 250, 40, 40, 60, 0.3,
+		0.7, 0.3, 0.7, 0.5)
 	pdf.ClipEnd()
 
-	pdf.ClipPolygon([]gofpdf.PointType{{80, y + 20}, {90, y}, {100, y + 20}}, true)
-	pdf.LinearGradient(80, y, 20, 20, 250, 220, 250, 60, 40, 60, 0.5, 1, 0.5, 0.5)
+	pdf.ClipPolygon([]gofpdf.PointType{{80, y + 20}, {90, y},
+		{100, y + 20}}, true)
+	pdf.LinearGradient(80, y, 20, 20, 250, 220, 250, 60, 40, 60, 0.5,
+		1, 0.5, 0.5)
 	pdf.ClipEnd()
 
 	y += 30
 	pdf.SetLineWidth(.1)
 	pdf.SetDrawColor(180, 180, 180)
 	pdf.ClipRoundedRect(10, y, 120, 20, 5, true)
-	pdf.RadialGradient(10, y, 120, 20, 255, 255, 255, 240, 240, 220, 0.25, 0.75, 0.25, 0.75, 0.5)
+	pdf.RadialGradient(10, y, 120, 20, 255, 255, 255, 240, 240, 220,
+		0.25, 0.75, 0.25, 0.75, 0.5)
 	pdf.SetXY(5, y-5)
 	pdf.SetFont("Times", "", 12)
 	pdf.MultiCell(130, 5, lorem(), "", "", false)
@@ -925,7 +949,8 @@ func ExampleFpdf_TransformBegin() {
 	pdf.TransformMirrorVertical(10 + titleHt + 0.5)
 	pdf.ClipText(titleX, 10+titleHt, titleStr, false)
 	// Remember that the transform will mirror the gradient box too
-	pdf.LinearGradient(titleX, 10, titleWd, titleHt+4, 120, 120, 120, 255, 255, 255, 0, 0, 0, 0.6)
+	pdf.LinearGradient(titleX, 10, titleWd, titleHt+4, 120, 120, 120,
+		255, 255, 255, 0, 0, 0, 0.6)
 	pdf.ClipEnd()
 	pdf.TransformEnd()
 
@@ -1273,7 +1298,9 @@ func ExampleFpdf_Polygon() {
 		mlt := 2.0 * math.Pi / float64(count)
 		for j := 0; j < count; j++ {
 			pt.Y, pt.X = math.Sincos(float64(j) * mlt)
-			res = append(res, gofpdf.PointType{X: x + radius*pt.X, Y: y + radius*pt.Y})
+			res = append(res, gofpdf.PointType{
+				X: x + radius*pt.X,
+				Y: y + radius*pt.Y})
 		}
 		return
 	}
@@ -1376,7 +1403,8 @@ func ExampleFpdf_RegisterImageReader() {
 		infoPtr := pdf.RegisterImageReader(urlStr, tp, rsp.Body)
 		if pdf.Ok() {
 			imgWd, imgHt := infoPtr.Extent()
-			pdf.Image(urlStr, (wd-imgWd)/2.0, pdf.GetY()+ln, imgWd, imgHt, false, tp, 0, "")
+			pdf.Image(urlStr, (wd-imgWd)/2.0, pdf.GetY()+ln,
+				imgWd, imgHt, false, tp, 0, "")
 		}
 	} else {
 		pdf.SetError(err)
