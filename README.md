@@ -166,5 +166,3 @@ UTF-8 runes to code page bytes is provided.
 * Improve test coverage as reported by the coverage tool.
 
 
-
-[1]: http://godoc.org/github.com/jung-kurt/gofpdf
