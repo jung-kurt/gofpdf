@@ -53,7 +53,7 @@ pdf.Cell(40, 10, "Hello, world")
 err := pdf.OutputFileAndClose("hello.pdf")
 ```
 
-See the functions in the fpdf_test.go file (shown as examples in this
+See the functions in the [fpdf_test.go](https://github.com/jung-kurt/gofpdf/blob/master/fpdf_test.go) file (shown as examples in this
 documentation) for more advanced PDF examples.
 
 ##Errors
@@ -74,8 +74,8 @@ retrieved with a call to Error().
 ##Conversion Notes
 
 
-This package is a relatively straightforward translation from the original [FPDF](http://www.fpdf.org/) library written in PHP (despite the caveat in the introduction to Effective
-Go). The API names have been retained even though the Go idiom would suggest
+This package is a relatively straightforward translation from the original [FPDF](http://www.fpdf.org/) library written in PHP (despite the caveat in the introduction to [Effective
+Go](https://golang.org/doc/effective_go.html)). The API names have been retained even though the Go idiom would suggest
 otherwise (for example, pdf.GetX() is used rather than simply pdf.X()). The
 similarity of the two libraries makes the original FPDF website a good source
 of information. It includes a forum and FAQ.
@@ -96,7 +96,7 @@ A side effect of running "go test" is the production of a number of example
 PDFs. These can be found in the gofpdf/pdf directory after the tests complete.
 
 Please note that these examples run in the context of a test. In order run an
-example as a standalone application, you'll need to examine fpdf_test.go for
+example as a standalone application, you'll need to examine [fpdf_test.go](https://github.com/jung-kurt/gofpdf/blob/master/fpdf_test.go) for
 some helper routines, for example exampleFilename and summary.
 
 ##Nonstandard Fonts

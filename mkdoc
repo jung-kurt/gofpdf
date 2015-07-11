@@ -9,5 +9,7 @@ cat README.md | tr '\n' '\v' | sed \
   -e 's/draw2d.package.(\(https:\/\/github\.com\/llgcode\/draw2d\))/[draw2d](\1) package/g' \
   -e 's/FPDF.library.(\(http:\/\/www\.fpdf\.org\/\))/[FPDF](\1) library/g' \
   -e 's/original.FPDF.library/original [FPDF](http:\/\/www.fpdf.org\/) library/g' \
+  -e 's/\(Effective.Go\)/[\1](https:\/\/golang.org\/doc\/effective_go.html)/g' \
+  -e 's/\(fpdf_test.go\)/[\1](https:\/\/github.com\/jung-kurt\/gofpdf\/blob\/master\/fpdf_test.go)/g' \
   | tr '\v' '\n' > 0 
 mv 0 README.md
