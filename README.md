@@ -4,33 +4,21 @@ Package gofpdf implements a PDF document generator with high level support for
 text, drawing and images.
 
 ##Features
-• Choice of measurement unit, page format and margins
 
-• Page header and footer management
-
-• Automatic page breaks, line breaks, and text justification
-
-• Inclusion of JPEG, PNG, GIF and basic path-only SVG images
-
-• Colors, gradients and alpha channel transparency
-
-• Outline bookmarks
-
-• Internal and external links
-
-• TrueType, Type1 and encoding support
-
-• Page compression
-
-• Lines, Bézier curves, arcs, and ellipses
-
-• Rotation, scaling, skewing, translation, and mirroring
-
-• Clipping
-
-• Document protection
-
-• Layers
+* Choice of measurement unit, page format and margins
+* Page header and footer management
+* Automatic page breaks, line breaks, and text justification
+* Inclusion of JPEG, PNG, GIF and basic path-only SVG images
+* Colors, gradients and alpha channel transparency
+* Outline bookmarks
+* Internal and external links
+* TrueType, Type1 and encoding support
+* Page compression
+* Lines, Bézier curves, arcs, and ellipses
+* Rotation, scaling, skewing, translation, and mirroring
+* Clipping
+* Document protection
+* Layers
 
 gofpdf has no dependencies other than the Go standard library. All tests pass
 on Linux, Mac and Windows platforms. Like FPDF version 1.7, from which gofpdf
@@ -38,6 +26,8 @@ is derived, this package does not yet support UTF-8 fonts. However, support is
 provided to translate UTF-8 runes to code page encodings.
 
 ##Installation
+
+
 To install the package on your system, run
 
 ```
@@ -51,6 +41,8 @@ go get -u github.com/jung-kurt/gofpdf
 ```
 
 ##Quick Start
+
+
 The following Go code generates a simple PDF file.
 
 ```
@@ -65,6 +57,8 @@ See the functions in the fpdf_test.go file (shown as examples in this
 documentation) for more advanced PDF examples.
 
 ##Errors
+
+
 If an error occurs in an Fpdf method, an internal error field is set. After
 this occurs, Fpdf method calls typically return without performing any
 operations and the error state is retained. This error management scheme
@@ -78,8 +72,9 @@ can be determined with a call to Ok() or Err(). The error itself can be
 retrieved with a call to Error().
 
 ##Conversion Notes
-This package is a relatively straightforward translation from the original FPDF
-library written in PHP (despite the caveat in the introduction to Effective
+
+
+This package is a relatively straightforward translation from the original [FPDF](http://www.fpdf.org/) library written in PHP (despite the caveat in the introduction to Effective
 Go). The API names have been retained even though the Go idiom would suggest
 otherwise (for example, pdf.GetX() is used rather than simply pdf.X()). The
 similarity of the two libraries makes the original FPDF website a good source
@@ -95,6 +90,8 @@ to provide similar functionality. Font definition files are produced in JSON
 rather than PHP.
 
 ##Example PDFs
+
+
 A side effect of running "go test" is the production of a number of example
 PDFs. These can be found in the gofpdf/pdf directory after the tests complete.
 
@@ -103,6 +100,8 @@ example as a standalone application, you'll need to examine fpdf_test.go for
 some helper routines, for example exampleFilename and summary.
 
 ##Nonstandard Fonts
+
+
 Nothing special is required to use the standard PDF fonts (courier, helvetica,
 times, zapfdingbats) in your documents other than calling SetFont().
 
@@ -121,20 +120,25 @@ the font subdirectory and run the command as in the following example.
 In your PDF generation code, call AddFont() to load the font and, as with the
 standard fonts, SetFont() to begin using it. Most examples, including the
 package example, demonstrate this method. Good sources of free, open-source
-fonts include http://www.google.com/fonts/ and http://dejavu-fonts.org/.
+fonts include [Google Fonts](http://www.google.com/fonts/) and [DejaVu Fonts](http://dejavu-fonts.org/).
 
 ##Related Packages
-The draw2d package (https://github.com/llgcode/draw2d) is a two dimensional
+
+
+The [draw2d](https://github.com/llgcode/draw2d) package is a two dimensional
 vector graphics library that can generate output in different forms. It uses
 gofpdf for its document production mode.
 
 ##License
+
+
 gofpdf is released under the MIT License. It is copyrighted by Kurt Jung and
 the contributors acknowledged below.
 
 ##Acknowledgments
-This package's code and documentation are closely derived from the FPDF library
-(http://www.fpdf.org/) created by Olivier Plathey, and a number of font and
+
+
+This package's code and documentation are closely derived from the [FPDF](http://www.fpdf.org/) library created by Olivier Plathey, and a number of font and
 image resources are copied directly from it. Drawing support is adapted from
 the FPDF geometric figures script by David Hernández Sanz. Transparency
 support is adapted from the FPDF transparency script by Martin Hall-May.
@@ -156,10 +160,10 @@ joins, line join styles and enhanced fill modes. Bruno Michel has provided
 valuable assistance with the code.
 
 ##Roadmap
-• Handle UTF-8 source text natively. Until then, automatic translation of
-UTF-8 runes to code page bytes is provided.
 
-• Improve test coverage as reported by the coverage tool.
+* Handle UTF-8 source text natively. Until then, automatic translation of
+UTF-8 runes to code page bytes is provided.
+* Improve test coverage as reported by the coverage tool.
 
 
 
