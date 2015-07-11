@@ -23,8 +23,6 @@ package gofpdf
 // (as set with SetLineCapStyle()), line width (as set with SetLineWidth()),
 // and draw color (as set with SetDrawColor()) are used in drawing the image
 // paths.
-//
-// See example 20 for a demonstration of this function.
 func (f *Fpdf) SVGBasicWrite(sb *SVGBasicType, scale float64) {
 	originX, originY := f.GetXY()
 	var x, y, newX, newY float64
