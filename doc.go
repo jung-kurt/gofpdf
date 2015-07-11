@@ -169,8 +169,9 @@ Polygon function. Robert Lillack provided the Beziergon function and corrected
 some naming issues with the internal curve function. Claudio Felber provided
 implementations for dashed line drawing and generalized font loading. Stani
 Michiels provided support for multi-segment path drawing with smooth line
-joins, line join styles and enhanced fill modes. Bruno Michel has provided
-valuable assistance with the code.
+joins, line join styles, enhanced fill modes, and has helped greatly with
+package presentation and tests. Bruno Michel has provided valuable assistance
+with the code.
 
 Roadmap
 
