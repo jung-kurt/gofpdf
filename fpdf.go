@@ -1429,6 +1429,15 @@ func (f *Fpdf) AddFontFromReader(familyStr, styleStr string, r io.Reader) {
 	return
 }
 
+// GetFontDesc returns the font descriptor, which can be used for
+// example to find the baseline of a font. See FontDescType for
+// documentation about the font descriptor.
+// See AddFont for details about familyStr and styleStr.
+func (f *Fpdf) GetFontDesc(familyStr, styleStr string) FontDescType {
+	fontkey := familyStr + styleStr // see AddFontFromReader
+	return f.fonts[fontkey].Desc
+}
+
 // SetFont sets the font used to print character strings. It is mandatory to
 // call this method at least once before printing text or the resulting
 // document will not be valid.

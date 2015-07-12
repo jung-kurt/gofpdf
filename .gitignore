@@ -3,6 +3,7 @@ pdf/*.pdf
 look
 open
 pdf.txt
+private
 *.sublime*
 font/Ubuntu-*
 *.0
