@@ -146,7 +146,7 @@ gofpdf for its document production mode.
 Contributing Changes
 
 gofpdf is a global community effort and you are invited to make it even better.
-If you have implmented a new feature or corrected a problem, please consider
+If you have implemented a new feature or corrected a problem, please consider
 contributing your change to the project. Here are guidelines for making
 submissions. Your change should
 
