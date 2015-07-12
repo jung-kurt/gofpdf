@@ -11,5 +11,10 @@ cat README.md | tr '\n' '\v' | sed \
   -e 's/original.FPDF.library/original [FPDF](http:\/\/www.fpdf.org\/) library/g' \
   -e 's/\(Effective.Go\)/[\1](https:\/\/golang.org\/doc\/effective_go.html)/g' \
   -e 's/\(fpdf_test.go\)/[\1](https:\/\/github.com\/jung-kurt\/gofpdf\/blob\/master\/fpdf_test.go)/g' \
+  -e 's/golint.(\(https:\/\/github\.com\/golang\/lint\))/[golint](\1)/g' \
+  -e 's/go.vet.(\(https:\/\/godoc\.org\/golang\.org\/x\/tools\/cmd\/vet\))/[go vet](\1)/g' \
+  -e 's/test.coverage.(\(https:\/\/blog\.golang\.org\/cover\))/[test coverage](\1)/g' \
+  -e 's/Pull.requests.(\(https:\/\/help\.github\.com\/articles\/using\-pull\-requests\/\))/[Pull requests](\1)/g' \
+  -e 's/Your change should\v/Your change should\v\v/g' \
   | tr '\v' '\n' > 0 
 mv 0 README.md

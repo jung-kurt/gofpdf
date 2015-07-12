@@ -129,6 +129,25 @@ The [draw2d](https://github.com/llgcode/draw2d) package is a two dimensional
 vector graphics library that can generate output in different forms. It uses
 gofpdf for its document production mode.
 
+##Contributing Changes
+
+
+gofpdf is a global community effort and you are invited to make it even better.
+If you have implmented a new feature or corrected a problem, please consider
+contributing your change to the project. Here are guidelines for making
+submissions. Your change should
+
+* be compatible with the MIT License
+* be properly documented
+* include an example in [fpdf_test.go](https://github.com/jung-kurt/gofpdf/blob/master/fpdf_test.go) if appropriate
+* conform to the standards of [golint](https://github.com/golang/lint) and
+[go vet](https://godoc.org/golang.org/x/tools/cmd/vet), that is, `golint .` and
+`go vet .` should not generate any warnings
+* not diminish [test coverage](https://blog.golang.org/cover)
+
+[Pull requests](https://help.github.com/articles/using-pull-requests/) work
+nicely as a means of contributing your changes.
+
 ##License
 
 
