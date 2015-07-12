@@ -1435,10 +1435,14 @@ func (f *Fpdf) AddFontFromReader(familyStr, styleStr string, r io.Reader) {
 }
 
 // GetFontDesc returns the font descriptor, which can be used for
-// example to find the baseline of a font. See FontDescType for
-// documentation about the font descriptor.
+// example to find the baseline of a font. If familyStr is empty
+// current font descriptor will be returned.
+// See FontDescType for documentation about the font descriptor.
 // See AddFont for details about familyStr and styleStr.
 func (f *Fpdf) GetFontDesc(familyStr, styleStr string) FontDescType {
+	if familyStr == "" {
+		return f.currentFont.Desc
+	}
 	return f.fonts[getFontKey(familyStr, styleStr)].Desc
 }
 
