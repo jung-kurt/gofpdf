@@ -170,6 +170,8 @@ func fpdfNew(orientationStr, unitStr, sizeStr, fontDirStr string, size SizeType)
 	f.blendList = make([]blendModeType, 0, 8)
 	f.blendList = append(f.blendList, blendModeType{}) // blendList[0] is unused (1-based)
 	f.blendMap = make(map[string]int)
+	f.blendMode = "Normal"
+	f.alpha = 1
 	f.gradientList = make([]gradientType, 0, 8)
 	f.gradientList = append(f.gradientList, gradientType{}) // gradientList[0] is unused
 	// Set default PDF version number
@@ -1062,6 +1064,13 @@ func (f *Fpdf) Arc(x, y, rx, ry, degRotate, degStart, degEnd float64, styleStr s
 	f.arc(x, y, rx, ry, degRotate, degStart, degEnd, styleStr, false)
 }
 
+// GetAlpha returns the alpha blending channel, which consists of the
+// alpha transparency value and the blend mode. See SetAlpha for more
+// details.
+func (f *Fpdf) GetAlpha() (alpha float64, blendModeStr string) {
+	return f.alpha, f.blendMode
+}
+
 // SetAlpha sets the alpha blending channel. The blending effect applies to
 // text, drawings and images.
 //
@@ -1076,7 +1085,7 @@ func (f *Fpdf) Arc(x, y, rx, ry, degRotate, degStart, degEnd float64, styleStr s
 // To reset normal rendering after applying a blending mode, call this method
 // with alpha set to 1.0 and blendModeStr set to "Normal".
 func (f *Fpdf) SetAlpha(alpha float64, blendModeStr string) {
-	if f.err != nil {
+	if f.err != nil || (alpha == f.alpha && blendModeStr == f.blendMode) {
 		return
 	}
 	var bl blendModeType
@@ -1095,6 +1104,8 @@ func (f *Fpdf) SetAlpha(alpha float64, blendModeStr string) {
 		f.err = fmt.Errorf("alpha value (0.0 - 1.0) is out of range: %.3f", alpha)
 		return
 	}
+	f.alpha = alpha
+	f.blendMode = blendModeStr
 	alphaStr := sprintf("%.3f", alpha)
 	keyStr := sprintf("%s %s", alphaStr, blendModeStr)
 	pos, ok := f.blendMap[keyStr]
