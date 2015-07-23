@@ -10,3 +10,6 @@ font/Ubuntu-*
 *.swp
 **/*.out
 **/*.test
+font/CalligrapherRegular.json
+font/CalligrapherRegular.z
+coverage

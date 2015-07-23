@@ -605,21 +605,28 @@ func ExampleFpdf_SetAcceptPageBreakFunc() {
 
 // This examples tests corner cases as reported by the gocov tool.
 func ExampleFpdf_SetKeywords() {
-	gofpdf.MakeFont(fontFile("calligra.ttf"), fontFile("cp1252.map"),
-		cnFontDir, nil, true)
-	pdf := gofpdf.New("", "", "", "")
-	pdf.SetFontLocation(cnFontDir)
-	pdf.SetTitle("世界", true)
-	pdf.SetAuthor("世界", true)
-	pdf.SetSubject("世界", true)
-	pdf.SetCreator("世界", true)
-	pdf.SetKeywords("世界", true)
-	pdf.AddFont("Calligrapher", "", "calligra.json")
-	pdf.AddPage()
-	pdf.SetFont("Calligrapher", "", 16)
-	pdf.Writef(5, "\x95 %s \x95", pdf)
+	var err error
 	fileStr := exampleFilename("Fpdf_SetKeywords")
-	err := pdf.OutputFileAndClose(fileStr)
+	err = gofpdf.MakeFont(fontFile("CalligrapherRegular.pfb"),
+		fontFile("cp1252.map"), cnFontDir, nil, true)
+	if err == nil {
+		err = gofpdf.MakeFont(fontFile("calligra.ttf"),
+			fontFile("cp1252.map"), cnFontDir, nil, true)
+		if err == nil {
+			pdf := gofpdf.New("", "", "", "")
+			pdf.SetFontLocation(cnFontDir)
+			pdf.SetTitle("世界", true)
+			pdf.SetAuthor("世界", true)
+			pdf.SetSubject("世界", true)
+			pdf.SetCreator("世界", true)
+			pdf.SetKeywords("世界", true)
+			pdf.AddFont("Calligrapher", "", "CalligrapherRegular.json")
+			pdf.AddPage()
+			pdf.SetFont("Calligrapher", "", 16)
+			pdf.Writef(5, "\x95 %s \x95", pdf)
+			err = pdf.OutputFileAndClose(fileStr)
+		}
+	}
 	summary(err, fileStr)
 	// Output:
 	// Successfully generated pdf/Fpdf_SetKeywords.pdf

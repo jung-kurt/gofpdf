@@ -374,8 +374,10 @@ func makeDefinitionFile(fileStr, tpStr, encodingFileStr string, embed bool, encL
 // gofpdf generates. See the makefont utility in the gofpdf package for a
 // command line interface to this function.
 //
-// fontFileStr is the name of the TrueType (or OpenType based on TrueType) or
-// Type1 file from which to generate a definition file.
+// fontFileStr is the name of the TrueType (or OpenType based on TrueType,
+// extension .ttf) or binary Type1 file (extension .pfb) from which to generate
+// a definition file. If a Type1 file is specified, a metric file with the same
+// pathname except with the extension .afm must be present.
 //
 // encodingFileStr is the name of the encoding file that corresponds to the
 // font.
