@@ -223,6 +223,8 @@ type Fpdf struct {
 	dashPhase        float64                   // dash phase
 	blendList        []blendModeType           // slice[idx] of alpha transparency modes, 1-based
 	blendMap         map[string]int            // map into blendList
+	blendMode        string                    // current blend mode
+	alpha            float64                   // current transpacency
 	gradientList     []gradientType            // slice[idx] of gradient records
 	clipNest         int                       // Number of active clipping contexts
 	transformNest    int                       // Number of active transformation contexts
