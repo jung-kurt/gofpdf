@@ -1,7 +1,7 @@
 ![gofpdf](image/logo_gofpdf.jpg?raw=true "gofpdf")
 
-[![GoDoc](image/doc.svg?raw=true "godoc")](http://godoc.org/github.com/jung-kurt/gofpdf)
-[![MIT](image/mit.svg?raw=true "godoc")](http://opensource.org/licenses/MIT)
+[![GoDoc](image/doc.svg)](http://godoc.org/github.com/jung-kurt/gofpdf)
+[![MIT](image/mit.svg)](http://opensource.org/licenses/MIT)
 
 Package gofpdf implements a PDF document generator with high level support for
 text, drawing and images.
