@@ -72,6 +72,8 @@ func fpdfNew(orientationStr, unitStr, sizeStr, fontDirStr string, size SizeType)
 	f.fonts = make(map[string]fontDefType)
 	f.fontFiles = make(map[string]fontFileType)
 	f.diffs = make([]string, 0, 8)
+	f.templates = make(map[int64]Template)
+	f.templateObjects = make(map[int64]int)
 	f.images = make(map[string]*ImageInfoType)
 	f.pageLinks = make([][]linkType, 0, 8)
 	f.pageLinks = append(f.pageLinks, make([]linkType, 0, 0)) // pageLinks[0] is unused (1-based)
@@ -3223,6 +3225,12 @@ func (f *Fpdf) putxobjectdict() {
 		// 	foreach($this->images as $image)
 		f.outf("/I%d %d 0 R", image.i, image.n)
 	}
+	for _, tpl := range f.templates {
+		id := tpl.ID()
+		if objID, ok := f.templateObjects[id]; ok {
+			f.outf("/TPL%d %d 0 R", id, objID)
+		}
+	}
 }
 
 func (f *Fpdf) putresourcedict() {
@@ -3305,6 +3313,7 @@ func (f *Fpdf) putresources() {
 		return
 	}
 	f.putimages()
+	f.putTemplates()
 	// 	Resource dictionary
 	f.offsets[2] = f.buffer.Len()
 	f.out("2 0 obj")
