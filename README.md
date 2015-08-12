@@ -19,6 +19,7 @@ text, drawing and images.
 * Clipping
 * Document protection
 * Layers
+* Templates
 
 gofpdf has no dependencies other than the Go standard library. All tests pass
 on Linux, Mac and Windows platforms. Like FPDF version 1.7, from which gofpdf
@@ -176,8 +177,9 @@ some naming issues with the internal curve function. Claudio Felber provided
 implementations for dashed line drawing and generalized font loading. Stani
 Michiels provided support for multi-segment path drawing with smooth line
 joins, line join styles, enhanced fill modes, and has helped greatly with
-package presentation and tests. Bruno Michel has provided valuable assistance
-with the code.
+package presentation and tests. Templating is adapted by Marcus Downing from
+the FPDF_Tpl library created by Jan Slabon and Setasign. Bruno Michel has
+provided valuable assistance with the code.
 
 ##Roadmap
 

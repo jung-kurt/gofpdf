@@ -194,9 +194,9 @@ some naming issues with the internal curve function. Claudio Felber provided
 implementations for dashed line drawing and generalized font loading. Stani
 Michiels provided support for multi-segment path drawing with smooth line
 joins, line join styles, enhanced fill modes, and has helped greatly with
-package presentation and tests. Bruno Michel has provided valuable assistance
-with the code. Templating is adapted from the FPDF_Tpl library created by
-Jan Slabon and Setasign.
+package presentation and tests. Templating is adapted by Marcus Downing from
+the FPDF_Tpl library created by Jan Slabon and Setasign. Bruno Michel has
+provided valuable assistance with the code.
 
 Roadmap
 
