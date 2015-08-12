@@ -278,3 +278,37 @@ func (f *Fpdf) UnicodeTranslatorFromDescriptor(cpStr string) (rep func(string) s
 	}
 	return
 }
+
+// Transform moves a point by given X, Y offset
+func (p *PointType) Transform(x, y float64) PointType {
+	return PointType{p.X + x, p.Y + y}
+}
+
+// Orientation returns the orientation of a given size:
+// "P" for portrait, "L" for landscape
+func (s *SizeType) Orientation() string {
+	if s == nil || s.Ht == s.Wd {
+		return ""
+	}
+	if s.Wd > s.Ht {
+		return "L"
+	}
+	return "P"
+}
+
+// ScaleBy expands a size by a certain factor
+func (s *SizeType) ScaleBy(factor float64) SizeType {
+	return SizeType{s.Wd * factor, s.Ht * factor}
+}
+
+// ScaleToWidth adjusts the height of a size to match the given width
+func (s *SizeType) ScaleToWidth(width float64) SizeType {
+	height := s.Ht * width / s.Wd
+	return SizeType{width, height}
+}
+
+// ScaleToHeight adjsuts the width of a size to match the given height
+func (s *SizeType) ScaleToHeight(height float64) SizeType {
+	width := s.Wd * height / s.Ht
+	return SizeType{width, height}
+}
