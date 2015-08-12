@@ -160,6 +160,8 @@ type Fpdf struct {
 	page             int                       // current page number
 	n                int                       // current object number
 	offsets          []int                     // array of object offsets
+	templates        map[int64]Template        // templates used in this document
+	templateObjects  map[int64]int             //template object IDs within this document
 	buffer           fmtBuffer                 // buffer holding in-memory PDF
 	pages            []*bytes.Buffer           // slice[page] of page content; 1-based
 	state            int                       // current document state

@@ -48,6 +48,8 @@ Features
 
 • Layers
 
+• Templates
+
 gofpdf has no dependencies other than the Go standard library. All tests pass
 on Linux, Mac and Windows platforms. Like FPDF version 1.7, from which gofpdf
 is derived, this package does not yet support UTF-8 fonts. However, support is
@@ -193,7 +195,8 @@ implementations for dashed line drawing and generalized font loading. Stani
 Michiels provided support for multi-segment path drawing with smooth line
 joins, line join styles, enhanced fill modes, and has helped greatly with
 package presentation and tests. Bruno Michel has provided valuable assistance
-with the code.
+with the code. Templating is adapted from the FPDF_Tpl library created by
+Jan Slabon and Setasign.
 
 Roadmap
 
