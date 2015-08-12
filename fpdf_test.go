@@ -109,6 +109,7 @@ func exampleFilename(baseStr string) string {
 
 func summary(err error, fileStr string) {
 	if err == nil {
+		fileStr = filepath.ToSlash(fileStr)
 		fmt.Printf("Successfully generated %s\n", fileStr)
 	} else {
 		fmt.Println(err)
