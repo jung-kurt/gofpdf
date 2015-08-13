@@ -2355,10 +2355,18 @@ func (f *Fpdf) RegisterRemoteImage(urlStr, tp string) (info *ImageInfoType) {
 		return
 	}
 
-	resp, _ := http.Get(urlStr)
+	resp, err := http.Get(urlStr)
 	defer resp.Body.Close()
 
-	body, _ := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		f.SetError(err)
+	}
+
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		f.SetError(err)
+	}
+
 	file := bytes.NewReader(body)
 
 	if tp == "" {
