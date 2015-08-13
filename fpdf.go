@@ -2370,7 +2370,7 @@ func (f *Fpdf) RegisterRemoteImage(urlStr, tp string) (info *ImageInfoType) {
 	file := bytes.NewReader(body)
 
 	if tp == "" {
-		tp = f.getFileExtensionFromString(urlStr)
+		tp = f.ImageTypeFromMime(resp.Header["Content-Type"][0])
 	}
 
 	return f.RegisterImageReader(urlStr, tp, file)
