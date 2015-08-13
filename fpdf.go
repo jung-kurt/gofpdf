@@ -2362,18 +2362,11 @@ func (f *Fpdf) RegisterRemoteImage(urlStr, tp string) (info *ImageInfoType) {
 		f.SetError(err)
 	}
 
-	body, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		f.SetError(err)
-	}
-
-	file := bytes.NewReader(body)
-
 	if tp == "" {
 		tp = f.ImageTypeFromMime(resp.Header["Content-Type"][0])
 	}
 
-	return f.RegisterImageReader(urlStr, tp, file)
+	return f.RegisterImageReader(urlStr, tp, resp.Body)
 }
 
 // GetXY returns the abscissa and ordinate of the current position.
