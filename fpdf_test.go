@@ -1089,6 +1089,25 @@ func ExampleFpdf_RegisterImage() {
 	// Successfully generated pdf/Fpdf_RegisterImage.pdf
 }
 
+// This example demonstrates how to include a remote image.
+func ExampleFpdf_RemoteImage() {
+	pdf := gofpdf.New("P", "mm", "A4", "")
+	pdf.AddPage()
+	pdf.SetMargins(10, 10, 10)
+	pdf.SetFont("Helvetica", "", 15)
+
+	imageUrl := "https://raw.githubusercontent.com/jung-kurt/gofpdf/master/image/logo_gofpdf.jpg"
+	pdf.RegisterRemoteImage(imageUrl, "")
+	pdf.Image(imageUrl, 5, 5, 50, 50, false, "", 0, "")
+
+	fileStr := exampleFilename("Fpdf_RegisterImage")
+	err := pdf.OutputFileAndClose(fileStr)
+
+	summary(err, fileStr)
+	// Output:
+	// Successfully generated pdf/Fpdf_RegisterImage.pdf
+}
+
 // This example demonstrates Bruno Michel's line splitting function.
 func ExampleFpdf_SplitLines() {
 	const (

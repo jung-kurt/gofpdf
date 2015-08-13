@@ -2350,6 +2350,33 @@ func (f *Fpdf) RegisterImage(fileStr, tp string) (info *ImageInfoType) {
 	return f.RegisterImageReader(fileStr, tp, file)
 }
 
+// RegisterRemoteImage registers a remote image. Downloading the image from the
+// provided URL and adding it to the PDF but not adding it to the page. Use
+// Image() with the same URL to add the image to the page.
+func (f *Fpdf) RegisterRemoteImage(urlStr, tp string) (info *ImageInfoType) {
+	info, ok := f.images[urlStr]
+	if ok {
+		return
+	}
+
+	resp, _ := http.Get(urlStr)
+	defer resp.Body.Close()
+
+	body, _ := ioutil.ReadAll(resp.Body)
+	file := bytes.NewReader(body)
+
+	if tp == "" {
+		pos := strings.LastIndex(urlStr, ".")
+		if pos < 0 {
+			f.err = fmt.Errorf("image file has no extension and no type was specified: %s", urlStr)
+			return
+		}
+		tp = urlStr[pos+1:]
+	}
+
+	return f.RegisterImageReader(urlStr, tp, file)
+}
+
 // GetXY returns the abscissa and ordinate of the current position.
 //
 // Note: the value returned for the abscissa will be affected by the current
