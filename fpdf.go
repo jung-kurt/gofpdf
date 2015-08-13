@@ -2340,12 +2340,7 @@ func (f *Fpdf) RegisterImage(fileStr, tp string) (info *ImageInfoType) {
 
 	// First use of this image, get info
 	if tp == "" {
-		pos := strings.LastIndex(fileStr, ".")
-		if pos < 0 {
-			f.err = fmt.Errorf("image file has no extension and no type was specified: %s", fileStr)
-			return
-		}
-		tp = fileStr[pos+1:]
+		tp = f.getFileExtensionFromString(fileStr)
 	}
 
 	return f.RegisterImageReader(fileStr, tp, file)
@@ -2367,12 +2362,7 @@ func (f *Fpdf) RegisterRemoteImage(urlStr, tp string) (info *ImageInfoType) {
 	file := bytes.NewReader(body)
 
 	if tp == "" {
-		pos := strings.LastIndex(urlStr, ".")
-		if pos < 0 {
-			f.err = fmt.Errorf("image file has no extension and no type was specified: %s", urlStr)
-			return
-		}
-		tp = urlStr[pos+1:]
+		tp = f.getFileExtensionFromString(urlStr)
 	}
 
 	return f.RegisterImageReader(urlStr, tp, file)
@@ -2502,6 +2492,15 @@ func (f *Fpdf) Output(w io.Writer) error {
 		f.err = err
 	}
 	return f.err
+}
+
+func (f *Fpdf) getFileExtensionFromString(value string) (extension string) {
+	pos := strings.LastIndex(value, ".")
+	if pos < 0 {
+		f.err = fmt.Errorf("image file has no extension and no type was specified: %s", value)
+		return
+	}
+	return value[pos+1:]
 }
 
 func (f *Fpdf) getpagesizestr(sizeStr string) (size SizeType) {
