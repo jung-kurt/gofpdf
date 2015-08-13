@@ -1100,12 +1100,12 @@ func ExampleFpdf_RemoteImage() {
 	pdf.RegisterRemoteImage(imageUrl, "")
 	pdf.Image(imageUrl, 5, 5, 50, 50, false, "", 0, "")
 
-	fileStr := exampleFilename("Fpdf_RegisterImage")
+	fileStr := exampleFilename("Fpdf_RegisterRemoteImage")
 	err := pdf.OutputFileAndClose(fileStr)
 
 	summary(err, fileStr)
 	// Output:
-	// Successfully generated pdf/Fpdf_RegisterImage.pdf
+	// Successfully generated pdf/Fpdf_RegisterRemoteImage.pdf
 }
 
 // This example demonstrates Bruno Michel's line splitting function.
