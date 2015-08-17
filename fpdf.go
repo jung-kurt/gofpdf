@@ -224,6 +224,14 @@ func (f *Fpdf) Err() bool {
 	return f.err != nil
 }
 
+// ClearError unsets the internal Fpdf error. This method should be used with
+// care, as an internal error condition usually indicates an unrecoverable
+// problem with the generation of a document. It is intended to deal with cases
+// in which an error is used to select an alternate form of the document.
+func (f *Fpdf) ClearError() {
+	f.err = nil
+}
+
 // SetErrorf sets the internal Fpdf error with formatted text to halt PDF
 // generation; this may facilitate error handling by application. If an error
 // condition is already set, this call is ignored.
@@ -2060,7 +2068,7 @@ func (f *Fpdf) write(h float64, txtStr string, link int, linkStr string) {
 	l := 0.0
 	nl := 1
 	for i < nb {
-		// 		Get next character
+		// Get next character
 		c := []byte(s)[i]
 		if c == '\n' {
 			// Explicit line break
