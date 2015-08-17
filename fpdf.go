@@ -34,6 +34,7 @@ import (
 	"io"
 	"io/ioutil"
 	"math"
+	"net/http"
 	"os"
 	"path"
 	"strconv"
@@ -2347,15 +2348,33 @@ func (f *Fpdf) RegisterImage(fileStr, tp string) (info *ImageInfoType) {
 
 	// First use of this image, get info
 	if tp == "" {
-		pos := strings.LastIndex(fileStr, ".")
-		if pos < 0 {
-			f.err = fmt.Errorf("image file has no extension and no type was specified: %s", fileStr)
-			return
-		}
-		tp = fileStr[pos+1:]
+		tp = f.imageTypeFromString(fileStr)
 	}
 
 	return f.RegisterImageReader(fileStr, tp, file)
+}
+
+// RegisterRemoteImage registers a remote image. Downloading the image from the
+// provided URL and adding it to the PDF but not adding it to the page. Use
+// Image() with the same URL to add the image to the page.
+func (f *Fpdf) RegisterRemoteImage(urlStr, tp string) (info *ImageInfoType) {
+	info, ok := f.images[urlStr]
+	if ok {
+		return
+	}
+
+	resp, err := http.Get(urlStr)
+	defer resp.Body.Close()
+
+	if err != nil {
+		f.SetError(err)
+	}
+
+	if tp == "" {
+		tp = f.ImageTypeFromMime(resp.Header["Content-Type"][0])
+	}
+
+	return f.RegisterImageReader(urlStr, tp, resp.Body)
 }
 
 // GetXY returns the abscissa and ordinate of the current position.
@@ -2482,6 +2501,15 @@ func (f *Fpdf) Output(w io.Writer) error {
 		f.err = err
 	}
 	return f.err
+}
+
+func (f *Fpdf) imageTypeFromString(value string) (extension string) {
+	pos := strings.LastIndex(value, ".")
+	if pos < 0 {
+		f.err = fmt.Errorf("image file has no extension and no type was specified: %s", value)
+		return
+	}
+	return value[pos+1:]
 }
 
 func (f *Fpdf) getpagesizestr(sizeStr string) (size SizeType) {
