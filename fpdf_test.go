@@ -1083,9 +1083,27 @@ func ExampleFpdf_RegisterImage() {
 		pdf.Image(imageFileStr, lf, tp, imgWd, imgHt, false, "", 0, "")
 	}
 	fileStr := exampleFilename("Fpdf_RegisterImage")
+	// Test the image information retrieval method
+	infoShow := func(imageStr string) {
+		imageStr = imageFile(imageStr)
+		info, ok := pdf.GetImageInfo(imageStr)
+		if ok {
+			if info.Width() > 0.0 {
+				fmt.Printf("Image %s is registered\n", imageStr)
+			} else {
+				fmt.Printf("Incorrect information for image %s\n", imageStr)
+			}
+		} else {
+			fmt.Printf("Image %s is not registered\n", imageStr)
+		}
+	}
+	infoShow(fileList[0])
+	infoShow("foo.png")
 	err := pdf.OutputFileAndClose(fileStr)
 	summary(err, fileStr)
 	// Output:
+	// Image image/logo-gray.png is registered
+	// Image image/foo.png is not registered
 	// Successfully generated pdf/Fpdf_RegisterImage.pdf
 }
 
