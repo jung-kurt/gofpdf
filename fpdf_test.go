@@ -1086,8 +1086,8 @@ func ExampleFpdf_RegisterImage() {
 	// Test the image information retrieval method
 	infoShow := func(imageStr string) {
 		imageStr = imageFile(imageStr)
-		info, ok := pdf.GetImageInfo(imageStr)
-		if ok {
+		info := pdf.GetImageInfo(imageStr)
+		if info != nil {
 			if info.Width() > 0.0 {
 				fmt.Printf("Image %s is registered\n", imageStr)
 			} else {
