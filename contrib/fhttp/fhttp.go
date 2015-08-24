@@ -5,10 +5,10 @@ import (
 	"net/http"
 )
 
-// RegisterRemoteImage registers a remote image. Downloading the image from the
+// RegisterHttpImage registers a HTTP image. Downloading the image from the
 // provided URL and adding it to the PDF but not adding it to the page. Use
 // Image() with the same URL to add the image to the page.
-func RegisterRemoteImage(f *gofpdf.Fpdf, urlStr, tp string) (info *gofpdf.ImageInfoType) {
+func RegisterHttpImage(f *gofpdf.Fpdf, urlStr, tp string) (info *gofpdf.ImageInfoType) {
 	info = f.GetImageInfo(urlStr)
 
 	if info != nil {

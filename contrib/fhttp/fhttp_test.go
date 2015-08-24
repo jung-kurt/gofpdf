@@ -25,19 +25,19 @@ func summary(err error, fileStr string) {
 	}
 }
 
-func ExampleFpdf_AddRemoteImage() {
+func ExampleFpdf_AddHttpImage() {
 	pdf := gofpdf.New("", "", "", "")
 	pdf.SetFont("Helvetica", "", 12)
 	pdf.SetFillColor(200, 200, 220)
 	pdf.AddPage()
 
 	url := "https://github.com/jung-kurt/gofpdf/raw/master/image/logo_gofpdf.jpg?raw=true"
-	fhttp.RegisterRemoteImage(pdf, url, "")
+	fhttp.RegisterHttpImage(pdf, url, "")
 	pdf.Image(url, 100, 100, 20, 20, false, "", 0, "")
 
-	fileStr := exampleFilename("Fpdf_AddRemoteImage")
+	fileStr := exampleFilename("Fpdf_AddHttpImage")
 	err := pdf.OutputFileAndClose(fileStr)
 	summary(err, fileStr)
 	// Output:
-	// Successfully generated pdf/Fpdf_AddRemoteImage.pdf
+	// Successfully generated pdf/Fpdf_AddHttpImage.pdf
 }
