@@ -2359,15 +2359,10 @@ func (f *Fpdf) RegisterImage(fileStr, tp string) (info *ImageInfoType) {
 }
 
 // GetImageInfo returns information about the registered image specified by
-// imageStr. If the image has not been registered, an empty structure followed
-// by false is returned. The internal error is not modified by this method.
-func (f *Fpdf) GetImageInfo(imageStr string) (info ImageInfoType, ok bool) {
-	var infoPtr *ImageInfoType
-	infoPtr, ok = f.images[imageStr]
-	if ok {
-		info = *infoPtr
-	}
-	return
+// imageStr. If the image has not been registered, nil is returned. The
+// internal error is not modified by this method.
+func (f *Fpdf) GetImageInfo(imageStr string) (info *ImageInfoType) {
+	return f.images[imageStr]
 }
 
 // GetXY returns the abscissa and ordinate of the current position.

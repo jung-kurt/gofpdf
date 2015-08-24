@@ -14,7 +14,15 @@ func errPrintf(fmtStr string, args ...interface{}) {
 func showHelp() {
 	errPrintf("Usage: %s [options] font_file [font_file...]\n", os.Args[0])
 	flag.PrintDefaults()
-	errPrintf("Example: %s --embed --enc=../font/cp1252.map --dst=../font calligra.ttf /opt/font/symbol.pfb\n", os.Args[0])
+	fmt.Fprintln(os.Stderr, "\n"+
+		"font_file is the name of the TrueType file (extension .ttf), OpenType file\n"+
+		"(extension .otf) or binary Type1 file (extension .pfb) from which to\n"+
+		"generate a definition file. If an OpenType file is specified, it must be one\n"+
+		"that is based on TrueType outlines, not PostScript outlines; this cannot be\n"+
+		"determined from the file extension alone. If a Type1 file is specified, a\n"+
+		"metric file with the same pathname except with the extension .afm must be\n"+
+		"present.")
+	errPrintf("\nExample: %s --embed --enc=../font/cp1252.map --dst=../font calligra.ttf /opt/font/symbol.pfb\n", os.Args[0])
 }
 
 func tutorialSummary(f *gofpdf.Fpdf, fileStr string) {
