@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/jung-kurt/gofpdf"
 	"github.com/jung-kurt/gofpdf/contrib/httpimg"
+	"os"
 	"path/filepath"
 )
 
@@ -11,6 +12,20 @@ const (
 	cnGofpdfDir  = "./"
 	cnExampleDir = cnGofpdfDir + "/pdf"
 )
+
+func init() {
+	cleanup()
+}
+
+func cleanup() {
+	filepath.Walk(cnExampleDir,
+		func(path string, info os.FileInfo, err error) (reterr error) {
+			if path[len(path)-4:] == ".pdf" {
+				os.Remove(path)
+			}
+			return
+		})
+}
 
 func exampleFilename(baseStr string) string {
 	return filepath.Join(cnExampleDir, baseStr+".pdf")
