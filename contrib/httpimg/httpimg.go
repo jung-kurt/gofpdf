@@ -1,4 +1,4 @@
-package fhttp
+package httpimg
 
 import (
 	"github.com/jung-kurt/gofpdf"
