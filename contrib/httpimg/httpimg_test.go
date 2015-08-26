@@ -25,7 +25,7 @@ func summary(err error, fileStr string) {
 	}
 }
 
-func ExampleFpdf_AddHttpImage() {
+func ExampleRegister() {
 	pdf := gofpdf.New("", "", "", "")
 	pdf.SetFont("Helvetica", "", 12)
 	pdf.SetFillColor(200, 200, 220)
@@ -35,9 +35,9 @@ func ExampleFpdf_AddHttpImage() {
 	httpimg.Register(pdf, url, "")
 	pdf.Image(url, 100, 100, 20, 20, false, "", 0, "")
 
-	fileStr := exampleFilename("Fpdf_AddHttpImage")
+	fileStr := exampleFilename("contrib_httpimg_Register")
 	err := pdf.OutputFileAndClose(fileStr)
 	summary(err, fileStr)
 	// Output:
-	// Successfully generated pdf/Fpdf_AddHttpImage.pdf
+	// Successfully generated pdf/contrib_httpimg_Register.pdf
 }
