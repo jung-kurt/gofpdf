@@ -5,10 +5,10 @@ import (
 	"net/http"
 )
 
-// RegisterHttpImage registers a HTTP image. Downloading the image from the
-// provided URL and adding it to the PDF but not adding it to the page. Use
-// Image() with the same URL to add the image to the page.
-func RegisterHttpImage(f *gofpdf.Fpdf, urlStr, tp string) (info *gofpdf.ImageInfoType) {
+// Register registers a HTTP image. Downloading the image from the provided URL
+// and adding it to the PDF but not adding it to the page. Use Image() with the
+// same URL to add the image to the page.
+func Register(f *gofpdf.Fpdf, urlStr, tp string) (info *gofpdf.ImageInfoType) {
 	info = f.GetImageInfo(urlStr)
 
 	if info != nil {

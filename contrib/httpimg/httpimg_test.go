@@ -32,7 +32,7 @@ func ExampleFpdf_AddHttpImage() {
 	pdf.AddPage()
 
 	url := "https://github.com/jung-kurt/gofpdf/raw/master/image/logo_gofpdf.jpg?raw=true"
-	httpimg.RegisterHttpImage(pdf, url, "")
+	httpimg.Register(pdf, url, "")
 	pdf.Image(url, 100, 100, 20, 20, false, "", 0, "")
 
 	fileStr := exampleFilename("Fpdf_AddHttpImage")
