@@ -7,15 +7,14 @@ import (
 )
 
 func ExampleRegister() {
-	pdf := gofpdf.New("", "", "", "")
+	pdf := gofpdf.New("L", "mm", "A4", "")
 	pdf.SetFont("Helvetica", "", 12)
 	pdf.SetFillColor(200, 200, 220)
 	pdf.AddPage()
 
 	url := "https://github.com/jung-kurt/gofpdf/raw/master/image/logo_gofpdf.jpg?raw=true"
 	httpimg.Register(pdf, url, "")
-	pdf.Image(url, 100, 100, 20, 20, false, "", 0, "")
-
+	pdf.Image(url, 15, 15, 267, 0, false, "", 0, "")
 	fileStr := example.Filename("contrib_httpimg_Register")
 	err := pdf.OutputFileAndClose(fileStr)
 	example.Summary(err, fileStr)
