@@ -17,15 +17,17 @@
 package example_test
 
 import (
-	"fmt"
-	"path/filepath"
+	"errors"
 
 	"github.com/jung-kurt/gofpdf/internal/example"
 )
 
-// Test the Filename() function.
-func ExampleExample_Filename() {
-	fmt.Println(filepath.ToSlash(example.Filename("foo")))
+// Test the Filename() and Summary() functions.
+func Example_Filename() {
+	fileStr := example.Filename("example")
+	example.Summary(nil, fileStr)
+	example.Summary(errors.New("printer on fire"), fileStr)
 	// Output:
-	// ../../pdf/foo.pdf
+	// Successfully generated ../../pdf/example.pdf
+	// printer on fire
 }
