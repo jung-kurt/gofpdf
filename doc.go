@@ -112,8 +112,9 @@ rather than PHP.
 
 Example PDFs
 
-A side effect of running "go test" is the production of a number of example
-PDFs. These can be found in the gofpdf/pdf directory after the tests complete.
+A side effect of running "go test ./..." is the production of a number of
+example PDFs. These can be found in the gofpdf/pdf directory after the tests
+complete.
 
 Please note that these examples run in the context of a test. In order run an
 example as a standalone application, you'll need to examine fpdf_test.go for
@@ -149,8 +150,11 @@ Contributing Changes
 
 gofpdf is a global community effort and you are invited to make it even better.
 If you have implemented a new feature or corrected a problem, please consider
-contributing your change to the project. Here are guidelines for making
-submissions. Your change should
+contributing your change to the project. Contributions that do not directly
+pertain to the core functionality of gofpdf should be placed in their own
+directory directly beneath the `contrib` directory.
+
+Here are guidelines for making submissions. Your change should
 
 • be compatible with the MIT License
 
