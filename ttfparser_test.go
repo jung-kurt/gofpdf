@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013 Kurt Jung (Gmail: kurt.w.jung)
+ * Copyright (c) 2013-2015 Kurt Jung (Gmail: kurt.w.jung)
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -19,12 +19,13 @@ package gofpdf_test
 import (
 	"bytes"
 	"fmt"
+
 	"github.com/jung-kurt/gofpdf"
-	// "testing"
+	"github.com/jung-kurt/gofpdf/internal/example"
 )
 
 func ExampleTtfParse() {
-	ttf, err := gofpdf.TtfParse(cnFontDir + "/calligra.ttf")
+	ttf, err := gofpdf.TtfParse(example.FontDir() + "/calligra.ttf")
 	if err == nil {
 		fmt.Printf("Postscript name:  %s\n", ttf.PostScriptName)
 		fmt.Printf("unitsPerEm:       %8d\n", ttf.UnitsPerEm)
@@ -55,7 +56,7 @@ func hexStr(s string) string {
 }
 
 func ExampleFpdf_GetStringWidth() {
-	pdf := gofpdf.New("", "", "", cnFontDir)
+	pdf := gofpdf.New("", "", "", example.FontDir())
 	pdf.SetFont("Helvetica", "", 12)
 	pdf.AddPage()
 	for _, s := range []string{"Hello", "世界", "\xe7a va?"} {
