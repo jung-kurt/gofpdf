@@ -200,8 +200,9 @@ Michiels provided support for multi-segment path drawing with smooth line
 joins, line join styles, enhanced fill modes, and has helped greatly with
 package presentation and tests. Templating is adapted by Marcus Downing from
 the FPDF_Tpl library created by Jan Slabon and Setasign. Jelmer Snoeck
-contributed a package that helps with registering images on the web. Bruno
-Michel has provided valuable assistance with the code.
+contributed packages that generate a variety of barcodes and help with
+registering images on the web. Bruno Michel has provided valuable assistance
+with the code.
 
 Roadmap
 
