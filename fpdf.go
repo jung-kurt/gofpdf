@@ -2365,6 +2365,12 @@ func (f *Fpdf) GetImageInfo(imageStr string) (info *ImageInfoType) {
 	return f.images[imageStr]
 }
 
+// GetConversionRatio returns the conversion ratio based on the unit given when
+// creating the PDF.
+func (f *Fpdf) GetConversionRatio() float64 {
+	return f.k
+}
+
 // GetXY returns the abscissa and ordinate of the current position.
 //
 // Note: the value returned for the abscissa will be affected by the current
