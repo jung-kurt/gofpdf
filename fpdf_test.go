@@ -1055,12 +1055,12 @@ func ExampleFpdf_RegisterImage() {
 		info := pdf.GetImageInfo(imageStr)
 		if info != nil {
 			if info.Width() > 0.0 {
-				fmt.Printf("Image %s is registered\n", imageStr)
+				fmt.Printf("Image %s is registered\n", filepath.ToSlash(imageStr))
 			} else {
-				fmt.Printf("Incorrect information for image %s\n", imageStr)
+				fmt.Printf("Incorrect information for image %s\n", filepath.ToSlash(imageStr))
 			}
 		} else {
-			fmt.Printf("Image %s is not registered\n", imageStr)
+			fmt.Printf("Image %s is not registered\n", filepath.ToSlash(imageStr))
 		}
 	}
 	infoShow(fileList[0])
