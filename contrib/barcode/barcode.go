@@ -20,6 +20,10 @@ package barcode
 import (
 	"bytes"
 	"errors"
+	"image/jpeg"
+	"io"
+	"strconv"
+
 	"github.com/boombuler/barcode"
 	"github.com/boombuler/barcode/codabar"
 	"github.com/boombuler/barcode/code128"
@@ -29,20 +33,28 @@ import (
 	"github.com/boombuler/barcode/qr"
 	"github.com/boombuler/barcode/twooffive"
 	"github.com/jung-kurt/gofpdf"
-	"image/jpeg"
-	"strconv"
 )
 
 // barcodes represents the barcodes that have been registered through this
 // package. They will later be used to be scaled and put on the page.
 var barcodes map[string]barcode.Barcode
 
+// barcodePdf is a partial PDF implementation that only implements a subset of
+// functions that are required to add the barcode to the PDF.
+type barcodePdf interface {
+	GetConversionRatio() float64
+	GetImageInfo(imageStr string) *gofpdf.ImageInfoType
+	Image(imageNameStr string, x, y, w, h float64, flow bool, tp string, link int, linkStr string)
+	RegisterImageReader(imgName, tp string, r io.Reader) *gofpdf.ImageInfoType
+	SetError(err error)
+}
+
 // Barcode puts a registered barcode in the current page.
 //
 // The size should be specified in the units used to create the PDF document.
 //
 // Positioning with x, y and flow is inherited from Fpdf.Image().
-func Barcode(pdf *gofpdf.Fpdf, code string, x, y, w, h float64, flow bool) {
+func Barcode(pdf barcodePdf, code string, x, y, w, h float64, flow bool) {
 	unscaled, ok := barcodes[code]
 
 	if !ok {
@@ -90,14 +102,14 @@ func Register(bcode barcode.Barcode) string {
 
 // RegisterCodabar registers a barcode of type Codabar to the PDF, but not to
 // the page. Use Barcode() with the return value to put the barcode on the page.
-func RegisterCodabar(pdf *gofpdf.Fpdf, code string) string {
+func RegisterCodabar(pdf barcodePdf, code string) string {
 	bcode, err := codabar.Encode(code)
 	return registerBarcode(pdf, bcode, err)
 }
 
 // RegisterCode128 registers a barcode of type Code128 to the PDF, but not to
 // the page. Use Barcode() with the return value to put the barcode on the page.
-func RegisterCode128(pdf *gofpdf.Fpdf, code string) string {
+func RegisterCode128(pdf barcodePdf, code string) string {
 	bcode, err := code128.Encode(code)
 	return registerBarcode(pdf, bcode, err)
 }
@@ -106,7 +118,7 @@ func RegisterCode128(pdf *gofpdf.Fpdf, code string) string {
 // the page. Use Barcode() with the return value to put the barcode on the page.
 //
 // includeChecksum and fullASCIIMode are inherited from code39.Encode().
-func RegisterCode39(pdf *gofpdf.Fpdf, code string, includeChecksum, fullASCIIMode bool) string {
+func RegisterCode39(pdf barcodePdf, code string, includeChecksum, fullASCIIMode bool) string {
 	bcode, err := code39.Encode(code, includeChecksum, fullASCIIMode)
 	return registerBarcode(pdf, bcode, err)
 }
@@ -114,7 +126,7 @@ func RegisterCode39(pdf *gofpdf.Fpdf, code string, includeChecksum, fullASCIIMod
 // RegisterDataMatrix registers a barcode of type DataMatrix to the PDF, but not
 // to the page. Use Barcode() with the return value to put the barcode on the
 // page.
-func RegisterDataMatrix(pdf *gofpdf.Fpdf, code string) string {
+func RegisterDataMatrix(pdf barcodePdf, code string) string {
 	bcode, err := datamatrix.Encode(code)
 	return registerBarcode(pdf, bcode, err)
 }
@@ -122,7 +134,7 @@ func RegisterDataMatrix(pdf *gofpdf.Fpdf, code string) string {
 // RegisterEAN registers a barcode of type EAN to the PDF, but not to the page.
 // It will automatically detect if the barcode is EAN8 or EAN13. Use Barcode()
 // with the return value to put the barcode on the page.
-func RegisterEAN(pdf *gofpdf.Fpdf, code string) string {
+func RegisterEAN(pdf barcodePdf, code string) string {
 	bcode, err := ean.Encode(code)
 	return registerBarcode(pdf, bcode, err)
 }
@@ -131,7 +143,7 @@ func RegisterEAN(pdf *gofpdf.Fpdf, code string) string {
 // Use Barcode() with the return value to put the barcode on the page.
 //
 // The ErrorCorrectionLevel and Encoding mode are inherited from qr.Encode().
-func RegisterQR(pdf *gofpdf.Fpdf, code string, ecl qr.ErrorCorrectionLevel, mode qr.Encoding) string {
+func RegisterQR(pdf barcodePdf, code string, ecl qr.ErrorCorrectionLevel, mode qr.Encoding) string {
 	bcode, err := qr.Encode(code, ecl, mode)
 	return registerBarcode(pdf, bcode, err)
 }
@@ -141,7 +153,7 @@ func RegisterQR(pdf *gofpdf.Fpdf, code string, ecl qr.ErrorCorrectionLevel, mode
 // page.
 //
 // The interleaved bool is inherited from twooffive.Encode().
-func RegisterTwoOfFive(pdf *gofpdf.Fpdf, code string, interleaved bool) string {
+func RegisterTwoOfFive(pdf barcodePdf, code string, interleaved bool) string {
 	bcode, err := twooffive.Encode(code, interleaved)
 	return registerBarcode(pdf, bcode, err)
 }
@@ -150,7 +162,7 @@ func RegisterTwoOfFive(pdf *gofpdf.Fpdf, code string, interleaved bool) string {
 // In case of an error generating the barcode it will not be registered and will
 // set an error on the PDF. It will return a unique key for the barcode type and
 // content that can be used to put the barcode on the page.
-func registerBarcode(pdf *gofpdf.Fpdf, bcode barcode.Barcode, err error) string {
+func registerBarcode(pdf barcodePdf, bcode barcode.Barcode, err error) string {
 	if err != nil {
 		pdf.SetError(err)
 	}
@@ -178,7 +190,7 @@ func barcodeKey(bcode barcode.Barcode) string {
 // registerScaledBarcode registers a barcode with its exact dimensions to the
 // PDF but does not put it on the page. Use Fpdf.Image() with the same code to
 // add the barcode to the page.
-func registerScaledBarcode(pdf *gofpdf.Fpdf, code string, bcode barcode.Barcode) error {
+func registerScaledBarcode(pdf barcodePdf, code string, bcode barcode.Barcode) error {
 	buf := new(bytes.Buffer)
 	err := jpeg.Encode(buf, bcode, nil)
 
@@ -199,6 +211,6 @@ func registerScaledBarcode(pdf *gofpdf.Fpdf, code string, bcode barcode.Barcode)
 // Doing this through the Fpdf.Image() function would mean that it uses a 72 DPI
 // value and stretches it to a 96 DPI value. This results in quality loss which
 // could be problematic for barcode scanners.
-func convertTo96Dpi(pdf *gofpdf.Fpdf, value float64) float64 {
+func convertTo96Dpi(pdf barcodePdf, value float64) float64 {
 	return value * pdf.GetConversionRatio() / 72 * 96
 }
