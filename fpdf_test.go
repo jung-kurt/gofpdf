@@ -463,6 +463,7 @@ func ExampleFpdf_HTMLBasicNew() {
 	_, lineHt = pdf.GetFontSize()
 	htmlStr := `You can now easily print text mixing different styles: <b>bold</b>, ` +
 		`<i>italic</i>, <u>underlined</u>, or <b><i><u>all at once</u></i></b>!<br><br>` +
+		`<center>You can also center text.</center>` +
 		`You can also insert links on text, such as ` +
 		`<a href="http://www.fpdf.org">www.fpdf.org</a>, or on an image: click on the logo.`
 	html := pdf.HTMLBasicNew()
@@ -486,6 +487,25 @@ func ExampleFpdf_AddFont() {
 	example.Summary(err, fileStr)
 	// Output:
 	// Successfully generated pdf/Fpdf_AddFont.pdf
+}
+
+// This example demonstrates how to align text with the Write function.
+func ExampleFpdf_WriteAligned() {
+	pdf := gofpdf.New("P", "mm", "A4", example.FontDir())
+	pdf.AddPage()
+	pdf.SetFont("Helvetica", "", 12)
+	pdf.WriteAligned(0, 35, "This text is the default alignment, Left", "")
+	pdf.Ln(35)
+	pdf.WriteAligned(0, 35, "This text is aligned Left", "L")
+	pdf.Ln(35)
+	pdf.WriteAligned(0, 35, "This text is aligned Center", "C")
+	pdf.Ln(35)
+	pdf.WriteAligned(0, 35, "This text is aligned Right", "R")
+	fileStr := example.Filename("Fpdf_WriteAligned")
+	err := pdf.OutputFileAndClose(fileStr)
+	example.Summary(err, fileStr)
+	// Output:
+	// Successfully generated pdf/Fpdf_WriteAligned.pdf
 }
 
 // This example demonstrates how images are included in documents.
