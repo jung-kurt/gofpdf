@@ -2160,6 +2160,47 @@ func (f *Fpdf) WriteLinkID(h float64, displayStr string, linkID int) {
 	f.write(h, displayStr, linkID, "")
 }
 
+// WriteAligned is an implementation of Write that makes it possible to align
+// text.
+//
+// width indicates the width of the box the text will be drawn in. This is in
+// the unit of measure specified in New(). If it is set to 0, the bounding box
+//of the page will be taken (pageWidth - leftMargin - rightMargin).
+//
+// lineHeight indicates the line height in the unit of measure specified in
+// New().
+//
+// alignStr sees to horizontal alignment of the given textStr. The options are
+// "L", "C" and "R" (Left, Center, Right). The default is "L".
+func (f *Fpdf) WriteAligned(width, lineHeight float64, textStr, alignStr string) {
+	lMargin, _, rMargin, _ := f.GetMargins()
+
+	if width == 0 {
+		pageWidth, _ := f.GetPageSize()
+		width = pageWidth - (lMargin + rMargin)
+	}
+
+	lines := f.SplitLines([]byte(textStr), width)
+
+	for _, lineBt := range lines {
+		lineStr := string(lineBt[:])
+		lineWidth := f.GetStringWidth(lineStr)
+
+		switch alignStr {
+		case "C":
+			f.SetLeftMargin(lMargin + ((width - lineWidth) / 2))
+			f.Write(lineHeight, lineStr)
+			f.SetLeftMargin(lMargin)
+		case "R":
+			f.SetLeftMargin(lMargin + (width - lineWidth) - rMargin)
+			f.Write(lineHeight, lineStr)
+			f.SetLeftMargin(lMargin)
+		default:
+			f.Write(lineHeight, lineStr)
+		}
+	}
+}
+
 // Ln performs a line break. The current abscissa goes back to the left margin
 // and the ordinate increases by the amount passed in parameter. A negative
 // value of h indicates the height of the last printed cell.

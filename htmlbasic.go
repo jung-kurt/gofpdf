@@ -116,10 +116,10 @@ func (f *Fpdf) HTMLBasicNew() (html HTMLBasicType) {
 // Write prints text from the current position using the currently selected
 // font. See HTMLBasicNew() to create a receiver that is associated with the
 // PDF document instance. The text can be encoded with a basic subset of HTML
-// that includes hyperlinks and tags for italic (I), bold (B) and underscore
-// (U) attributes. When the right margin is reached a line break occurs and
-// text continues from the left margin. Upon method exit, the current position
-// is left at the end of the text.
+// that includes hyperlinks and tags for italic (I), bold (B), underscore
+// (U) and center (CENTER) attributes. When the right margin is reached a line
+// break occurs and text continues from the left margin. Upon method exit, the
+// current position is left at the end of the text.
 //
 // lineHt indicates the line height in the unit of measure specified in New().
 func (html *HTMLBasicType) Write(lineHt float64, htmlStr string) {
@@ -161,6 +161,7 @@ func (html *HTMLBasicType) Write(lineHt float64, htmlStr string) {
 	}
 	list := HTMLBasicTokenize(htmlStr)
 	var ok bool
+	alignStr := "L"
 	for _, el := range list {
 		switch el.Cat {
 		case 'T':
@@ -168,7 +169,7 @@ func (html *HTMLBasicType) Write(lineHt float64, htmlStr string) {
 				putLink(hrefStr, el.Str)
 				hrefStr = ""
 			} else {
-				html.pdf.Write(lineHt, el.Str)
+				html.pdf.WriteAligned(0, lineHt, el.Str, alignStr)
 			}
 		case 'O':
 			switch el.Str {
@@ -180,6 +181,9 @@ func (html *HTMLBasicType) Write(lineHt float64, htmlStr string) {
 				setStyle(0, 0, 1)
 			case "br":
 				html.pdf.Ln(lineHt)
+			case "center":
+				html.pdf.Ln(lineHt)
+				alignStr = "C"
 			case "a":
 				hrefStr, ok = el.Attr["href"]
 				if !ok {
@@ -194,7 +198,9 @@ func (html *HTMLBasicType) Write(lineHt float64, htmlStr string) {
 				setStyle(0, -1, 0)
 			case "u":
 				setStyle(0, 0, -1)
-
+			case "center":
+				html.pdf.Ln(lineHt)
+				alignStr = "L"
 			}
 		}
 	}
