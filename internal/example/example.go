@@ -94,8 +94,8 @@ var (
 	// 00000230  44 46 20 31 2e 37 29 0a  2f 43 72 65 61 74 69 6f  |DF 1.7)./Creatio|
 	// 00000240  6e 44 61 74 65 20 28 44  3a 32 30 31 35 31 30 30  |nDate (D:2015100|
 	// 00000250  38 31 32 33 30 34 35 29  0a 3e 3e 0a 65 6e 64 6f  |8123045).>>.endo|
-	creationDateRe *regexp.Regexp = regexp.MustCompile("/CreationDate \\(D:\\d{14}\\)")
-	fixDate        []byte         = []byte("/CreationDate (D:20000101000000)")
+	creationDateRe = regexp.MustCompile("/CreationDate \\(D:\\d{14}\\)")
+	fixDate        = []byte("/CreationDate (D:20000101000000)")
 )
 
 // referenceCompare compares the specified file with the file's reference copy
