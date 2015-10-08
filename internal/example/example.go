@@ -101,9 +101,9 @@ var (
 // referenceCompare compares the specified file with the file's reference copy
 // located in the 'reference' subdirectory. All bytes of the two files are
 // compared except for the value of the /CreationDate field in the PDF. An
-// error is returned if the two files do not match. If the file does not exist,
-// a copy of the specified file is made and a non-nil error is returned only if
-// this copy fails.
+// error is returned if the two files do not match. If the reference file does
+// not exist, a copy of the specified file is made and a non-nil error is
+// returned only if this copy fails.
 func referenceCompare(fileStr string) (err error) {
 	var fileBuf, refFileBuf []byte
 	var refFileStr, refDirStr, dirStr, baseFileStr string
