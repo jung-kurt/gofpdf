@@ -18,13 +18,14 @@
 package example
 
 import (
-	"bytes"
 	"fmt"
-	"io/ioutil"
+	//	"io/ioutil"
 	"os"
 	"path/filepath"
 	"regexp"
 	"strings"
+
+	"github.com/jung-kurt/gofpdf"
 )
 
 var gofpdfDir string
@@ -39,8 +40,7 @@ func setRoot() {
 	wdStr, err := os.Getwd()
 	if err == nil {
 		gofpdfDir = ""
-		sepStr := string(os.PathSeparator)
-		list := strings.Split(wdStr, sepStr)
+		list := strings.Split(filepath.ToSlash(wdStr), "/")
 		for j := len(list) - 1; j >= 0 && list[j] != "gofpdf"; j-- {
 			gofpdfDir = filepath.Join(gofpdfDir, "..")
 		}
@@ -103,38 +103,32 @@ var (
 // compared except for the value of the /CreationDate field in the PDF. An
 // error is returned if the two files do not match. If the reference file does
 // not exist, a copy of the specified file is made and a non-nil error is
-// returned only if this copy fails.
+// returned only if this copy fails. If the reference file exists but has zero
+// length, the file will not be overwritten and will be considered to be equal
+// to the example file. This is intended to facilitate initial example
+// development.
 func referenceCompare(fileStr string) (err error) {
-	var fileBuf, refFileBuf []byte
 	var refFileStr, refDirStr, dirStr, baseFileStr string
+	// var fileBuf []byte
+	// var info os.FileInfo
 	dirStr, baseFileStr = filepath.Split(fileStr)
 	refDirStr = filepath.Join(dirStr, "reference")
 	err = os.MkdirAll(refDirStr, 0755)
 	if err == nil {
 		refFileStr = filepath.Join(refDirStr, baseFileStr)
-		fileBuf, err = ioutil.ReadFile(fileStr)
-		if err == nil {
-			// Replace the creation timestamp of this PDF with a fixed value
-			fileBuf = creationDateRe.ReplaceAll(fileBuf, fixDate)
-			refFileBuf, err = ioutil.ReadFile(refFileStr)
-			if err == nil {
-				if len(fileBuf) == len(refFileBuf) {
-					if bytes.Equal(fileBuf, refFileBuf) {
-						// Files match
-					} else {
-						err = fmt.Errorf("%s differs from %s", fileStr, refFileStr)
-					}
-				} else {
-					err = fmt.Errorf("size of %s (%d) does not match size of %s (%d)",
-						fileStr, len(fileBuf), refFileStr, len(refFileBuf))
-				}
-			} else {
-				// Reference file is missing. Create it with a copy of the newly produced
-				// file in which the creation date has been fixed. Overwrite error with copy
-				// error.
-				err = ioutil.WriteFile(refFileStr, fileBuf, 0644)
-			}
-		}
+		// info, err = os.Stat(refFileStr)
+		// if err == nil {
+		//	if info.Size() > 0 {
+		err = gofpdf.ComparePDFFiles(fileStr, refFileStr)
+		//	}
+		// 		} else {
+		// 			// Reference file is missing. Create it with a copy of the example file.
+		// 			// Overwrite error with copy error.
+		// 			fileBuf, err = ioutil.ReadFile(fileStr)
+		// 			if err == nil {
+		// 				err = ioutil.WriteFile(refFileStr, fileBuf, 0644)
+		// 			}
+		// 		}
 	}
 	return
 }

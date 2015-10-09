@@ -40,9 +40,14 @@ func init() {
 func cleanup() {
 	filepath.Walk(example.PdfDir(),
 		func(path string, info os.FileInfo, err error) (reterr error) {
-			if len(path) > 3 {
-				if path[len(path)-4:] == ".pdf" {
-					os.Remove(path)
+			if info.Mode().IsRegular() {
+				dir, _ := filepath.Split(path)
+				if "reference" != filepath.Base(dir) {
+					if len(path) > 3 {
+						if path[len(path)-4:] == ".pdf" {
+							os.Remove(path)
+						}
+					}
 				}
 			}
 			return
