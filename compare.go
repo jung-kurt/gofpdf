@@ -64,8 +64,6 @@ func writeBytes(leadStr string, startPos int, sl []byte) {
 func checkBytes(pos int, sl1, sl2 []byte) (eq bool) {
 	eq = bytes.Equal(sl1, sl2)
 	if !eq {
-		// 		fmt.Printf("< %v\n", sl1)
-		// 		fmt.Printf("> %v\n", sl2)
 		writeBytes("<", pos, sl1)
 		writeBytes(">", pos, sl2)
 	}
@@ -88,13 +86,11 @@ func compareBytes(sl1, sl2 []byte) (err error) {
 	if length > len2 {
 		length = len2
 	}
-	// fmt.Printf("Len 1 %d, Len 2 %d, Len %d\n", len1, len2, length)
 	for posStart < length-1 {
 		posEnd = posStart + 16
 		if posEnd > length {
 			posEnd = length
 		}
-		// fmt.Printf("%d to %d\n", posStart, posEnd)
 		if !checkBytes(posStart, sl1[posStart:posEnd], sl2[posStart:posEnd]) {
 			diffs = true
 		}
@@ -129,7 +125,6 @@ func ComparePDFs(rdr1, rdr2 io.Reader) (err error) {
 // error.
 func ComparePDFFiles(file1Str, file2Str string) (err error) {
 	var sl1, sl2 []byte
-	// fmt.Printf("Comparing [%s] with [%s]\n", file1Str, file2Str)
 	sl1, err = ioutil.ReadFile(file1Str)
 	if err == nil {
 		sl2, err = ioutil.ReadFile(file2Str)

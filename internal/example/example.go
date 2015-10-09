@@ -19,10 +19,8 @@ package example
 
 import (
 	"fmt"
-	//	"io/ioutil"
 	"os"
 	"path/filepath"
-	"regexp"
 	"strings"
 
 	"github.com/jung-kurt/gofpdf"
@@ -90,45 +88,19 @@ func Filename(baseStr string) string {
 	return PdfFile(baseStr + ".pdf")
 }
 
-var (
-	// 00000230  44 46 20 31 2e 37 29 0a  2f 43 72 65 61 74 69 6f  |DF 1.7)./Creatio|
-	// 00000240  6e 44 61 74 65 20 28 44  3a 32 30 31 35 31 30 30  |nDate (D:2015100|
-	// 00000250  38 31 32 33 30 34 35 29  0a 3e 3e 0a 65 6e 64 6f  |8123045).>>.endo|
-	creationDateRe = regexp.MustCompile("/CreationDate \\(D:\\d{14}\\)")
-	fixDate        = []byte("/CreationDate (D:20000101000000)")
-)
-
 // referenceCompare compares the specified file with the file's reference copy
 // located in the 'reference' subdirectory. All bytes of the two files are
-// compared except for the value of the /CreationDate field in the PDF. An
-// error is returned if the two files do not match. If the reference file does
-// not exist, a copy of the specified file is made and a non-nil error is
-// returned only if this copy fails. If the reference file exists but has zero
-// length, the file will not be overwritten and will be considered to be equal
-// to the example file. This is intended to facilitate initial example
-// development.
+// compared except for the value of the /CreationDate field in the PDF. This
+// function succeeds if both files are equivalent except for their
+// /CreationDate values or if the reference file does not exist.
 func referenceCompare(fileStr string) (err error) {
 	var refFileStr, refDirStr, dirStr, baseFileStr string
-	// var fileBuf []byte
-	// var info os.FileInfo
 	dirStr, baseFileStr = filepath.Split(fileStr)
 	refDirStr = filepath.Join(dirStr, "reference")
 	err = os.MkdirAll(refDirStr, 0755)
 	if err == nil {
 		refFileStr = filepath.Join(refDirStr, baseFileStr)
-		// info, err = os.Stat(refFileStr)
-		// if err == nil {
-		//	if info.Size() > 0 {
 		err = gofpdf.ComparePDFFiles(fileStr, refFileStr)
-		//	}
-		// 		} else {
-		// 			// Reference file is missing. Create it with a copy of the example file.
-		// 			// Overwrite error with copy error.
-		// 			fileBuf, err = ioutil.ReadFile(fileStr)
-		// 			if err == nil {
-		// 				err = ioutil.WriteFile(refFileStr, fileBuf, 0644)
-		// 			}
-		// 		}
 	}
 	return
 }
