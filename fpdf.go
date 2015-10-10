@@ -3140,7 +3140,6 @@ func (f *Fpdf) putfonts() {
 			sort.Strings(fileList)
 		}
 		for _, file = range fileList {
-			// for file, info := range f.fontFiles {
 			info = f.fontFiles[file]
 			// Font file embedding
 			f.newobj()
@@ -3352,9 +3351,20 @@ func (f *Fpdf) putimage(info *ImageInfoType) {
 }
 
 func (f *Fpdf) putxobjectdict() {
-	for _, image := range f.images {
-		// 	foreach($this->images as $image)
-		f.outf("/I%d %d 0 R", image.i, image.n)
+	{
+		var image *ImageInfoType
+		var key string
+		var keyList []string
+		for key = range f.images {
+			keyList = append(keyList, key)
+		}
+		if f.catalogSort {
+			sort.Strings(keyList)
+		}
+		for _, key = range keyList {
+			image = f.images[key]
+			f.outf("/I%d %d 0 R", image.i, image.n)
+		}
 	}
 	for _, tpl := range f.templates {
 		id := tpl.ID()
@@ -3379,8 +3389,6 @@ func (f *Fpdf) putresourcedict() {
 		}
 		for _, key = range keyList {
 			font = f.fonts[key]
-			// for _, font := range f.fonts {
-			// 	foreach($this->fonts as $font)
 			f.outf("/F%d %d 0 R", font.I, font.N)
 		}
 	}

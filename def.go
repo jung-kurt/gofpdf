@@ -151,7 +151,7 @@ type InitType struct {
 // from arbitrary locations (e.g. files, zip files, embedded font resources).
 //
 // Open provides an io.Reader for the specified font file (.json or .z). The file name
-// does never include a path. Open returns an error if the specified file cannot be opened.
+// never includes a path. Open returns an error if the specified file cannot be opened.
 type FontLoader interface {
 	Open(name string) (io.Reader, error)
 }
@@ -162,7 +162,7 @@ type Fpdf struct {
 	n                int                       // current object number
 	offsets          []int                     // array of object offsets
 	templates        map[int64]Template        // templates used in this document
-	templateObjects  map[int64]int             //template object IDs within this document
+	templateObjects  map[int64]int             // template object IDs within this document
 	buffer           fmtBuffer                 // buffer holding in-memory PDF
 	pages            []*bytes.Buffer           // slice[page] of page content; 1-based
 	state            int                       // current document state

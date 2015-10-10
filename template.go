@@ -36,7 +36,7 @@ func CreateTemplate(corner PointType, size SizeType, unitStr, fontDirStr string,
 // using the size and position at which it was originally written.
 func (f *Fpdf) UseTemplate(t Template) {
 	if t == nil {
-		f.SetErrorf("Template is nil")
+		f.SetErrorf("template is nil")
 		return
 	}
 	corner, size := t.Size()
@@ -47,13 +47,13 @@ func (f *Fpdf) UseTemplate(t Template) {
 // using the given page coordinates.
 func (f *Fpdf) UseTemplateScaled(t Template, corner PointType, size SizeType) {
 	if t == nil {
-		f.SetErrorf("Template is nil")
+		f.SetErrorf("template is nil")
 		return
 	}
 
 	// You have to add at least a page first
 	if f.page <= 0 {
-		f.SetErrorf("Cannot use a template without first adding a page")
+		f.SetErrorf("cannot use a template without first adding a page")
 		return
 	}
 
