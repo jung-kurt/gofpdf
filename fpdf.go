@@ -2986,6 +2986,14 @@ func (f *Fpdf) outf(fmtStr string, args ...interface{}) {
 	f.out(sprintf(fmtStr, args...))
 }
 
+// SetCreationDate fixes the document's internal CreationDate value. By
+// default, the time when the document is generated is used for this value.
+// This method is typically only used for testing purposes. Specify a
+// zero-value time to revert to the default behavior
+func (f *Fpdf) SetCreationDate(tm time.Time) {
+	f.creationDate = tm
+}
+
 func (f *Fpdf) putpages() {
 	var wPt, hPt float64
 	var pageSize SizeType
@@ -3400,6 +3408,7 @@ func (f *Fpdf) putresources() {
 }
 
 func (f *Fpdf) putinfo() {
+	var tm time.Time
 	f.outf("/Producer %s", f.textstring("FPDF "+cnFpdfVersion))
 	if len(f.title) > 0 {
 		f.outf("/Title %s", f.textstring(f.title))
@@ -3416,7 +3425,12 @@ func (f *Fpdf) putinfo() {
 	if len(f.creator) > 0 {
 		f.outf("/Creator %s", f.textstring(f.creator))
 	}
-	f.outf("/CreationDate %s", f.textstring("D:"+time.Now().Format("20060102150405")))
+	if f.creationDate.IsZero() {
+		tm = time.Now()
+	} else {
+		tm = f.creationDate
+	}
+	f.outf("/CreationDate %s", f.textstring("D:"+tm.Format("20060102150405")))
 }
 
 func (f *Fpdf) putcatalog() {

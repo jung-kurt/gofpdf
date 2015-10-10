@@ -19,6 +19,7 @@ package gofpdf
 import (
 	"bytes"
 	"io"
+	"time"
 )
 
 // Version of FPDF from which this package is derived
@@ -216,6 +217,7 @@ type Fpdf struct {
 	author           string                    // author
 	keywords         string                    // keywords
 	creator          string                    // creator
+	creationDate     time.Time                 // override for dcoument CreationDate value
 	aliasNbPagesStr  string                    // alias for total number of pages
 	pdfVersion       string                    // PDF version number
 	fontDirStr       string                    // location of font definition files
