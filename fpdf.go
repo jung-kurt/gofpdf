@@ -42,6 +42,11 @@ import (
 	"time"
 )
 
+var gl struct {
+	catalogSort  bool
+	creationDate time.Time
+}
+
 type fmtBuffer struct {
 	bytes.Buffer
 }
@@ -180,6 +185,8 @@ func fpdfNew(orientationStr, unitStr, sizeStr, fontDirStr string, size SizeType)
 	// Set default PDF version number
 	f.pdfVersion = "1.3"
 	f.layerInit()
+	f.catalogSort = gl.catalogSort
+	f.creationDate = gl.creationDate
 	return
 }
 
@@ -2987,6 +2994,13 @@ func (f *Fpdf) outf(fmtStr string, args ...interface{}) {
 	f.out(sprintf(fmtStr, args...))
 }
 
+// SetDefaultCatalogSort sets the default value of the catalog sort flag that
+// will be used when initializing a new Fpdf instance. See SetCatalogSort() for
+// more details.
+func SetDefaultCatalogSort(flag bool) {
+	gl.catalogSort = flag
+}
+
 // SetCatalogSort sets a flag that will be used, if true, to consistently order
 // the document's internal resource catalogs. This method is typically only
 // used for test purposes.
@@ -2994,10 +3008,17 @@ func (f *Fpdf) SetCatalogSort(flag bool) {
 	f.catalogSort = flag
 }
 
+// SetDefaultCreationDate sets the default value of the document creation date
+// that will be used when initializing a new Fpdf instance. See
+// SetCreationDate() for more details.
+func SetDefaultCreationDate(tm time.Time) {
+	gl.creationDate = tm
+}
+
 // SetCreationDate fixes the document's internal CreationDate value. By
 // default, the time when the document is generated is used for this value.
 // This method is typically only used for testing purposes. Specify a
-// zero-value time to revert to the default behavior
+// zero-value time to revert to the default behavior.
 func (f *Fpdf) SetCreationDate(tm time.Time) {
 	f.creationDate = tm
 }
@@ -3346,9 +3367,22 @@ func (f *Fpdf) putxobjectdict() {
 func (f *Fpdf) putresourcedict() {
 	f.out("/ProcSet [/PDF /Text /ImageB /ImageC /ImageI]")
 	f.out("/Font <<")
-	for _, font := range f.fonts {
-		// 	foreach($this->fonts as $font)
-		f.outf("/F%d %d 0 R", font.I, font.N)
+	{
+		var keyList []string
+		var font fontDefType
+		var key string
+		for key = range f.fonts {
+			keyList = append(keyList, key)
+		}
+		if f.catalogSort {
+			sort.Strings(keyList)
+		}
+		for _, key = range keyList {
+			font = f.fonts[key]
+			// for _, font := range f.fonts {
+			// 	foreach($this->fonts as $font)
+			f.outf("/F%d %d 0 R", font.I, font.N)
+		}
 	}
 	f.out(">>")
 	f.out("/XObject <<")

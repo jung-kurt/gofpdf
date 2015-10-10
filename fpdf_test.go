@@ -28,6 +28,7 @@ import (
 	"path/filepath"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/jung-kurt/gofpdf"
 	"github.com/jung-kurt/gofpdf/internal/example"
@@ -35,6 +36,8 @@ import (
 
 func init() {
 	cleanup()
+	gofpdf.SetDefaultCatalogSort(true)
+	gofpdf.SetDefaultCreationDate(time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC))
 }
 
 func cleanup() {
