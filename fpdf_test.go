@@ -110,6 +110,7 @@ func Example() {
 // This example demonsrates the generation of headers, footers and page breaks.
 func ExampleFpdf_AddPage() {
 	pdf := gofpdf.New("P", "mm", "A4", "")
+	pdf.SetCatalogSort(true)
 	pdf.SetHeaderFunc(func() {
 		pdf.Image(example.ImageFile("logo.png"), 10, 6, 30, 0, false, "", 0, "")
 		pdf.SetY(5)

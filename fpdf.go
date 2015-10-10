@@ -36,6 +36,7 @@ import (
 	"math"
 	"os"
 	"path"
+	"sort"
 	"strconv"
 	"strings"
 	"time"
@@ -2986,6 +2987,13 @@ func (f *Fpdf) outf(fmtStr string, args ...interface{}) {
 	f.out(sprintf(fmtStr, args...))
 }
 
+// SetCatalogSort sets a flag that will be used, if true, to consistently order
+// the document's internal resource catalogs. This method is typically only
+// used for test purposes.
+func (f *Fpdf) SetCatalogSort(flag bool) {
+	f.catalogSort = flag
+}
+
 // SetCreationDate fixes the document's internal CreationDate value. By
 // default, the time when the document is generated is used for this value.
 // This method is typically only used for testing purposes. Specify a
@@ -3100,107 +3108,131 @@ func (f *Fpdf) putfonts() {
 		f.outf("<</Type /Encoding /BaseEncoding /WinAnsiEncoding /Differences [%s]>>", diff)
 		f.out("endobj")
 	}
-	for file, info := range f.fontFiles {
-		// 	foreach($this->fontFiles as $file=>$info)
-		// Font file embedding
-		f.newobj()
-		info.n = f.n
-		f.fontFiles[file] = info
-		font, err := f.loadFontFile(file)
-		if err != nil {
-			f.err = err
-			return
+	{
+		var fileList []string
+		var info fontFileType
+		var file string
+		for file = range f.fontFiles {
+			fileList = append(fileList, file)
 		}
-		// dbg("font file [%s], ext [%s]", file, file[len(file)-2:])
-		compressed := file[len(file)-2:] == ".z"
-		if !compressed && info.length2 > 0 {
-			buf := font[6:info.length1]
-			buf = append(buf, font[6+info.length1+6:info.length2]...)
-			font = buf
+		if f.catalogSort {
+			sort.Strings(fileList)
 		}
-		f.outf("<</Length %d", len(font))
-		if compressed {
-			f.out("/Filter /FlateDecode")
+		for _, file = range fileList {
+			// for file, info := range f.fontFiles {
+			info = f.fontFiles[file]
+			// Font file embedding
+			f.newobj()
+			info.n = f.n
+			f.fontFiles[file] = info
+			font, err := f.loadFontFile(file)
+			if err != nil {
+				f.err = err
+				return
+			}
+			// dbg("font file [%s], ext [%s]", file, file[len(file)-2:])
+			compressed := file[len(file)-2:] == ".z"
+			if !compressed && info.length2 > 0 {
+				buf := font[6:info.length1]
+				buf = append(buf, font[6+info.length1+6:info.length2]...)
+				font = buf
+			}
+			f.outf("<</Length %d", len(font))
+			if compressed {
+				f.out("/Filter /FlateDecode")
+			}
+			f.outf("/Length1 %d", info.length1)
+			if info.length2 > 0 {
+				f.outf("/Length2 %d /Length3 0", info.length2)
+			}
+			f.out(">>")
+			f.putstream(font)
+			f.out("endobj")
 		}
-		f.outf("/Length1 %d", info.length1)
-		if info.length2 > 0 {
-			f.outf("/Length2 %d /Length3 0", info.length2)
-		}
-		f.out(">>")
-		f.putstream(font)
-		f.out("endobj")
 	}
-	for k, font := range f.fonts {
-		// Font objects
-		font.N = f.n + 1
-		f.fonts[k] = font
-		tp := font.Tp
-		name := font.Name
-		if tp == "Core" {
-			// Core font
-			f.newobj()
-			f.out("<</Type /Font")
-			f.outf("/BaseFont /%s", name)
-			f.out("/Subtype /Type1")
-			if name != "Symbol" && name != "ZapfDingbats" {
-				f.out("/Encoding /WinAnsiEncoding")
-			}
-			f.out(">>")
-			f.out("endobj")
-		} else if tp == "Type1" || tp == "TrueType" {
-			// Additional Type1 or TrueType/OpenType font
-			f.newobj()
-			f.out("<</Type /Font")
-			f.outf("/BaseFont /%s", name)
-			f.outf("/Subtype /%s", tp)
-			f.out("/FirstChar 32 /LastChar 255")
-			f.outf("/Widths %d 0 R", f.n+1)
-			f.outf("/FontDescriptor %d 0 R", f.n+2)
-			if font.DiffN > 0 {
-				f.outf("/Encoding %d 0 R", nf+font.DiffN)
+	{
+		var keyList []string
+		var font fontDefType
+		var key string
+		for key = range f.fonts {
+			keyList = append(keyList, key)
+		}
+		if f.catalogSort {
+			sort.Strings(keyList)
+		}
+		for _, key = range keyList {
+			font = f.fonts[key]
+			// Font objects
+			font.N = f.n + 1
+			f.fonts[key] = font
+			tp := font.Tp
+			name := font.Name
+			if tp == "Core" {
+				// Core font
+				f.newobj()
+				f.out("<</Type /Font")
+				f.outf("/BaseFont /%s", name)
+				f.out("/Subtype /Type1")
+				if name != "Symbol" && name != "ZapfDingbats" {
+					f.out("/Encoding /WinAnsiEncoding")
+				}
+				f.out(">>")
+				f.out("endobj")
+			} else if tp == "Type1" || tp == "TrueType" {
+				// Additional Type1 or TrueType/OpenType font
+				f.newobj()
+				f.out("<</Type /Font")
+				f.outf("/BaseFont /%s", name)
+				f.outf("/Subtype /%s", tp)
+				f.out("/FirstChar 32 /LastChar 255")
+				f.outf("/Widths %d 0 R", f.n+1)
+				f.outf("/FontDescriptor %d 0 R", f.n+2)
+				if font.DiffN > 0 {
+					f.outf("/Encoding %d 0 R", nf+font.DiffN)
+				} else {
+					f.out("/Encoding /WinAnsiEncoding")
+				}
+				f.out(">>")
+				f.out("endobj")
+				// Widths
+				f.newobj()
+				var s fmtBuffer
+				s.WriteString("[")
+				for j := 32; j < 256; j++ {
+					s.printf("%d ", font.Cw[j])
+				}
+				s.WriteString("]")
+				f.out(s.String())
+				f.out("endobj")
+				// Descriptor
+				f.newobj()
+				s.Truncate(0)
+				s.printf("<</Type /FontDescriptor /FontName /%s ", name)
+				s.printf("/Ascent %d ", font.Desc.Ascent)
+				s.printf("/Descent %d ", font.Desc.Descent)
+				s.printf("/CapHeight %d ", font.Desc.CapHeight)
+				s.printf("/Flags %d ", font.Desc.Flags)
+				s.printf("/FontBBox [%d %d %d %d] ", font.Desc.FontBBox.Xmin, font.Desc.FontBBox.Ymin,
+					font.Desc.FontBBox.Xmax, font.Desc.FontBBox.Ymax)
+				s.printf("/ItalicAngle %d ", font.Desc.ItalicAngle)
+				s.printf("/StemV %d ", font.Desc.StemV)
+				s.printf("/MissingWidth %d ", font.Desc.MissingWidth)
+				var suffix string
+				if tp != "Type1" {
+					suffix = "2"
+				}
+				s.printf("/FontFile%s %d 0 R>>", suffix, f.fontFiles[font.File].n)
+				f.out(s.String())
+				f.out("endobj")
 			} else {
-				f.out("/Encoding /WinAnsiEncoding")
+				f.err = fmt.Errorf("unsupported font type: %s", tp)
+				return
+				// Allow for additional types
+				// 			$mtd = 'put'.strtolower($type);
+				// 			if(!method_exists($this,$mtd))
+				// 				$this->Error('Unsupported font type: '.$type);
+				// 			$this->$mtd($font);
 			}
-			f.out(">>")
-			f.out("endobj")
-			// Widths
-			f.newobj()
-			var s fmtBuffer
-			s.WriteString("[")
-			for j := 32; j < 256; j++ {
-				s.printf("%d ", font.Cw[j])
-			}
-			s.WriteString("]")
-			f.out(s.String())
-			f.out("endobj")
-			// Descriptor
-			f.newobj()
-			s.Truncate(0)
-			s.printf("<</Type /FontDescriptor /FontName /%s ", name)
-			s.printf("/Ascent %d ", font.Desc.Ascent)
-			s.printf("/Descent %d ", font.Desc.Descent)
-			s.printf("/CapHeight %d ", font.Desc.CapHeight)
-			s.printf("/Flags %d ", font.Desc.Flags)
-			s.printf("/FontBBox [%d %d %d %d] ", font.Desc.FontBBox.Xmin, font.Desc.FontBBox.Ymin,
-				font.Desc.FontBBox.Xmax, font.Desc.FontBBox.Ymax)
-			s.printf("/ItalicAngle %d ", font.Desc.ItalicAngle)
-			s.printf("/StemV %d ", font.Desc.StemV)
-			s.printf("/MissingWidth %d ", font.Desc.MissingWidth)
-			var suffix string
-			if tp != "Type1" {
-				suffix = "2"
-			}
-			s.printf("/FontFile%s %d 0 R>>", suffix, f.fontFiles[font.File].n)
-			f.out(s.String())
-			f.out("endobj")
-		} else {
-			f.err = fmt.Errorf("unsupported font type: %s", tp)
-			return
-			// Allow for additional types
-			// 			$mtd = 'put'.strtolower($type);
-			// 			if(!method_exists($this,$mtd))
-			// 				$this->Error('Unsupported font type: '.$type);
-			// 			$this->$mtd($font);
 		}
 	}
 	return
@@ -3221,8 +3253,16 @@ func (f *Fpdf) loadFontFile(name string) ([]byte, error) {
 }
 
 func (f *Fpdf) putimages() {
-	for _, img := range f.images {
-		f.putimage(img)
+	var keyList []string
+	var key string
+	for key = range f.images {
+		keyList = append(keyList, key)
+	}
+	if f.catalogSort {
+		sort.Strings(keyList)
+	}
+	for _, key = range keyList {
+		f.putimage(f.images[key])
 	}
 }
 
