@@ -17,6 +17,10 @@ package gofpdf
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
+import (
+	"sort"
+)
+
 // CreateTemplate defines a new template using the current page size.
 func (f *Fpdf) CreateTemplate(fn func(*Tpl)) Template {
 	return newTpl(PointType{0, 0}, f.curPageSize, f.unitStr, f.fontDirStr, fn, f)
@@ -135,8 +139,21 @@ func (f *Fpdf) putTemplates() {
 		tTemplates := t.Templates()
 		if len(tImages) > 0 || len(tTemplates) > 0 {
 			f.out("/XObject <<")
-			for _, ti := range tImages {
-				f.outf("/I%d %d 0 R", ti.i, ti.n)
+			{
+				var key string
+				var keyList []string
+				var ti *ImageInfoType
+				for key = range tImages {
+					keyList = append(keyList, key)
+				}
+				if gl.catalogSort {
+					sort.Strings(keyList)
+				}
+				for _, key = range keyList {
+					// for _, ti := range tImages {
+					ti = tImages[key]
+					f.outf("/I%d %d 0 R", ti.i, ti.n)
+				}
 			}
 			for _, tt := range tTemplates {
 				id := tt.ID()

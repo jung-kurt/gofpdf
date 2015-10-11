@@ -3366,10 +3366,29 @@ func (f *Fpdf) putxobjectdict() {
 			f.outf("/I%d %d 0 R", image.i, image.n)
 		}
 	}
-	for _, tpl := range f.templates {
-		id := tpl.ID()
-		if objID, ok := f.templateObjects[id]; ok {
-			f.outf("/TPL%d %d 0 R", id, objID)
+	{
+		var key int64
+		var keyList []int64
+		var tpl Template
+		for key = range f.templates {
+			keyList = append(keyList, key)
+		}
+		if f.catalogSort {
+			gensort(len(keyList),
+				func(a, b int) bool {
+					return keyList[a] < keyList[b]
+				},
+				func(a, b int) {
+					keyList[a], keyList[b] = keyList[b], keyList[a]
+				})
+		}
+		for _, key = range keyList {
+			tpl = f.templates[key]
+			// for _, tpl := range f.templates {
+			id := tpl.ID()
+			if objID, ok := f.templateObjects[id]; ok {
+				f.outf("/TPL%d %d 0 R", id, objID)
+			}
 		}
 	}
 }
