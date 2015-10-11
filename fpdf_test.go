@@ -1140,6 +1140,7 @@ func ExampleFpdf_SVGBasicWrite() {
 		err error
 	)
 	pdf := gofpdf.New("P", "mm", "A4", "") // A4 210.0 x 297.0
+	pdf.SetCompression(false)
 	pdf.SetFont("Times", "", fontPtSize)
 	lineHt := pdf.PointConvert(fontPtSize)
 	pdf.AddPage()
