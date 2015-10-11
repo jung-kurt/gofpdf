@@ -1,10 +1,17 @@
 package httpimg_test
 
 import (
+	"time"
+
 	"github.com/jung-kurt/gofpdf"
 	"github.com/jung-kurt/gofpdf/contrib/httpimg"
 	"github.com/jung-kurt/gofpdf/internal/example"
 )
+
+func init() {
+	gofpdf.SetDefaultCatalogSort(true)
+	gofpdf.SetDefaultCreationDate(time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC))
+}
 
 func ExampleRegister() {
 	pdf := gofpdf.New("L", "mm", "A4", "")
