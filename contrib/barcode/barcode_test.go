@@ -1,19 +1,12 @@
 package barcode_test
 
 import (
-	"time"
-
 	"github.com/boombuler/barcode/code128"
 	"github.com/boombuler/barcode/qr"
 	"github.com/jung-kurt/gofpdf"
 	"github.com/jung-kurt/gofpdf/contrib/barcode"
 	"github.com/jung-kurt/gofpdf/internal/example"
 )
-
-func init() {
-	gofpdf.SetDefaultCatalogSort(true)
-	gofpdf.SetDefaultCreationDate(time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC))
-}
 
 func createPdf() (pdf *gofpdf.Fpdf) {
 	pdf = gofpdf.New("L", "mm", "A4", "")

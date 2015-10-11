@@ -22,6 +22,7 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"time"
 
 	"github.com/jung-kurt/gofpdf"
 )
@@ -30,6 +31,8 @@ var gofpdfDir string
 
 func init() {
 	setRoot()
+	gofpdf.SetDefaultCatalogSort(true)
+	gofpdf.SetDefaultCreationDate(time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC))
 }
 
 // Assign the relative path to the gofpdfDir directory based on current working
