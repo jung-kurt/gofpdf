@@ -3367,21 +3367,10 @@ func (f *Fpdf) putxobjectdict() {
 		}
 	}
 	{
-		var key int64
 		var keyList []int64
+		var key int64
 		var tpl Template
-		for key = range f.templates {
-			keyList = append(keyList, key)
-		}
-		if f.catalogSort {
-			gensort(len(keyList),
-				func(a, b int) bool {
-					return keyList[a] < keyList[b]
-				},
-				func(a, b int) {
-					keyList[a], keyList[b] = keyList[b], keyList[a]
-				})
-		}
+		keyList = templateKeyList(f.templates, f.catalogSort)
 		for _, key = range keyList {
 			tpl = f.templates[key]
 			// for _, tpl := range f.templates {
