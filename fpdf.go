@@ -3003,7 +3003,7 @@ func SetDefaultCatalogSort(flag bool) {
 
 // SetCatalogSort sets a flag that will be used, if true, to consistently order
 // the document's internal resource catalogs. This method is typically only
-// used for test purposes.
+// used for test purposes to facilitate PDF comparison.
 func (f *Fpdf) SetCatalogSort(flag bool) {
 	f.catalogSort = flag
 }
@@ -3017,8 +3017,8 @@ func SetDefaultCreationDate(tm time.Time) {
 
 // SetCreationDate fixes the document's internal CreationDate value. By
 // default, the time when the document is generated is used for this value.
-// This method is typically only used for testing purposes. Specify a
-// zero-value time to revert to the default behavior.
+// This method is typically only used for testing purposes to facilitate PDF
+// comparsion. Specify a zero-value time to revert to the default behavior.
 func (f *Fpdf) SetCreationDate(tm time.Time) {
 	f.creationDate = tm
 }

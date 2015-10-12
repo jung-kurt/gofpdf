@@ -116,7 +116,7 @@ func (f *Fpdf) putTemplates() {
 		filter = "/Filter /FlateDecode "
 	}
 
-	templates := sortTemplates(f.templates)
+	templates := sortTemplates(f.templates, f.catalogSort)
 	var t Template
 	for _, t = range templates {
 		corner, size := t.Size()
@@ -196,14 +196,14 @@ func templateKeyList(mp map[int64]Template, sort bool) (keyList []int64) {
 }
 
 // sortTemplates puts templates in a suitable order based on dependices
-func sortTemplates(templates map[int64]Template) []Template {
+func sortTemplates(templates map[int64]Template, catalogSort bool) []Template {
 	chain := make([]Template, 0, len(templates)*2)
 
 	// build a full set of dependency chains
 	var keyList []int64
 	var key int64
 	var t Template
-	keyList = templateKeyList(templates, true) // FIXME
+	keyList = templateKeyList(templates, catalogSort)
 	for _, key = range keyList {
 		t = templates[key]
 		tlist := templateChainDependencies(t)
@@ -243,6 +243,7 @@ func templateChainDependencies(template Template) []Template {
 }
 
 // < 0002640  31 20 31 32 20 30 20 52  0a 2f 54 50 4c 32 20 31  |1 12 0 R./TPL2 1|
-// > 0002640  31 20 31 32 20 30 20 52  0a 2f 54 50 4c 31 20 31  |1 12 0 R./TPL1 1|
 // < 0002650  35 20 30 20 52 0a 2f 54  50 4c 31 20 31 34 20 30  |5 0 R./TPL1 14 0|
+
+// > 0002640  31 20 31 32 20 30 20 52  0a 2f 54 50 4c 31 20 31  |1 12 0 R./TPL1 1|
 // > 0002650  34 20 30 20 52 0a 2f 54  50 4c 32 20 31 35 20 30  |4 0 R./TPL2 15 0|
