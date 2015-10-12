@@ -169,7 +169,11 @@ func (html *HTMLBasicType) Write(lineHt float64, htmlStr string) {
 				putLink(hrefStr, el.Str)
 				hrefStr = ""
 			} else {
-				html.pdf.WriteAligned(0, lineHt, el.Str, alignStr)
+				if alignStr == "C" {
+					html.pdf.WriteAligned(0, lineHt, el.Str, alignStr)
+				} else {
+					html.pdf.Write(lineHt, el.Str)
+				}
 			}
 		case 'O':
 			switch el.Str {
