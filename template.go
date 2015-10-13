@@ -79,7 +79,7 @@ func (f *Fpdf) UseTemplateScaled(t Template, corner PointType, size SizeType) {
 	tx := corner.X * f.k
 	ty := (f.curPageSize.Ht - corner.Y - size.Ht) * f.k
 
-	f.outf("q %.4F 0 0 %.4F %.4F %.4F cm", scaleX, scaleY, tx, ty) // Translate
+	f.outf("q %.4f 0 0 %.4f %.4f %.4f cm", scaleX, scaleY, tx, ty) // Translate
 	f.outf("/TPL%d Do Q", t.ID())
 }
 
@@ -126,9 +126,9 @@ func (f *Fpdf) putTemplates() {
 		f.outf("<<%s/Type /XObject", filter)
 		f.out("/Subtype /Form")
 		f.out("/Formtype 1")
-		f.outf("/BBox [%.2F %.2F %.2F %.2F]", corner.X*f.k, corner.Y*f.k, (corner.X+size.Wd)*f.k, (corner.Y+size.Ht)*f.k)
+		f.outf("/BBox [%.2f %.2f %.2f %.2f]", corner.X*f.k, corner.Y*f.k, (corner.X+size.Wd)*f.k, (corner.Y+size.Ht)*f.k)
 		if corner.X != 0 || corner.Y != 0 {
-			f.outf("/Matrix [1 0 0 1 %.5F %.5F]", -corner.X*f.k*2, corner.Y*f.k*2)
+			f.outf("/Matrix [1 0 0 1 %.5f %.5f]", -corner.X*f.k*2, corner.Y*f.k*2)
 		}
 
 		// Template's resource dictionary
