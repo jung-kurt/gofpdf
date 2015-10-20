@@ -1,3 +1,5 @@
+#!/bin/bash
+
 # https://github.com/jimmyfrasche/autoreadme
 autoreadme -f -template README.md.template
 # Improve the appearance of the markdown document with features unavailable in godoc
@@ -16,5 +18,5 @@ cat README.md | tr '\n' '\v' | sed \
   -e 's/test.coverage.(\(https:\/\/blog\.golang\.org\/cover\))/[test coverage](\1)/g' \
   -e 's/Pull.requests.(\(https:\/\/help\.github\.com\/articles\/using\-pull\-requests\/\))/[Pull requests](\1)/g' \
   -e 's/Your change should\v/Your change should\v\v/g' \
-  | tr '\v' '\n' > 0 
-mv 0 README.md
+  | tr '\v' '\n' > _0 
+mv _0 README.md

@@ -35,8 +35,8 @@ func newTpl(corner PointType, size SizeType, unitStr, fontDirStr string, fn func
 	fn(&tpl)
 	bytes := tpl.Fpdf.pages[tpl.Fpdf.page].Bytes()
 	templates := make([]Template, 0, len(tpl.Fpdf.templates))
-	for _, t := range tpl.Fpdf.templates {
-		templates = append(templates, t)
+	for _, key := range templateKeyList(tpl.Fpdf.templates, true) {
+		templates = append(templates, tpl.Fpdf.templates[key])
 	}
 	images := tpl.Fpdf.images
 

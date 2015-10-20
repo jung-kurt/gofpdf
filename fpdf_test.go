@@ -40,9 +40,14 @@ func init() {
 func cleanup() {
 	filepath.Walk(example.PdfDir(),
 		func(path string, info os.FileInfo, err error) (reterr error) {
-			if len(path) > 3 {
-				if path[len(path)-4:] == ".pdf" {
-					os.Remove(path)
+			if info.Mode().IsRegular() {
+				dir, _ := filepath.Split(path)
+				if "reference" != filepath.Base(dir) {
+					if len(path) > 3 {
+						if path[len(path)-4:] == ".pdf" {
+							os.Remove(path)
+						}
+					}
 				}
 			}
 			return
@@ -1728,8 +1733,8 @@ func ExampleFpdf_CreateTemplate() {
 
 	pdf.AddPage()
 	pdf.UseTemplate(template)
-	pdf.UseTemplateScaled(template, gofpdf.PointType{0, 30}, tplSize)
-	pdf.UseTemplateScaled(template, gofpdf.PointType{0, 60}, tplSize.ScaleBy(1.4))
+	pdf.UseTemplateScaled(template, gofpdf.PointType{X: 0, Y: 30}, tplSize)
+	pdf.UseTemplateScaled(template, gofpdf.PointType{X: 0, Y: 60}, tplSize.ScaleBy(1.4))
 	pdf.Line(40, 210, 60, 210)
 	pdf.Text(40, 200, "Template example page 1")
 

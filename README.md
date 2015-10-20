@@ -99,7 +99,20 @@ complete.
 
 Please note that these examples run in the context of a test. In order run an
 example as a standalone application, you'll need to examine [fpdf_test.go](https://github.com/jung-kurt/gofpdf/blob/master/fpdf_test.go) for
-some helper routines, for example exampleFilename and summary.
+some helper routines, for example exampleFilename() and summary().
+
+Example PDFs can be compared with reference copies in order to verify that they
+have been generated as expected. This comparison will be performed if a PDF
+with the same name as the example PDF is placed in the gofpdf/pdf/reference
+directory. The routine that summarizes an example will look for this file and,
+if found, will call ComparePDFFiles() to check the example PDF for equality
+with its reference PDF. If differences exist between the two files they will be
+printed to standard output and the test will fail. If the reference file is
+missing, the comparison is considered to succeed. In order to successfully
+compare two PDFs, the placement of internal resources must be consistent and
+the internal creation timestamps must be the same. To do this, the methods
+SetCatalogSort() and SetCreationDate() need to be called for both files. This
+is done automatically for all examples.
 
 ##Nonstandard Fonts
 

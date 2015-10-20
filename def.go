@@ -19,6 +19,7 @@ package gofpdf
 import (
 	"bytes"
 	"io"
+	"time"
 )
 
 // Version of FPDF from which this package is derived
@@ -150,7 +151,7 @@ type InitType struct {
 // from arbitrary locations (e.g. files, zip files, embedded font resources).
 //
 // Open provides an io.Reader for the specified font file (.json or .z). The file name
-// does never include a path. Open returns an error if the specified file cannot be opened.
+// never includes a path. Open returns an error if the specified file cannot be opened.
 type FontLoader interface {
 	Open(name string) (io.Reader, error)
 }
@@ -161,7 +162,7 @@ type Fpdf struct {
 	n                int                       // current object number
 	offsets          []int                     // array of object offsets
 	templates        map[int64]Template        // templates used in this document
-	templateObjects  map[int64]int             //template object IDs within this document
+	templateObjects  map[int64]int             // template object IDs within this document
 	buffer           fmtBuffer                 // buffer holding in-memory PDF
 	pages            []*bytes.Buffer           // slice[page] of page content; 1-based
 	state            int                       // current document state
@@ -216,6 +217,7 @@ type Fpdf struct {
 	author           string                    // author
 	keywords         string                    // keywords
 	creator          string                    // creator
+	creationDate     time.Time                 // override for dcoument CreationDate value
 	aliasNbPagesStr  string                    // alias for total number of pages
 	pdfVersion       string                    // PDF version number
 	fontDirStr       string                    // location of font definition files
@@ -233,6 +235,7 @@ type Fpdf struct {
 	err              error                     // Set if error occurs during life cycle of instance
 	protect          protectType               // document protection structure
 	layer            layerRecType              // manages optional layers in document
+	catalogSort      bool                      // sort resource catalogs in document
 	colorFlag        bool                      // indicates whether fill and text colors are different
 	color            struct {                  // Composite values of colors
 		draw, fill, text clrType

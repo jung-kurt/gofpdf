@@ -17,6 +17,10 @@ package gofpdf
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
+import (
+	"sort"
+)
+
 // CreateTemplate defines a new template using the current page size.
 func (f *Fpdf) CreateTemplate(fn func(*Tpl)) Template {
 	return newTpl(PointType{0, 0}, f.curPageSize, f.unitStr, f.fontDirStr, fn, f)
@@ -36,7 +40,7 @@ func CreateTemplate(corner PointType, size SizeType, unitStr, fontDirStr string,
 // using the size and position at which it was originally written.
 func (f *Fpdf) UseTemplate(t Template) {
 	if t == nil {
-		f.SetErrorf("Template is nil")
+		f.SetErrorf("template is nil")
 		return
 	}
 	corner, size := t.Size()
@@ -47,13 +51,13 @@ func (f *Fpdf) UseTemplate(t Template) {
 // using the given page coordinates.
 func (f *Fpdf) UseTemplateScaled(t Template, corner PointType, size SizeType) {
 	if t == nil {
-		f.SetErrorf("Template is nil")
+		f.SetErrorf("template is nil")
 		return
 	}
 
 	// You have to add at least a page first
 	if f.page <= 0 {
-		f.SetErrorf("Cannot use a template without first adding a page")
+		f.SetErrorf("cannot use a template without first adding a page")
 		return
 	}
 
@@ -75,7 +79,7 @@ func (f *Fpdf) UseTemplateScaled(t Template, corner PointType, size SizeType) {
 	tx := corner.X * f.k
 	ty := (f.curPageSize.Ht - corner.Y - size.Ht) * f.k
 
-	f.outf("q %.4F 0 0 %.4F %.4F %.4F cm", scaleX, scaleY, tx, ty) // Translate
+	f.outf("q %.4f 0 0 %.4f %.4f %.4f cm", scaleX, scaleY, tx, ty) // Translate
 	f.outf("/TPL%d Do Q", t.ID())
 }
 
@@ -112,7 +116,7 @@ func (f *Fpdf) putTemplates() {
 		filter = "/Filter /FlateDecode "
 	}
 
-	templates := sortTemplates(f.templates)
+	templates := sortTemplates(f.templates, f.catalogSort)
 	var t Template
 	for _, t = range templates {
 		corner, size := t.Size()
@@ -122,9 +126,9 @@ func (f *Fpdf) putTemplates() {
 		f.outf("<<%s/Type /XObject", filter)
 		f.out("/Subtype /Form")
 		f.out("/Formtype 1")
-		f.outf("/BBox [%.2F %.2F %.2F %.2F]", corner.X*f.k, corner.Y*f.k, (corner.X+size.Wd)*f.k, (corner.Y+size.Ht)*f.k)
+		f.outf("/BBox [%.2f %.2f %.2f %.2f]", corner.X*f.k, corner.Y*f.k, (corner.X+size.Wd)*f.k, (corner.Y+size.Ht)*f.k)
 		if corner.X != 0 || corner.Y != 0 {
-			f.outf("/Matrix [1 0 0 1 %.5F %.5F]", -corner.X*f.k*2, corner.Y*f.k*2)
+			f.outf("/Matrix [1 0 0 1 %.5f %.5f]", -corner.X*f.k*2, corner.Y*f.k*2)
 		}
 
 		// Template's resource dictionary
@@ -135,8 +139,21 @@ func (f *Fpdf) putTemplates() {
 		tTemplates := t.Templates()
 		if len(tImages) > 0 || len(tTemplates) > 0 {
 			f.out("/XObject <<")
-			for _, ti := range tImages {
-				f.outf("/I%d %d 0 R", ti.i, ti.n)
+			{
+				var key string
+				var keyList []string
+				var ti *ImageInfoType
+				for key = range tImages {
+					keyList = append(keyList, key)
+				}
+				if gl.catalogSort {
+					sort.Strings(keyList)
+				}
+				for _, key = range keyList {
+					// for _, ti := range tImages {
+					ti = tImages[key]
+					f.outf("/I%d %d 0 R", ti.i, ti.n)
+				}
 			}
 			for _, tt := range tTemplates {
 				id := tt.ID()
@@ -161,12 +178,34 @@ func (f *Fpdf) putTemplates() {
 	}
 }
 
+func templateKeyList(mp map[int64]Template, sort bool) (keyList []int64) {
+	var key int64
+	for key = range mp {
+		keyList = append(keyList, key)
+	}
+	if sort {
+		gensort(len(keyList),
+			func(a, b int) bool {
+				return keyList[a] < keyList[b]
+			},
+			func(a, b int) {
+				keyList[a], keyList[b] = keyList[b], keyList[a]
+			})
+	}
+	return
+}
+
 // sortTemplates puts templates in a suitable order based on dependices
-func sortTemplates(templates map[int64]Template) []Template {
+func sortTemplates(templates map[int64]Template, catalogSort bool) []Template {
 	chain := make([]Template, 0, len(templates)*2)
 
 	// build a full set of dependency chains
-	for _, t := range templates {
+	var keyList []int64
+	var key int64
+	var t Template
+	keyList = templateKeyList(templates, catalogSort)
+	for _, key = range keyList {
+		t = templates[key]
 		tlist := templateChainDependencies(t)
 		for _, tt := range tlist {
 			if tt != nil {
@@ -202,3 +241,9 @@ func templateChainDependencies(template Template) []Template {
 	chain = append(chain, template)
 	return chain
 }
+
+// < 0002640  31 20 31 32 20 30 20 52  0a 2f 54 50 4c 32 20 31  |1 12 0 R./TPL2 1|
+// < 0002650  35 20 30 20 52 0a 2f 54  50 4c 31 20 31 34 20 30  |5 0 R./TPL1 14 0|
+
+// > 0002640  31 20 31 32 20 30 20 52  0a 2f 54 50 4c 31 20 31  |1 12 0 R./TPL1 1|
+// > 0002650  34 20 30 20 52 0a 2f 54  50 4c 32 20 31 35 20 30  |4 0 R./TPL2 15 0|
