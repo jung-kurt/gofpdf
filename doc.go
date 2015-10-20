@@ -124,7 +124,7 @@ Example PDFs can be compared with reference copies in order to verify that they
 have been generated as expected. This comparison will be performed if a PDF
 with the same name as the example PDF is placed in the gofpdf/pdf/reference
 directory. The routine that summarizes an example will look for this file and,
-if found, will call the ComparePDFFiles() to check the example PDF for equality
+if found, will call ComparePDFFiles() to check the example PDF for equality
 with its reference PDF. If differences exist between the two files they will be
 printed to standard output and the test will fail. If the reference file is
 missing, the comparison is considered to succeed. In order to successfully
