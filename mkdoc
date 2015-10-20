@@ -18,10 +18,5 @@ cat README.md | tr '\n' '\v' | sed \
   -e 's/test.coverage.(\(https:\/\/blog\.golang\.org\/cover\))/[test coverage](\1)/g' \
   -e 's/Pull.requests.(\(https:\/\/help\.github\.com\/articles\/using\-pull\-requests\/\))/[Pull requests](\1)/g' \
   -e 's/Your change should\v/Your change should\v\v/g' \
-	-e 's/##Nonstandard Fonts/__PDFS__\v\v##Nonstandard Fonts/g' \
   | tr '\v' '\n' > _0 
-sed -e '/__PDFS__/,$d' _0 > _1
-go run list/list.go >> _1
-sed -e '1,/__PDFS__/d' _0 >> _1
-rm _0
-mv _1 README.md
+mv _0 README.md

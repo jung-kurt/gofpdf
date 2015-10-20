@@ -118,7 +118,7 @@ complete.
 
 Please note that these examples run in the context of a test. In order run an
 example as a standalone application, you'll need to examine fpdf_test.go for
-some helper routines, for example exampleFilename and summary.
+some helper routines, for example exampleFilename() and summary().
 
 Example PDFs can be compared with reference copies in order to verify that they
 have been generated as expected. This comparison will be performed if a PDF
