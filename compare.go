@@ -84,9 +84,9 @@ func checkBytes(pos int, sl1, sl2 []byte) (eq bool) {
 	return
 }
 
-// compareBytes compares the bytes referred to by sl1 with those referred to by
+// CompareBytes compares the bytes referred to by sl1 with those referred to by
 // sl2. Nil is returned if the buffers are equal, otherwise an error.
-func compareBytes(sl1, sl2 []byte) (err error) {
+func CompareBytes(sl1, sl2 []byte) (err error) {
 	var posStart, posEnd, len1, len2, length int
 	var diffs bool
 
@@ -122,7 +122,7 @@ func ComparePDFs(rdr1, rdr2 io.Reader) (err error) {
 	if err == nil {
 		_, err = b2.ReadFrom(rdr2)
 		if err == nil {
-			err = compareBytes(b1.Bytes(), b2.Bytes())
+			err = CompareBytes(b1.Bytes(), b2.Bytes())
 		}
 	}
 	return
@@ -139,7 +139,7 @@ func ComparePDFFiles(file1Str, file2Str string) (err error) {
 	if err == nil {
 		sl2, err = ioutil.ReadFile(file2Str)
 		if err == nil {
-			err = compareBytes(sl1, sl2)
+			err = CompareBytes(sl1, sl2)
 		} else {
 			// Second file is missing; treat this as success
 			err = nil
