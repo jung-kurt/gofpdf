@@ -36,13 +36,11 @@ func newPdf() (pdf *gofpdf.Fpdf) {
 	return
 }
 
-func full() {
-	const name = "full.pdf"
+func full(name string) {
 	report(name, newPdf().OutputFileAndClose(name))
 }
 
-func min() {
-	const name = "min.pdf"
+func min(name string) {
 	cmd := exec.Command("gs", "-sDEVICE=pdfwrite",
 		"-dCompatibilityLevel=1.4",
 		"-dPDFSETTINGS=/screen", "-dNOPAUSE", "-dQUIET",
@@ -61,6 +59,6 @@ func min() {
 }
 
 func main() {
-	full()
-	min()
+	full("full.pdf")
+	min("min.pdf")
 }
