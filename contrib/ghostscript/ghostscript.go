@@ -1,5 +1,9 @@
 package main
 
+// This command demonstrates the use of ghotscript to reduce the size
+// of generated PDFs. This is based on a comment made by farkerhaiku:
+// https://github.com/jung-kurt/gofpdf/issues/57#issuecomment-185843315
+
 import (
 	"fmt"
 	"os"
