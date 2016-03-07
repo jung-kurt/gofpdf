@@ -2250,6 +2250,16 @@ func (f *Fpdf) imageOut(info *ImageInfoType, x, y, w, h float64, flow bool, link
 		w = -96
 		h = -96
 	}
+	if w == -1 {
+		// Set image width to whatever value for dpi we read
+		// from the image or that was set manually
+		w = -info.dpi
+	}
+	if h == -1 {
+		// Set image height to whatever value for dpi we read
+		// from the image or that was set manually
+		h = -info.dpi
+	}
 	if w < 0 {
 		w = -info.w * 72.0 / w / f.k
 	}
@@ -2287,11 +2297,30 @@ func (f *Fpdf) imageOut(info *ImageInfoType, x, y, w, h float64, flow bool, link
 	}
 }
 
+// Image puts a JPEG, PNG or GIF image in the current page.
+//
+// Deprecated in favor of ImageOptions -- see that function for
+// details on the behavior of arguments
+func (f *Fpdf) Image(imageNameStr string, x, y, w, h float64, flow bool, tp string, link int, linkStr string) {
+	options := ImageOptions{
+		ReadDpi:   false,
+		ImageType: tp,
+	}
+	f.ImageOptions(imageNameStr, x, y, w, h, flow, options, link, linkStr)
+}
+
 // Image puts a JPEG, PNG or GIF image in the current page. The size it will
 // take on the page can be specified in different ways. If both w and h are 0,
 // the image is rendered at 96 dpi. If either w or h is zero, it will be
 // calculated from the other dimension so that the aspect ratio is maintained.
-// If w and h are negative, their absolute values indicate their dpi extents.
+// If w and/or h are -1, the dpi for that dimension will be read from
+// the ImageInfoType object. PNG files can contain dpi information, and if
+// present, this information will be populated in the ImageInfoType object
+// and used in Width, Height, and Extent calculations. Otherwise, the
+// SetDpi function can be used to change the dpi from the default of 72.
+//
+// If w and h are any other negative value, their absolute values
+// indicate their dpi extents.
 //
 // Supported JPEG formats are 24 bit, 32 bit and gray scale. Supported PNG
 // formats are 24 bit, indexed color, and 8 bit indexed gray scale. If a GIF
@@ -2313,18 +2342,14 @@ func (f *Fpdf) imageOut(info *ImageInfoType, x, y, w, h float64, flow bool, link
 // If flow is true, the current y value is advanced after placing the image and
 // a page break may be made if necessary.
 //
-// tp specifies the image format. Possible values are (case insensitive):
-// "JPG", "JPEG", "PNG" and "GIF". If not specified, the type is inferred from
-// the file extension.
-//
 // If link refers to an internal page anchor (that is, it is non-zero; see
 // AddLink()), the image will be a clickable internal link. Otherwise, if
 // linkStr specifies a URL, the image will be a clickable external link.
-func (f *Fpdf) Image(imageNameStr string, x, y, w, h float64, flow bool, tp string, link int, linkStr string) {
+func (f *Fpdf) ImageOptions(imageNameStr string, x, y, w, h float64, flow bool, options ImageOptions, link int, linkStr string) {
 	if f.err != nil {
 		return
 	}
-	info := f.RegisterImage(imageNameStr, tp)
+	info := f.RegisterImageOptions(imageNameStr, options)
 	if f.err != nil {
 		return
 	}
@@ -2333,12 +2358,41 @@ func (f *Fpdf) Image(imageNameStr string, x, y, w, h float64, flow bool, tp stri
 }
 
 // RegisterImageReader registers an image, reading it from Reader r, adding it
+// to the PDF file but not adding it to the page.
+//
+// This function is now deprecated in favor of RegisterImageOptionsReader
+func (f *Fpdf) RegisterImageReader(imgName, tp string, r io.Reader) (info *ImageInfoType) {
+	options := ImageOptions{
+		ReadDpi:   false,
+		ImageType: tp,
+	}
+	return f.RegisterImageOptionsReader(imgName, options, r)
+}
+
+// ImageOptions provides a place to hang any options we want to use while
+// parsing an image.
+//
+// ImageType's possible values are (case insensitive):
+// "JPG", "JPEG", "PNG" and "GIF". If empty, the type is inferred from
+// the file extension.
+//
+// ReadDpi defines whether to attempt to automatically read the image
+// dpi information from the image file. Normally, this should be set
+// to true (understanding that not all images will have this info
+// available). However, for backwards compatibility with previous
+// versions of the API, it defaults to false.
+type ImageOptions struct {
+	ImageType string
+	ReadDpi   bool
+}
+
+// RegisterImageOptionsReader registers an image, reading it from Reader r, adding it
 // to the PDF file but not adding it to the page. Use Image() with the same
 // name to add the image to the page. Note that tp should be specified in this
 // case.
 //
-// See Image() for restrictions on the image and the "tp" parameters.
-func (f *Fpdf) RegisterImageReader(imgName, tp string, r io.Reader) (info *ImageInfoType) {
+// See Image() for restrictions on the image and the options parameters.
+func (f *Fpdf) RegisterImageOptionsReader(imgName string, options ImageOptions, r io.Reader) (info *ImageInfoType) {
 	// Thanks, Ivan Daniluk, for generalizing this code to use the Reader interface.
 	if f.err != nil {
 		return
@@ -2349,23 +2403,23 @@ func (f *Fpdf) RegisterImageReader(imgName, tp string, r io.Reader) (info *Image
 	}
 
 	// First use of this image, get info
-	if tp == "" {
+	if options.ImageType == "" {
 		f.err = fmt.Errorf("image type should be specified if reading from custom reader")
 		return
 	}
-	tp = strings.ToLower(tp)
-	if tp == "jpeg" {
-		tp = "jpg"
+	options.ImageType = strings.ToLower(options.ImageType)
+	if options.ImageType == "jpeg" {
+		options.ImageType = "jpg"
 	}
-	switch tp {
+	switch options.ImageType {
 	case "jpg":
 		info = f.parsejpg(r)
 	case "png":
-		info = f.parsepng(r)
+		info = f.parsepng(r, options.ReadDpi)
 	case "gif":
 		info = f.parsegif(r)
 	default:
-		f.err = fmt.Errorf("unsupported image type: %s", tp)
+		f.err = fmt.Errorf("unsupported image type: %s", options.ImageType)
 	}
 	if f.err != nil {
 		return
@@ -2379,9 +2433,24 @@ func (f *Fpdf) RegisterImageReader(imgName, tp string, r io.Reader) (info *Image
 // RegisterImage registers an image, adding it to the PDF file but not adding
 // it to the page. Use Image() with the same filename to add the image to the
 // page. Note that Image() calls this function, so this function is only
+// necessary if you need information about the image before placing it.
+//
+// This function is now deprecated in favor of RegisterImageOptions.
+// See Image() for restrictions on the image and the "tp" parameters.
+func (f *Fpdf) RegisterImage(fileStr, tp string) (info *ImageInfoType) {
+	options := ImageOptions{
+		ReadDpi:   false,
+		ImageType: tp,
+	}
+	return f.RegisterImageOptions(fileStr, options)
+}
+
+// RegisterImage registers an image, adding it to the PDF file but not adding
+// it to the page. Use Image() with the same filename to add the image to the
+// page. Note that Image() calls this function, so this function is only
 // necessary if you need information about the image before placing it. See
 // Image() for restrictions on the image and the "tp" parameters.
-func (f *Fpdf) RegisterImage(fileStr, tp string) (info *ImageInfoType) {
+func (f *Fpdf) RegisterImageOptions(fileStr string, options ImageOptions) (info *ImageInfoType) {
 	info, ok := f.images[fileStr]
 	if ok {
 		return
@@ -2395,16 +2464,16 @@ func (f *Fpdf) RegisterImage(fileStr, tp string) (info *ImageInfoType) {
 	defer file.Close()
 
 	// First use of this image, get info
-	if tp == "" {
+	if options.ImageType == "" {
 		pos := strings.LastIndex(fileStr, ".")
 		if pos < 0 {
 			f.err = fmt.Errorf("image file has no extension and no type was specified: %s", fileStr)
 			return
 		}
-		tp = fileStr[pos+1:]
+		options.ImageType = fileStr[pos+1:]
 	}
 
-	return f.RegisterImageReader(fileStr, tp, file)
+	return f.RegisterImageOptionsReader(fileStr, options, file)
 }
 
 // GetImageInfo returns information about the registered image specified by
@@ -2682,7 +2751,8 @@ func be16(buf []byte) int {
 }
 
 func (f *Fpdf) newImageInfo() *ImageInfoType {
-	return &ImageInfoType{scale: f.k}
+	// default dpi to 72 unless told otherwise
+	return &ImageInfoType{scale: f.k, dpi: 72}
 }
 
 // Extract info from io.Reader with JPEG data
@@ -2722,13 +2792,13 @@ func (f *Fpdf) parsejpg(r io.Reader) (info *ImageInfoType) {
 }
 
 // Extract info from a PNG data
-func (f *Fpdf) parsepng(r io.Reader) (info *ImageInfoType) {
+func (f *Fpdf) parsepng(r io.Reader, readdpi bool) (info *ImageInfoType) {
 	buf, err := bufferFromReader(r)
 	if err != nil {
 		f.err = err
 		return
 	}
-	return f.parsepngstream(buf)
+	return f.parsepngstream(buf, readdpi)
 }
 
 func (f *Fpdf) readBeInt32(buf *bytes.Buffer) (val int32) {
@@ -2747,7 +2817,7 @@ func (f *Fpdf) readByte(buf *bytes.Buffer) (val byte) {
 	return
 }
 
-func (f *Fpdf) parsepngstream(buf *bytes.Buffer) (info *ImageInfoType) {
+func (f *Fpdf) parsepngstream(buf *bytes.Buffer, readdpi bool) (info *ImageInfoType) {
 	info = f.newImageInfo()
 	// 	Check signature
 	if string(buf.Next(8)) != "\x89PNG\x0d\x0a\x1a\x0a" {
@@ -2834,6 +2904,28 @@ func (f *Fpdf) parsepngstream(buf *bytes.Buffer) (info *ImageInfoType) {
 		case "IEND":
 			// dbg("IEND")
 			loop = false
+		case "pHYs":
+			// dbg("pHYs")
+			// png files theoretically support different x/y dpi
+			// but we ignore files like this
+			// but if they're the same then we can stamp our info
+			// object with it
+			x := int(f.readBeInt32(buf))
+			y := int(f.readBeInt32(buf))
+			units := buf.Next(1)[0]
+			fmt.Printf("got a pHYs block, x=%d, y=%d, u=%d, readdpi=%t\n",
+				x, y, int(units), readdpi)
+			// only modify the info block if the user wants us to
+			if x == y && readdpi {
+				switch units {
+				// if units is 1 then measurement is px/meter
+				case 1:
+					info.dpi = float64(x) / 39.3701 // inches per meter
+				default:
+					info.dpi = float64(x)
+				}
+			}
+			_ = buf.Next(4)
 		default:
 			// dbg("default")
 			_ = buf.Next(n + 4)
@@ -2927,7 +3019,7 @@ func (f *Fpdf) parsegif(r io.Reader) (info *ImageInfoType) {
 		f.err = err
 		return
 	}
-	return f.parsepngstream(pngBuf)
+	return f.parsepngstream(pngBuf, false)
 }
 
 // Begin a new object

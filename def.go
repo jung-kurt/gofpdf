@@ -71,6 +71,7 @@ type ImageInfoType struct {
 	dp    string
 	trns  []int
 	scale float64 // document scaling factor
+	dpi   float64
 }
 
 // PointConvert returns the value of pt, expressed in points (1/72 inch), as a
@@ -97,17 +98,26 @@ func (f *Fpdf) UnitToPointConvert(u float64) (pt float64) {
 // Extent returns the width and height of the image in the units of the Fpdf
 // object.
 func (info *ImageInfoType) Extent() (wd, ht float64) {
-	return info.w / info.scale, info.h / info.scale
+	return info.Width(), info.Height()
 }
 
 // Width returns the width of the image in the units of the Fpdf object.
 func (info *ImageInfoType) Width() float64 {
-	return info.w / info.scale
+	return info.w / (info.scale * info.dpi / 72)
 }
 
 // Height returns the height of the image in the units of the Fpdf object.
 func (info *ImageInfoType) Height() float64 {
-	return info.h / info.scale
+	return info.h / (info.scale * info.dpi / 72)
+}
+
+// Dpi sets the dots per inch for an image
+// PNG images MAY have their dpi set automatically, if the image
+// specifies it. DPI information is not currently available
+// automatically for JPG and GIF images, so if it's important to
+// you, you can set it here. It defaults to 72 dpi.
+func (info *ImageInfoType) SetDpi(dpi float64) {
+	info.dpi = dpi
 }
 
 type fontFileType struct {
