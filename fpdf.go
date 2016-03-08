@@ -2309,15 +2309,15 @@ func (f *Fpdf) Image(imageNameStr string, x, y, w, h float64, flow bool, tp stri
 	f.ImageOptions(imageNameStr, x, y, w, h, flow, options, link, linkStr)
 }
 
-// Image puts a JPEG, PNG or GIF image in the current page. The size it will
-// take on the page can be specified in different ways. If both w and h are 0,
-// the image is rendered at 96 dpi. If either w or h is zero, it will be
+// ImageOptions puts a JPEG, PNG or GIF image in the current page. The size it
+// will take on the page can be specified in different ways. If both w and h
+// are 0, the image is rendered at 96 dpi. If either w or h is zero, it will be
 // calculated from the other dimension so that the aspect ratio is maintained.
-// If w and/or h are -1, the dpi for that dimension will be read from
-// the ImageInfoType object. PNG files can contain dpi information, and if
-// present, this information will be populated in the ImageInfoType object
-// and used in Width, Height, and Extent calculations. Otherwise, the
-// SetDpi function can be used to change the dpi from the default of 72.
+// If w and/or h are -1, the dpi for that dimension will be read from the
+// ImageInfoType object. PNG files can contain dpi information, and if present,
+// this information will be populated in the ImageInfoType object and used in
+// Width, Height, and Extent calculations. Otherwise, the SetDpi function can
+// be used to change the dpi from the default of 72.
 //
 // If w and h are any other negative value, their absolute values
 // indicate their dpi extents.
@@ -2445,9 +2445,9 @@ func (f *Fpdf) RegisterImage(fileStr, tp string) (info *ImageInfoType) {
 	return f.RegisterImageOptions(fileStr, options)
 }
 
-// RegisterImage registers an image, adding it to the PDF file but not adding
-// it to the page. Use Image() with the same filename to add the image to the
-// page. Note that Image() calls this function, so this function is only
+// RegisterImageOptions registers an image, adding it to the PDF file but not
+// adding it to the page. Use Image() with the same filename to add the image
+// to the page. Note that Image() calls this function, so this function is only
 // necessary if you need information about the image before placing it. See
 // Image() for restrictions on the image and the "tp" parameters.
 func (f *Fpdf) RegisterImageOptions(fileStr string, options ImageOptions) (info *ImageInfoType) {
@@ -2913,8 +2913,8 @@ func (f *Fpdf) parsepngstream(buf *bytes.Buffer, readdpi bool) (info *ImageInfoT
 			x := int(f.readBeInt32(buf))
 			y := int(f.readBeInt32(buf))
 			units := buf.Next(1)[0]
-			fmt.Printf("got a pHYs block, x=%d, y=%d, u=%d, readdpi=%t\n",
-				x, y, int(units), readdpi)
+			// fmt.Printf("got a pHYs block, x=%d, y=%d, u=%d, readdpi=%t\n",
+			// x, y, int(units), readdpi)
 			// only modify the info block if the user wants us to
 			if x == y && readdpi {
 				switch units {

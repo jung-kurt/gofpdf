@@ -111,11 +111,10 @@ func (info *ImageInfoType) Height() float64 {
 	return info.h / (info.scale * info.dpi / 72)
 }
 
-// Dpi sets the dots per inch for an image
-// PNG images MAY have their dpi set automatically, if the image
-// specifies it. DPI information is not currently available
-// automatically for JPG and GIF images, so if it's important to
-// you, you can set it here. It defaults to 72 dpi.
+// SetDpi sets the dots per inch for an image. PNG images MAY have their dpi
+// set automatically, if the image specifies it. DPI information is not
+// currently available automatically for JPG and GIF images, so if it's
+// important to you, you can set it here. It defaults to 72 dpi.
 func (info *ImageInfoType) SetDpi(dpi float64) {
 	info.dpi = dpi
 }
