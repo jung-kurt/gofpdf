@@ -1274,7 +1274,8 @@ func ExampleFpdf_CellFormat_4() {
 	ht := pdf.PointConvert(fontSize)
 	tr := pdf.UnicodeTranslatorFromDescriptor("") // "" defaults to "cp1252"
 	write := func(str string) {
-		pdf.CellFormat(190, ht, tr(str), "", 1, "C", false, 0, "")
+		// pdf.CellFormat(190, ht, tr(str), "", 1, "C", false, 0, "")
+		pdf.MultiCell(190, ht, tr(str), "", "C", false)
 		pdf.Ln(ht)
 	}
 	pdf.AddPage()
@@ -1286,7 +1287,8 @@ func ExampleFpdf_CellFormat_4() {
 	write("Falsches Üben von Xylophonmusik quält jeden größeren Zwerg.")
 	write("Heizölrückstoßabdämpfung")
 	write("Forårsjævndøgn / Efterårsjævndøgn")
-
+	write("À noite, vovô Kowalsky vê o ímã cair no pé do pingüim queixoso e vovó" +
+		"põe açúcar no chá de tâmaras do jabuti feliz.")
 	pdf.SetFont("Helvetica-1251", "", fontSize) // Name matches one specified in AddFont()
 	tr = pdf.UnicodeTranslatorFromDescriptor("cp1251")
 	write("Съешь же ещё этих мягких французских булок, да выпей чаю.")
