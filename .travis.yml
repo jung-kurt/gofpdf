@@ -1,0 +1,11 @@
+language: go
+
+sudo: false
+
+go:
+  - tip
+
+script: go test -v
+
+notifications:
+    email: false
