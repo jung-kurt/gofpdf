@@ -32,6 +32,7 @@ import (
 	"github.com/boombuler/barcode/ean"
 	"github.com/boombuler/barcode/qr"
 	"github.com/boombuler/barcode/twooffive"
+	"github.com/ruudk/golang-pdf417"
 	"github.com/jung-kurt/gofpdf"
 )
 
@@ -129,6 +130,15 @@ func RegisterCode39(pdf barcodePdf, code string, includeChecksum, fullASCIIMode 
 func RegisterDataMatrix(pdf barcodePdf, code string) string {
 	bcode, err := datamatrix.Encode(code)
 	return registerBarcode(pdf, bcode, err)
+}
+
+// RegisterPdf417 registers a barcode of type Pdf417 to the PDF, but not
+// to the page. Use Barcode() with the return value to put the barcode on the
+// page.
+func RegisterPdf417(pdf barcodePdf, code string) string {
+	bcode := pdf417.Encode(code)
+
+	return registerBarcode(pdf, bcode, nil)
 }
 
 // RegisterEAN registers a barcode of type EAN to the PDF, but not to the page.
