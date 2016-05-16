@@ -3,7 +3,7 @@ language: go
 sudo: false
 
 go:
-  - tip
+  - 1.6.2
 
 os:
   - linux
