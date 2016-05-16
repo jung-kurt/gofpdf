@@ -7,6 +7,7 @@ go:
 
 os:
   - linux
+  - osx
             
 script: go test -v
 
