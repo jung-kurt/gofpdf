@@ -135,8 +135,8 @@ func RegisterDataMatrix(pdf barcodePdf, code string) string {
 // RegisterPdf417 registers a barcode of type Pdf417 to the PDF, but not
 // to the page. Use Barcode() with the return value to put the barcode on the
 // page.
-func RegisterPdf417(pdf barcodePdf, code string) string {
-	bcode := pdf417.Encode(code)
+func RegisterPdf417(pdf barcodePdf, code string, columns int, securityLevel int) string {
+	bcode := pdf417.Encode(code, columns, securityLevel)
 
 	return registerBarcode(pdf, bcode, nil)
 }
