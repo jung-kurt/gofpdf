@@ -124,3 +124,16 @@ func ExampleRegisterTwoOfFive() {
 	// Output:
 	// Successfully generated ../../pdf/contrib_barcode_RegisterTwoOfFive.pdf
 }
+
+func ExampleRegisterPdf417() {
+	pdf := createPdf()
+
+	key := barcode.RegisterPdf417(pdf, "1234567895", 10, 5)
+	barcode.Barcode(pdf, key, 15, 15, 100, 20, false)
+
+	fileStr := example.Filename("contrib_barcode_RegisterPdf417")
+	err := pdf.OutputFileAndClose(fileStr)
+	example.Summary(err, fileStr)
+	// Output:
+	// Successfully generated ../../pdf/contrib_barcode_RegisterPdf417.pdf
+}
