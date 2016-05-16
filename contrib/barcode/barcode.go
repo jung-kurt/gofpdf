@@ -33,6 +33,7 @@ import (
 	"github.com/boombuler/barcode/qr"
 	"github.com/boombuler/barcode/twooffive"
 	"github.com/jung-kurt/gofpdf"
+	"github.com/ruudk/golang-pdf417"
 )
 
 // barcodes represents the barcodes that have been registered through this
@@ -129,6 +130,18 @@ func RegisterCode39(pdf barcodePdf, code string, includeChecksum, fullASCIIMode 
 func RegisterDataMatrix(pdf barcodePdf, code string) string {
 	bcode, err := datamatrix.Encode(code)
 	return registerBarcode(pdf, bcode, err)
+}
+
+// RegisterPdf417 registers a barcode of type Pdf417 to the PDF, but not to the
+// page. code is the string to be encoded. columns specifies the number of
+// barcode columns; this should be a value between 1 and 30 inclusive.
+// securityLevel specifies an error correction level between zero and 8
+// inclusive. Barcodes for use with FedEx must set columns to 10 and
+// securityLevel to 5. Use Barcode() with the return value to put the barcode
+// on the page.
+func RegisterPdf417(pdf barcodePdf, code string, columns int, securityLevel int) string {
+	bcode := pdf417.Encode(code, columns, securityLevel)
+	return registerBarcode(pdf, bcode, nil)
 }
 
 // RegisterEAN registers a barcode of type EAN to the PDF, but not to the page.
