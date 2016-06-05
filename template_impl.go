@@ -80,9 +80,9 @@ func (t *FpdfTpl) Templates() []Template {
 	return t.templates
 }
 
-// Tpl is an Fpdf used for writing a template.
-// It has most of the facilities of an Fpdf,but cannot add more pages.
-// Tpl is used directly only during the limited time a template is writable.
+// Tpl is an Fpdf used for writing a template. It has most of the facilities of
+// an Fpdf, but cannot add more pages. Tpl is used directly only during the
+// limited time a template is writable.
 type Tpl struct {
 	Fpdf
 }
@@ -101,6 +101,7 @@ func (t *Tpl) loadParamsFromFpdf(f *Fpdf) {
 	t.Fpdf.color.fill = f.color.fill
 	t.Fpdf.color.text = f.color.text
 
+	t.Fpdf.fonts = f.fonts
 	t.Fpdf.currentFont = f.currentFont
 	t.Fpdf.fontFamily = f.fontFamily
 	t.Fpdf.fontSize = f.fontSize
