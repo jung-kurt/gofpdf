@@ -1720,7 +1720,7 @@ func (f *Fpdf) SetAcceptPageBreakFunc(fnc func() bool) {
 // values are 0 (to the right), 1 (to the beginning of the next line), and 2
 // (below). Putting 1 is equivalent to putting 0 and calling Ln() just after.
 //
-// alignStr specifies how the text is to be positionined within the cell.
+// alignStr specifies how the text is to be positioned within the cell.
 // Horizontal alignment is controlled by including "L", "C" or "R" (left,
 // center, right) in alignStr. Vertical alignment is controlled by including
 // "T", "M", "B" or "A" (top, middle, bottom, baseline) in alignStr. The default
