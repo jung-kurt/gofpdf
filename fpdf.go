@@ -1405,6 +1405,80 @@ func (f *Fpdf) AddFont(familyStr, styleStr, fileStr string) {
 	f.AddFontFromReader(familyStr, styleStr, file)
 }
 
+// AddFont imports a TrueType, OpenType or Type1 font and makes it available.
+//
+// You need use the content of files .json and .z of your font files as an
+// array of bytes.
+//
+// family specifies the font family. The name can be chosen arbitrarily. If it
+// is a standard family name, it will override the corresponding font. This
+// string is used to subsequently set the font with the SetFont method.
+//
+// style specifies the font style. Acceptable values are (case insensitive) the
+// empty string for regular style, "B" for bold, "I" for italic, or "BI" or
+// "IB" for bold and italic combined.
+//
+// jsonFileBytes contain all bytes of JSON file
+// zFileBytes contain all bytes of Z file
+func (f *Fpdf) AddFontFromBytes(familyStr string, styleStr string, jsonFileBytes []byte, zFileBytes []byte) {
+	if f.err != nil {
+		return
+	}
+
+	// load font key
+	var ok bool
+	fontkey := getFontKey(familyStr, styleStr)
+	_, ok = f.fonts[fontkey]
+
+	if ok {
+		return
+	}
+
+	// load font definitions
+	var info fontDefType
+	err := json.Unmarshal(jsonFileBytes, &info)
+
+	if err != nil {
+		f.err = err
+	}
+
+	if f.err != nil {
+		return
+	}
+
+	// search existing encodings
+	info.I = len(f.fonts)
+
+	if len(info.Diff) > 0 {
+		n := -1
+
+		for j, str := range f.diffs {
+			if str == info.Diff {
+				n = j + 1
+				break
+			}
+		}
+
+		if n < 0 {
+			f.diffs = append(f.diffs, info.Diff)
+			n = len(f.diffs)
+		}
+
+		info.DiffN = n
+	}
+
+	// embed font
+	if len(info.File) > 0 {
+		if info.Tp == "TrueType" {
+			f.fontFiles[info.File] = fontFileType{length1: int64(info.OriginalSize), embedded: true, content: zFileBytes}
+		} else {
+			f.fontFiles[info.File] = fontFileType{length1: int64(info.Size1), length2: int64(info.Size2), embedded: true, content: zFileBytes}
+		}
+	}
+
+	f.fonts[fontkey] = info
+}
+
 // getFontKey is used by AddFontFromReader and GetFontDesc
 func getFontKey(familyStr, styleStr string) string {
 	familyStr = strings.ToLower(familyStr)
@@ -3237,11 +3311,20 @@ func (f *Fpdf) putfonts() {
 			f.newobj()
 			info.n = f.n
 			f.fontFiles[file] = info
-			font, err := f.loadFontFile(file)
-			if err != nil {
-				f.err = err
-				return
+
+			var font []byte
+
+			if info.embedded {
+				font = info.content
+			} else {
+				var err error
+				font, err = f.loadFontFile(file)
+				if err != nil {
+					f.err = err
+					return
+				}
 			}
+
 			// dbg("font file [%s], ext [%s]", file, file[len(file)-2:])
 			compressed := file[len(file)-2:] == ".z"
 			if !compressed && info.length2 > 0 {
