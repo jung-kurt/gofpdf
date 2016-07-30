@@ -1182,20 +1182,20 @@ func ExampleFpdf_CellFormat_2() {
 		align, txt string
 	}
 	recList := []recType{
-		recType{"TL", "top left"},
-		recType{"TC", "top center"},
-		recType{"TR", "top right"},
-		recType{"LM", "middle left"},
-		recType{"CM", "middle center"},
-		recType{"RM", "middle right"},
-		recType{"BL", "bottom left"},
-		recType{"BC", "bottom center"},
-		recType{"BR", "bottom right"},
+		{"TL", "top left"},
+		{"TC", "top center"},
+		{"TR", "top right"},
+		{"LM", "middle left"},
+		{"CM", "middle center"},
+		{"RM", "middle right"},
+		{"BL", "bottom left"},
+		{"BC", "bottom center"},
+		{"BR", "bottom right"},
 	}
 	recListBaseline := []recType{
-		recType{"AL", "baseline left"},
-		recType{"AC", "baseline center"},
-		recType{"AR", "baseline right"},
+		{"AL", "baseline left"},
+		{"AC", "baseline center"},
+		{"AR", "baseline right"},
 	}
 	var formatRect = func(pdf *gofpdf.Fpdf, recList []recType) {
 		linkStr := ""
