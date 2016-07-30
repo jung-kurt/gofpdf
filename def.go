@@ -122,6 +122,8 @@ func (info *ImageInfoType) SetDpi(dpi float64) {
 type fontFileType struct {
 	length1, length2 int64
 	n                int
+	embedded         bool
+	content          []byte
 }
 
 type linkType struct {
@@ -246,7 +248,8 @@ type Fpdf struct {
 	layer            layerRecType              // manages optional layers in document
 	catalogSort      bool                      // sort resource catalogs in document
 	colorFlag        bool                      // indicates whether fill and text colors are different
-	color            struct {                  // Composite values of colors
+	color            struct {
+		// Composite values of colors
 		draw, fill, text clrType
 	}
 }

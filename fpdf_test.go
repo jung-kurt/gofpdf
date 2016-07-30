@@ -20,6 +20,9 @@ import (
 	"bufio"
 	"bytes"
 	"fmt"
+	"github.com/jung-kurt/gofpdf"
+	"github.com/jung-kurt/gofpdf/internal/example"
+	"github.com/jung-kurt/gofpdf/internal/files"
 	"io"
 	"io/ioutil"
 	"math"
@@ -28,9 +31,6 @@ import (
 	"path/filepath"
 	"strconv"
 	"strings"
-
-	"github.com/jung-kurt/gofpdf"
-	"github.com/jung-kurt/gofpdf/internal/example"
 )
 
 func init() {
@@ -1750,4 +1750,18 @@ func ExampleFpdf_CreateTemplate() {
 	example.Summary(err, fileStr)
 	// Output:
 	// Successfully generated pdf/Fpdf_CreateTemplate.pdf
+}
+
+// This example demonstrate how to use embedded fonts from byte array
+func ExampleEmbeddedBytes() {
+	pdf := gofpdf.New("P", "mm", "A4", "")
+	pdf.AddPage()
+	pdf.AddFontFromBytes("calligra", "", files.CalligraJson, files.CalligraZ)
+	pdf.SetFont("calligra", "", 16)
+	pdf.Cell(40, 10, "Hello World With Embedded Font!")
+	fileStr := example.Filename("Fpdf_EmbeddedFont")
+	err := pdf.OutputFileAndClose(fileStr)
+	example.Summary(err, fileStr)
+	// Output:
+	// Successfully generated pdf/Fpdf_EmbeddedFont.pdf
 }
