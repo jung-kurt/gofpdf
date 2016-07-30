@@ -1405,10 +1405,8 @@ func (f *Fpdf) AddFont(familyStr, styleStr, fileStr string) {
 	f.AddFontFromReader(familyStr, styleStr, file)
 }
 
-// AddFont imports a TrueType, OpenType or Type1 font and makes it available.
-//
-// You need use the content of files .json and .z of your font files as an
-// array of bytes.
+// AddFont imports a TrueType, OpenType or Type1 font and makes it available
+// for use in the generated document.
 //
 // family specifies the font family. The name can be chosen arbitrarily. If it
 // is a standard family name, it will override the corresponding font. This
@@ -1418,8 +1416,9 @@ func (f *Fpdf) AddFont(familyStr, styleStr, fileStr string) {
 // empty string for regular style, "B" for bold, "I" for italic, or "BI" or
 // "IB" for bold and italic combined.
 //
-// jsonFileBytes contain all bytes of JSON file
-// zFileBytes contain all bytes of Z file
+// jsonFileBytes contain all bytes of JSON file.
+
+// zFileBytes contain all bytes of Z file.
 func (f *Fpdf) AddFontFromBytes(familyStr string, styleStr string, jsonFileBytes []byte, zFileBytes []byte) {
 	if f.err != nil {
 		return
@@ -1470,9 +1469,18 @@ func (f *Fpdf) AddFontFromBytes(familyStr string, styleStr string, jsonFileBytes
 	// embed font
 	if len(info.File) > 0 {
 		if info.Tp == "TrueType" {
-			f.fontFiles[info.File] = fontFileType{length1: int64(info.OriginalSize), embedded: true, content: zFileBytes}
+			f.fontFiles[info.File] = fontFileType{
+				length1:  int64(info.OriginalSize),
+				embedded: true,
+				content:  zFileBytes,
+			}
 		} else {
-			f.fontFiles[info.File] = fontFileType{length1: int64(info.Size1), length2: int64(info.Size2), embedded: true, content: zFileBytes}
+			f.fontFiles[info.File] = fontFileType{
+				length1:  int64(info.Size1),
+				length2:  int64(info.Size2),
+				embedded: true,
+				content:  zFileBytes,
+			}
 		}
 	}
 
