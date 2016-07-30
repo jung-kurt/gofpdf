@@ -220,7 +220,8 @@ registering images on the web. Additionally, he augmented the basic HTML
 functionality with aligned text. Kent Quirk implemented backwards-compatible
 support for reading DPI from images that support it, and for setting DPI
 manually and then having it properly taken into account when calculating image
-size. Bruno Michel has provided valuable assistance with the code.
+size. Paulo Coutinho provided support for static embedded fonts. Bruno Michel
+has provided valuable assistance with the code.
 
 Roadmap
 
