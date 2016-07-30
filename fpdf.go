@@ -1405,8 +1405,8 @@ func (f *Fpdf) AddFont(familyStr, styleStr, fileStr string) {
 	f.AddFontFromReader(familyStr, styleStr, file)
 }
 
-// AddFont imports a TrueType, OpenType or Type1 font and makes it available
-// for use in the generated document.
+// AddFontFronBytes imports a TrueType, OpenType or Type1 font and makes it
+// available for use in the generated document.
 //
 // family specifies the font family. The name can be chosen arbitrarily. If it
 // is a standard family name, it will override the corresponding font. This
