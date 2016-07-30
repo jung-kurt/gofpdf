@@ -23,11 +23,9 @@ import (
 )
 
 // Test the Filename() and Summary() functions.
-func Example_Filename() {
+func Example_ExampleFilename() {
 	fileStr := example.Filename("example")
-	example.Summary(nil, fileStr)
 	example.Summary(errors.New("printer on fire"), fileStr)
 	// Output:
-	// Successfully generated ../../pdf/example.pdf
 	// printer on fire
 }

@@ -1753,7 +1753,7 @@ func ExampleFpdf_CreateTemplate() {
 }
 
 // This example demonstrate how to use embedded fonts from byte array
-func ExampleEmbeddedBytes() {
+func ExampleFpdf_AddFontFromBytes() {
 	pdf := gofpdf.New("P", "mm", "A4", "")
 	pdf.AddPage()
 	pdf.AddFontFromBytes("calligra", "", files.CalligraJson, files.CalligraZ)
