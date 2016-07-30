@@ -321,7 +321,7 @@ func ExampleFpdf_SetLeftMargin() {
 }
 
 // This example demonstrates various table styles.
-func ExampleFpdf_CellFormat_1() {
+func ExampleFpdf_CellFormat_tables() {
 	pdf := gofpdf.New("P", "mm", "A4", "")
 	type countryType struct {
 		nameStr, capitalStr, areaStr, popStr string
@@ -439,11 +439,11 @@ func ExampleFpdf_CellFormat_1() {
 	improvedTable()
 	pdf.AddPage()
 	fancyTable()
-	fileStr := example.Filename("Fpdf_CellFormat_1_tables")
+	fileStr := example.Filename("Fpdf_CellFormat_tables")
 	err := pdf.OutputFileAndClose(fileStr)
 	example.Summary(err, fileStr)
 	// Output:
-	// Successfully generated pdf/Fpdf_CellFormat_1_tables.pdf
+	// Successfully generated pdf/Fpdf_CellFormat_tables.pdf
 }
 
 // This example demonstrates internal and external links with and without basic
@@ -1177,7 +1177,7 @@ func ExampleFpdf_SVGBasicWrite() {
 
 // This example demonstrates Stefan Schroeder's code to control vertical
 // alignment.
-func ExampleFpdf_CellFormat_2() {
+func ExampleFpdf_CellFormat_align() {
 	type recType struct {
 		align, txt string
 	}
@@ -1221,19 +1221,19 @@ func ExampleFpdf_CellFormat_2() {
 	pdf.AddFont("Calligrapher", "", "calligra.json")
 	pdf.SetFont("Calligrapher", "", 16)
 	formatRect(pdf, recListBaseline)
-	fileStr := example.Filename("Fpdf_CellFormat_2_align")
+	fileStr := example.Filename("Fpdf_CellFormat_align")
 	err := pdf.OutputFileAndClose(fileStr)
 	example.Summary(err, fileStr)
 	// Output:
 	// Generalized font loader reading calligra.json
 	// Generalized font loader reading calligra.z
-	// Successfully generated pdf/Fpdf_CellFormat_2_align.pdf
+	// Successfully generated pdf/Fpdf_CellFormat_align.pdf
 }
 
 // This example demonstrates the use of characters in the high range of the
 // Windows-1252 code page (gofdpf default). See the example for CellFormat (4)
 // for a way to do this automatically.
-func ExampleFpdf_CellFormat_3() {
+func ExampleFpdf_CellFormat_codepageescape() {
 	pdf := gofpdf.New("P", "mm", "A4", "") // A4 210.0 x 297.0
 	fontSize := 16.0
 	pdf.SetFont("Helvetica", "", fontSize)
@@ -1255,16 +1255,16 @@ func ExampleFpdf_CellFormat_3() {
 	write("Falsches \xdcben von Xylophonmusik qu\xe4lt jeden gr\xf6\xdferen Zwerg.")
 	write("Heiz\xf6lr\xfccksto\xdfabd\xe4mpfung")
 	write("For\xe5rsj\xe6vnd\xf8gn / Efter\xe5rsj\xe6vnd\xf8gn")
-	fileStr := example.Filename("Fpdf_CellFormat_3_codepageescape")
+	fileStr := example.Filename("Fpdf_CellFormat_codepageescape")
 	err := pdf.OutputFileAndClose(fileStr)
 	example.Summary(err, fileStr)
 	// Output:
-	// Successfully generated pdf/Fpdf_CellFormat_3_codepageescape.pdf
+	// Successfully generated pdf/Fpdf_CellFormat_codepageescape.pdf
 }
 
 // This example demonstrates the automatic conversion of UTF-8 strings to an
 // 8-bit font encoding.
-func ExampleFpdf_CellFormat_4() {
+func ExampleFpdf_CellFormat_codepage() {
 	pdf := gofpdf.New("P", "mm", "A4", example.FontDir()) // A4 210.0 x 297.0
 	// See documentation for details on how to generate fonts
 	pdf.AddFont("Helvetica-1251", "", "helvetica_1251.json")
@@ -1297,11 +1297,11 @@ func ExampleFpdf_CellFormat_4() {
 	tr = pdf.UnicodeTranslatorFromDescriptor("cp1253")
 	write("Θέλει αρετή και τόλμη η ελευθερία. (Ανδρέας Κάλβος)")
 
-	fileStr := example.Filename("Fpdf_CellFormat_4_codepage")
+	fileStr := example.Filename("Fpdf_CellFormat_codepage")
 	err := pdf.OutputFileAndClose(fileStr)
 	example.Summary(err, fileStr)
 	// Output:
-	// Successfully generated pdf/Fpdf_CellFormat_4_codepage.pdf
+	// Successfully generated pdf/Fpdf_CellFormat_codepage.pdf
 }
 
 // This example demonstrates password protection for documents.
