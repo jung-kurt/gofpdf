@@ -51,8 +51,12 @@ func min(name string) {
 		go func() {
 			errChan <- cmd.Start()
 		}()
-		newPdf().Output(inPipe)
-		report(name, <-errChan)
+		err = newPdf().Output(inPipe)
+		if err == nil {
+			report(name, <-errChan)
+		} else {
+			report(name, err)
+		}
 	} else {
 		report(name, err)
 	}

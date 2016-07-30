@@ -23,7 +23,7 @@ import (
 )
 
 // Test the Filename() and Summary() functions.
-func Example_ExampleFilename() {
+func ExampleExample_Filename() {
 	fileStr := example.Filename("example")
 	example.Summary(errors.New("printer on fire"), fileStr)
 	// Output:
