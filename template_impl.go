@@ -114,7 +114,7 @@ func (t *Tpl) loadParamsFromFpdf(f *Fpdf) {
 func (t *Tpl) AddPage() {
 }
 
-// AddPageFormat does nothign becasue you cannot add pages to a template
+// AddPageFormat does nothign because you cannot add pages to a template
 func (t *Tpl) AddPageFormat(orientationStr string, size SizeType) {
 }
 

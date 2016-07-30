@@ -307,7 +307,7 @@ func (s *SizeType) ScaleToWidth(width float64) SizeType {
 	return SizeType{width, height}
 }
 
-// ScaleToHeight adjsuts the width of a size to match the given height
+// ScaleToHeight adjusts the width of a size to match the given height
 func (s *SizeType) ScaleToHeight(height float64) SizeType {
 	width := s.Wd * height / s.Ht
 	return SizeType{width, height}

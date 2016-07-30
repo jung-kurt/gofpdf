@@ -2679,7 +2679,7 @@ func (f *Fpdf) OutputFileAndClose(fileStr string) error {
 }
 
 // Output sends the PDF document to the writer specified by w. No output will
-// take place if an error has occured in the document generation process. w
+// take place if an error has occurred in the document generation process. w
 // remains open after this function returns. After returning, f is in a closed
 // state and its methods should not be called.
 func (f *Fpdf) Output(w io.Writer) error {

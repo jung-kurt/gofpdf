@@ -93,7 +93,7 @@ func lorem() string {
 // functions belong to a separate, internal package and are not part of the
 // gofpdf library. If an error occurs at some point during the construction of
 // the document, subsequent method calls exit immediately and the error is
-// finally retreived with the output call where it can be handled by the
+// finally retrieved with the output call where it can be handled by the
 // application.
 func Example() {
 	pdf := gofpdf.New("P", "mm", "A4", "")
