@@ -44,6 +44,7 @@ import (
 
 var gl struct {
 	catalogSort  bool
+	noCompress   bool // Initial zero value indicates compression
 	creationDate time.Time
 }
 
@@ -174,7 +175,7 @@ func fpdfNew(orientationStr, unitStr, sizeStr, fontDirStr string, size SizeType)
 		return f.autoPageBreak
 	}
 	// Enable compression
-	f.SetCompression(true)
+	f.SetCompression(!gl.noCompress)
 	f.blendList = make([]blendModeType, 0, 8)
 	f.blendList = append(f.blendList, blendModeType{}) // blendList[0] is unused (1-based)
 	f.blendMap = make(map[string]int)
@@ -431,15 +432,19 @@ func (f *Fpdf) SetDisplayMode(zoomStr, layoutStr string) {
 	}
 }
 
+// SetDefaultCompression controls the default setting of the internal
+// compression flag. See SetCompression() for more details. Compression is on
+// by default.
+func SetDefaultCompression(compress bool) {
+	gl.noCompress = !compress
+}
+
 // SetCompression activates or deactivates page compression with zlib. When
 // activated, the internal representation of each page is compressed, which
 // leads to a compression ratio of about 2 for the resulting document.
 // Compression is on by default.
 func (f *Fpdf) SetCompression(compress bool) {
-	// 	if(function_exists('gzcompress'))
 	f.compress = compress
-	// 	else
-	// 		$this->compress = false;
 }
 
 // SetTitle defines the title of the document. isUTF8 indicates if the string

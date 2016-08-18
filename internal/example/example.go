@@ -31,6 +31,7 @@ var gofpdfDir string
 
 func init() {
 	setRoot()
+	gofpdf.SetDefaultCompression(false)
 	gofpdf.SetDefaultCatalogSort(true)
 	gofpdf.SetDefaultCreationDate(time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC))
 }

@@ -89,32 +89,38 @@ func TtfParse(fileStr string) (TtfRec TtfType, err error) {
 		t.Skip(4) // length
 		t.tables[tag] = offset
 	}
-	if err = t.ParseHead(); err != nil {
-		return
-	}
-	if err = t.ParseHhea(); err != nil {
-		return
-	}
-	if err = t.ParseMaxp(); err != nil {
-		return
-	}
-	if err = t.ParseHmtx(); err != nil {
-		return
-	}
-	if err = t.ParseCmap(); err != nil {
-		return
-	}
-	if err = t.ParseName(); err != nil {
-		return
-	}
-	if err = t.ParseOS2(); err != nil {
-		return
-	}
-	if err = t.ParsePost(); err != nil {
+	err = t.ParseComponents()
+	if err != nil {
 		return
 	}
 	t.f.Close()
 	TtfRec = t.rec
+	return
+}
+
+func (t *ttfParser) ParseComponents() (err error) {
+	err = t.ParseHead()
+	if err == nil {
+		err = t.ParseHhea()
+		if err == nil {
+			err = t.ParseMaxp()
+			if err == nil {
+				err = t.ParseHmtx()
+				if err == nil {
+					err = t.ParseCmap()
+					if err == nil {
+						err = t.ParseName()
+						if err == nil {
+							err = t.ParseOS2()
+							if err == nil {
+								err = t.ParsePost()
+							}
+						}
+					}
+				}
+			}
+		}
+	}
 	return
 }
 

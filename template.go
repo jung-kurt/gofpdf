@@ -109,6 +109,24 @@ type Template interface {
 	Templates() []Template
 }
 
+func (f *Fpdf) templateFontCatalog() {
+	var keyList []string
+	var font fontDefType
+	var key string
+	f.out("/Font <<")
+	for key = range f.fonts {
+		keyList = append(keyList, key)
+	}
+	if f.catalogSort {
+		sort.Strings(keyList)
+	}
+	for _, key = range keyList {
+		font = f.fonts[key]
+		f.outf("/F%d %d 0 R", font.I, font.N)
+	}
+	f.out(">>")
+}
+
 // putTemplates writes the templates to the PDF
 func (f *Fpdf) putTemplates() {
 	filter := ""
@@ -135,23 +153,7 @@ func (f *Fpdf) putTemplates() {
 		f.out("/Resources ")
 		f.out("<</ProcSet [/PDF /Text /ImageB /ImageC /ImageI]")
 
-		f.out("/Font <<")
-		{
-			var keyList []string
-			var font fontDefType
-			var key string
-			for key = range f.fonts {
-				keyList = append(keyList, key)
-			}
-			if f.catalogSort {
-				sort.Strings(keyList)
-			}
-			for _, key = range keyList {
-				font = f.fonts[key]
-				f.outf("/F%d %d 0 R", font.I, font.N)
-			}
-		}
-		f.out(">>")
+		f.templateFontCatalog()
 
 		tImages := t.Images()
 		tTemplates := t.Templates()
