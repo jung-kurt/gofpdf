@@ -2867,13 +2867,23 @@ func (f *Fpdf) parsejpg(r io.Reader) (info *ImageInfoType) {
 	info.h = float64(config.Height)
 	info.f = "DCTDecode"
 	info.bpc = 8
+	fmt.Printf("%+v", config.ColorModel)
 	switch config.ColorModel {
 	case color.GrayModel:
 		info.cs = "DeviceGray"
 	case color.YCbCrModel:
 		info.cs = "DeviceRGB"
+	case color.CMYKModel:
+		{
+			fmt.Printf("is CMYK color")
+
+			info.cs = "DeviceRGB"
+		}
 	default:
-		f.err = fmt.Errorf("image JPEG buffer has unsupported color space (%v)", config.ColorModel)
+		{
+			f.err = fmt.Errorf("image JPEG buffer has unsupported color space (%v)", config.ColorModel)
+		}
+		//info.cs = "DeviceRGB"
 		return
 	}
 	return
