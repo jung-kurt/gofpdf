@@ -2877,7 +2877,7 @@ func (f *Fpdf) parsejpg(r io.Reader) (info *ImageInfoType) {
 		{
 			fmt.Printf("is CMYK color")
 
-			info.cs = "DeviceRGB"
+			info.cs = "DeviceCMYK"
 		}
 	default:
 		{
