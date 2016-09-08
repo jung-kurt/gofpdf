@@ -2867,7 +2867,6 @@ func (f *Fpdf) parsejpg(r io.Reader) (info *ImageInfoType) {
 	info.h = float64(config.Height)
 	info.f = "DCTDecode"
 	info.bpc = 8
-	fmt.Printf("%+v", config.ColorModel)
 	switch config.ColorModel {
 	case color.GrayModel:
 		info.cs = "DeviceGray"
