@@ -44,7 +44,7 @@ go get github.com/jung-kurt/gofpdf
 Later, to receive updates, run
 
 ```
-go get -u github.com/jung-kurt/gofpdf
+go get -u -v github.com/jung-kurt/gofpdf/...
 ```
 
 ##Quick Start

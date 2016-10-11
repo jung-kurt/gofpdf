@@ -63,7 +63,7 @@ To install the package on your system, run
 
 Later, to receive updates, run
 
-	go get -u github.com/jung-kurt/gofpdf
+	go get -u -v github.com/jung-kurt/gofpdf/...
 
 Quick Start
 
