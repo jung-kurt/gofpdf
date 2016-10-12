@@ -23,7 +23,7 @@ import (
 	"image/jpeg"
 	"io"
 	"strconv"
-
+	"sync"
 	"github.com/boombuler/barcode"
 	"github.com/boombuler/barcode/codabar"
 	"github.com/boombuler/barcode/code128"
@@ -38,7 +38,11 @@ import (
 
 // barcodes represents the barcodes that have been registered through this
 // package. They will later be used to be scaled and put on the page.
-var barcodes map[string]barcode.Barcode
+// RubenN: made this a struct with a mutex to prevent race condition
+var barcodes struct {
+	sync.Mutex
+	cache map[string]barcode.Barcode
+}
 
 // barcodePdf is a partial PDF implementation that only implements a subset of
 // functions that are required to add the barcode to the PDF.
@@ -56,7 +60,9 @@ type barcodePdf interface {
 //
 // Positioning with x, y and flow is inherited from Fpdf.Image().
 func Barcode(pdf barcodePdf, code string, x, y, w, h float64, flow bool) {
-	unscaled, ok := barcodes[code]
+	barcodes.Lock()
+	unscaled, ok := barcodes.cache[code]
+	barcodes.Unlock()
 
 	if !ok {
 		err := errors.New("Barcode not found")
@@ -92,12 +98,15 @@ func Barcode(pdf barcodePdf, code string, x, y, w, h float64, flow bool) {
 // Register registers a barcode but does not put it on the page. Use Barcode()
 // with the same code to put the barcode on the PDF page.
 func Register(bcode barcode.Barcode) string {
-	if len(barcodes) == 0 {
-		barcodes = make(map[string]barcode.Barcode)
+	barcodes.Lock()
+	if len(barcodes.cache) == 0 {
+		barcodes.cache = make(map[string]barcode.Barcode)
 	}
 
 	key := barcodeKey(bcode)
-	barcodes[key] = bcode
+	barcodes.cache[key] = bcode
+	barcodes.Unlock()
+
 	return key
 }
 
