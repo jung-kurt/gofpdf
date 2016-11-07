@@ -20,9 +20,6 @@ import (
 	"bufio"
 	"bytes"
 	"fmt"
-	"github.com/jung-kurt/gofpdf"
-	"github.com/jung-kurt/gofpdf/internal/example"
-	"github.com/jung-kurt/gofpdf/internal/files"
 	"io"
 	"io/ioutil"
 	"math"
@@ -31,6 +28,10 @@ import (
 	"path/filepath"
 	"strconv"
 	"strings"
+
+	"github.com/jung-kurt/gofpdf"
+	"github.com/jung-kurt/gofpdf/internal/example"
+	"github.com/jung-kurt/gofpdf/internal/files"
 )
 
 func init() {
@@ -1760,4 +1761,98 @@ func ExampleFpdf_AddFontFromBytes() {
 	example.Summary(err, fileStr)
 	// Output:
 	// Successfully generated pdf/Fpdf_EmbeddedFont.pdf
+}
+
+// This example demonstrate Clipped table cells
+func ExampleFpdf_ClippedTableCells() {
+	marginCell := 2. // margin of top/bottom of cell
+	pdf := gofpdf.New("P", "mm", "A4", "")
+	pdf.SetFont("Arial", "", 12)
+	pdf.AddPage()
+	pagew, pageh := pdf.GetPageSize()
+	mleft, mright, _, mbottom := pdf.GetMargins()
+
+	cols := []float64{60, 100, pagew - mleft - mright - 100 - 60}
+	rows := [][]string{}
+	for i := 1; i <= 50; i++ {
+		word := fmt.Sprintf("%d:%s", i, strings.Repeat("A", i%100))
+		rows = append(rows, []string{word, word, word})
+	}
+
+	for _, row := range rows {
+		_, lineHt := pdf.GetFontSize()
+		height := lineHt + marginCell
+
+		x, y := pdf.GetXY()
+		// add a new page if the height of the row doesn't fit on the page
+		if y+height >= pageh-mbottom {
+			pdf.AddPage()
+			x, y = pdf.GetXY()
+		}
+		for i, txt := range row {
+			width := cols[i]
+			pdf.Rect(x, y, width, height, "")
+			pdf.ClipRect(x, y, width, height, false)
+			pdf.Cell(width, height, txt)
+			pdf.ClipEnd()
+			x += width
+		}
+		pdf.Ln(-1)
+	}
+	fileStr := example.Filename("Fpdf_ClippedTableCells")
+	err := pdf.OutputFileAndClose(fileStr)
+	example.Summary(err, fileStr)
+	// Output:
+	// Successfully generated pdf/Fpdf_ClippedTableCells.pdf
+}
+
+// This example demonstrate Wrapped table cells
+func ExampleFpdf_WrappedTableCells() {
+	marginCell := 2. // margin of top/bottom of cell
+	pdf := gofpdf.New("P", "mm", "A4", "")
+	pdf.SetFont("Arial", "", 12)
+	pdf.AddPage()
+	pagew, pageh := pdf.GetPageSize()
+	mleft, mright, _, mbottom := pdf.GetMargins()
+
+	cols := []float64{60, 100, pagew - mleft - mright - 100 - 60}
+	rows := [][]string{}
+	for i := 1; i <= 30; i++ {
+		word := fmt.Sprintf("%d:%s", i, strings.Repeat("A", i%100))
+		rows = append(rows, []string{word, word, word})
+	}
+
+	for _, row := range rows {
+		curx, y := pdf.GetXY()
+		x := curx
+
+		height := 0.
+		_, lineHt := pdf.GetFontSize()
+
+		for i, txt := range row {
+			lines := pdf.SplitLines([]byte(txt), cols[i])
+			h := float64(len(lines))*lineHt + marginCell*float64(len(lines))
+			if h > height {
+				height = h
+			}
+		}
+		// add a new page if the height of the row doesn't fit on the page
+		if pdf.GetY()+height > pageh-mbottom {
+			pdf.AddPage()
+			y = pdf.GetY()
+		}
+		for i, txt := range row {
+			width := cols[i]
+			pdf.Rect(x, y, width, height, "")
+			pdf.MultiCell(width, lineHt+marginCell, txt, "", "", false)
+			x += width
+			pdf.SetXY(x, y)
+		}
+		pdf.SetXY(curx, y+height)
+	}
+	fileStr := example.Filename("Fpdf_WrappedTableCells")
+	err := pdf.OutputFileAndClose(fileStr)
+	example.Summary(err, fileStr)
+	// Output:
+	// Successfully generated pdf/Fpdf_WrappedTableCells.pdf
 }
