@@ -825,8 +825,8 @@ func ExampleFpdf_ClipText() {
 		0.7, 0.3, 0.7, 0.5)
 	pdf.ClipEnd()
 
-	pdf.ClipPolygon([]gofpdf.PointType{{80, y + 20}, {90, y},
-		{100, y + 20}}, true)
+	pdf.ClipPolygon([]gofpdf.PointType{{X: 80, Y: y + 20}, {X: 90, Y: y},
+		{X: 100, Y: y + 20}}, true)
 	pdf.LinearGradient(80, y, 20, 20, 250, 220, 250, 60, 40, 60, 0.5,
 		1, 0.5, 0.5)
 	pdf.ClipEnd()
