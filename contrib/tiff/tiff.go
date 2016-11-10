@@ -14,6 +14,8 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
+// Package tiff allows standard (LZW-compressed) TIFF images to be used in
+// documents generated with gofpdf.
 package tiff
 
 import (
