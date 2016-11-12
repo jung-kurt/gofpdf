@@ -6,7 +6,7 @@ import (
 	"github.com/jung-kurt/gofpdf/internal/example"
 )
 
-func ExampleTiff() {
+func ExampleRegisterFile() {
 	pdf := gofpdf.New("L", "mm", "A4", "")
 	pdf.SetFont("Helvetica", "", 12)
 	pdf.SetFillColor(200, 200, 220)

@@ -1764,7 +1764,7 @@ func ExampleFpdf_AddFontFromBytes() {
 }
 
 // This example demonstrate Clipped table cells
-func ExampleFpdf_ClippedTableCells() {
+func ExampleFpdf_ClipRect() {
 	marginCell := 2. // margin of top/bottom of cell
 	pdf := gofpdf.New("P", "mm", "A4", "")
 	pdf.SetFont("Arial", "", 12)
@@ -1806,8 +1806,8 @@ func ExampleFpdf_ClippedTableCells() {
 	// Successfully generated pdf/Fpdf_ClippedTableCells.pdf
 }
 
-// This example demonstrate Wrapped table cells
-func ExampleFpdf_WrappedTableCells() {
+// This example demonstrate wrapped table cells
+func ExampleFpdf_Rect() {
 	marginCell := 2. // margin of top/bottom of cell
 	pdf := gofpdf.New("P", "mm", "A4", "")
 	pdf.SetFont("Arial", "", 12)

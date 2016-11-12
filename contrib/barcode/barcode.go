@@ -20,10 +20,6 @@ package barcode
 import (
 	"bytes"
 	"errors"
-	"image/jpeg"
-	"io"
-	"strconv"
-	"sync"
 	"github.com/boombuler/barcode"
 	"github.com/boombuler/barcode/codabar"
 	"github.com/boombuler/barcode/code128"
@@ -34,6 +30,10 @@ import (
 	"github.com/boombuler/barcode/twooffive"
 	"github.com/jung-kurt/gofpdf"
 	"github.com/ruudk/golang-pdf417"
+	"image/jpeg"
+	"io"
+	"strconv"
+	"sync"
 )
 
 // barcodes represents the barcodes that have been registered through this
