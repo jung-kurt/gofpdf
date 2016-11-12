@@ -113,9 +113,8 @@ func CompareBytes(sl1, sl2 []byte) (err error) {
 }
 
 // ComparePDFs reads and compares the full contents of the two specified
-// readers. The comparison is done byte-for-byte with the exception of the
-// CreationDate fields which are effectively ignored. Nil is returned if the
-// buffers are equal, otherwise an error.
+// readers byte-for-byte. Nil is returned if the buffers are equal, otherwise
+// an error.
 func ComparePDFs(rdr1, rdr2 io.Reader) (err error) {
 	var b1, b2 *bytes.Buffer
 	_, err = b1.ReadFrom(rdr1)
@@ -129,10 +128,8 @@ func ComparePDFs(rdr1, rdr2 io.Reader) (err error) {
 }
 
 // ComparePDFFiles reads and compares the full contents of the two specified
-// files. The comparison is done byte-for-byte with the exception of the
-// CreationDate fields which are effectively ignored. Nil is returned if the
-// file contents are equal, or if the second file is missing, otherwise an
-// error.
+// files byte-for-byte. Nil is returned if the file contents are equal, or if
+// the second file is missing, otherwise an error.
 func ComparePDFFiles(file1Str, file2Str string) (err error) {
 	var sl1, sl2 []byte
 	sl1, err = ioutil.ReadFile(file1Str)

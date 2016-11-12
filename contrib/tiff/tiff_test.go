@@ -6,6 +6,7 @@ import (
 	"github.com/jung-kurt/gofpdf/internal/example"
 )
 
+// ExampleRegisterFile demonstrates the loading and display of a TIFF image.
 func ExampleRegisterFile() {
 	pdf := gofpdf.New("L", "mm", "A4", "")
 	pdf.SetFont("Helvetica", "", 12)

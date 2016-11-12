@@ -30,7 +30,12 @@ import (
 	"golang.org/x/image/tiff"
 )
 
-// RegisterReader ...
+// RegisterReader registers a TIFF image, adding it to the PDF file but not
+// adding it to the page. imgName specifies the name that will be used in the
+// call to Image() that actually places the image in the document. options
+// specifies various image properties; in this case, the ImageType property
+// should be set to "tiff". The TIFF image is a reader from the reader
+// specified by r.
 func RegisterReader(fpdf *gofpdf.Fpdf, imgName string, options gofpdf.ImageOptions, r io.Reader) (info *gofpdf.ImageInfoType) {
 	var err error
 	var img image.Image
@@ -55,7 +60,12 @@ func RegisterReader(fpdf *gofpdf.Fpdf, imgName string, options gofpdf.ImageOptio
 	return
 }
 
-// RegisterFile ...
+// RegisterFile registers a TIFF image, adding it to the PDF file but not
+// adding it to the page. imgName specifies the name that will be used in the
+// call to Image() that actually places the image in the document. options
+// specifies various image properties; in this case, the ImageType property
+// should be set to "tiff". The TIFF image is read from the file specified by
+// tiffFileStr.
 func RegisterFile(fpdf *gofpdf.Fpdf, imgName string, options gofpdf.ImageOptions, tiffFileStr string) (info *gofpdf.ImageInfoType) {
 	var f *os.File
 	var err error
