@@ -2,7 +2,7 @@
 
 ![gofpdf](image/logo_gofpdf.jpg?raw=true "gofpdf")
 
-[![MIT licensed](https://img.shields.io/badge/license-MIT-blue.svg)](https://raw.githubusercontent.com/jung-kurt/gofpdf/master/LICENSE)
+[![MIT licensed](https://img.shields.io/badge/license-MIT-blue.svg)](https://raw.githubusercontent.com/jung-kurt/gofpdf/master/license.txt)
 [![GoDoc](https://godoc.org/github.com/jung-kurt/gofpdf?status.svg)](https://godoc.org/github.com/jung-kurt/gofpdf)
 [![Build Status](https://travis-ci.org/jung-kurt/gofpdf.svg?branch=master)](https://travis-ci.org/jung-kurt/gofpdf)
 
