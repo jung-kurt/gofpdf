@@ -216,12 +216,12 @@ joins, line join styles, enhanced fill modes, and has helped greatly with
 package presentation and tests. Templating is adapted by Marcus Downing from
 the FPDF_Tpl library created by Jan Slabon and Setasign. Jelmer Snoeck
 contributed packages that generate a variety of barcodes and help with
-registering images on the web. Additionally, he augmented the basic HTML
-functionality with aligned text. Kent Quirk implemented backwards-compatible
-support for reading DPI from images that support it, and for setting DPI
-manually and then having it properly taken into account when calculating image
-size. Paulo Coutinho provided support for static embedded fonts. Bruno Michel
-has provided valuable assistance with the code.
+registering images on the web. Jelmer Snoek and Guillermo Pascual augmented the
+basic HTML functionality with aligned text. Kent Quirk implemented
+backwards-compatible support for reading DPI from images that support it, and
+for setting DPI manually and then having it properly taken into account when
+calculating image size. Paulo Coutinho provided support for static embedded
+fonts. Bruno Michel has provided valuable assistance with the code.
 
 Roadmap
 
