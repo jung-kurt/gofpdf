@@ -470,6 +470,7 @@ func ExampleFpdf_HTMLBasicNew() {
 	htmlStr := `You can now easily print text mixing different styles: <b>bold</b>, ` +
 		`<i>italic</i>, <u>underlined</u>, or <b><i><u>all at once</u></i></b>!<br><br>` +
 		`<center>You can also center text.</center>` +
+		`<right>Or align it to the right.</right>` +
 		`You can also insert links on text, such as ` +
 		`<a href="http://www.fpdf.org">www.fpdf.org</a>, or on an image: click on the logo.`
 	html := pdf.HTMLBasicNew()

@@ -169,7 +169,7 @@ func (html *HTMLBasicType) Write(lineHt float64, htmlStr string) {
 				putLink(hrefStr, el.Str)
 				hrefStr = ""
 			} else {
-				if alignStr == "C" {
+				if alignStr == "C" || alignStr == "R" {
 					html.pdf.WriteAligned(0, lineHt, el.Str, alignStr)
 				} else {
 					html.pdf.Write(lineHt, el.Str)
@@ -188,6 +188,12 @@ func (html *HTMLBasicType) Write(lineHt float64, htmlStr string) {
 			case "center":
 				html.pdf.Ln(lineHt)
 				alignStr = "C"
+			case "right":
+				html.pdf.Ln(lineHt)
+				alignStr = "R"
+			case "left":
+				html.pdf.Ln(lineHt)
+				alignStr = "L"
 			case "a":
 				hrefStr, ok = el.Attr["href"]
 				if !ok {
@@ -203,6 +209,9 @@ func (html *HTMLBasicType) Write(lineHt float64, htmlStr string) {
 			case "u":
 				setStyle(0, 0, -1)
 			case "center":
+				html.pdf.Ln(lineHt)
+				alignStr = "L"
+			case "right":
 				html.pdf.Ln(lineHt)
 				alignStr = "L"
 			}
