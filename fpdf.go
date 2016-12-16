@@ -2026,6 +2026,9 @@ func (f *Fpdf) SplitLines(txt []byte, w float64) [][]byte {
 // Text can be aligned, centered or justified. The cell block can be framed and
 // the background painted. See CellFormat() for more details.
 //
+// The current position after calling MultiCell() is the beginning of the next
+// line, equivalent to calling CellFormat with ln equal to 1.
+//
 // w is the width of the cells. A value of zero indicates cells that reach to
 // the right margin.
 //
