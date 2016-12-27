@@ -47,6 +47,19 @@ func ExampleRegisterCodabar() {
 	// Successfully generated ../../pdf/contrib_barcode_RegisterCodabar.pdf
 }
 
+func ExampleRegisterAztec() {
+	pdf := createPdf()
+
+	key := barcode.RegisterAztec(pdf, "aztec", 33, 0)
+	barcode.Barcode(pdf, key, 15, 15, 100, 100, false)
+
+	fileStr := example.Filename("contrib_barcode_RegisterAztec")
+	err := pdf.OutputFileAndClose(fileStr)
+	example.Summary(err, fileStr)
+	// Output:
+	// Successfully generated ../../pdf/contrib_barcode_RegisterAztec.pdf
+}
+
 func ExampleRegisterCode128() {
 	pdf := createPdf()
 
