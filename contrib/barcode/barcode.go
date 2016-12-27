@@ -21,6 +21,7 @@ import (
 	"bytes"
 	"errors"
 	"github.com/boombuler/barcode"
+	"github.com/boombuler/barcode/aztec"
 	"github.com/boombuler/barcode/codabar"
 	"github.com/boombuler/barcode/code128"
 	"github.com/boombuler/barcode/code39"
@@ -108,6 +109,15 @@ func Register(bcode barcode.Barcode) string {
 	barcodes.Unlock()
 
 	return key
+}
+
+// RegisterAztec registers a barcode of type Aztec to the PDF, but not to
+// the page. Use Barcode() with the return value to put the barcode on the page.
+// code is the string to be encoded. minECCPercent is the error correction percentage. 33 is the default.
+// userSpecifiedLayers can be a value between -4 and 32 inclusive.
+func RegisterAztec(pdf barcodePdf, code string, minECCPercent int, userSpecifiedLayers int) string {
+	bcode, err := aztec.Encode([]byte(code), minECCPercent, userSpecifiedLayers)
+	return registerBarcode(pdf, bcode, err)
 }
 
 // RegisterCodabar registers a barcode of type Codabar to the PDF, but not to
