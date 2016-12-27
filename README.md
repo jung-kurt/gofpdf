@@ -26,6 +26,7 @@ text, drawing and images.
 * Document protection
 * Layers
 * Templates
+* Barcodes
 
 gofpdf has no dependencies other than the Go standard library. All tests pass
 on Linux, Mac and Windows platforms. Like FPDF version 1.7, from which gofpdf
