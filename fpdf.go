@@ -2897,16 +2897,16 @@ func (f *Fpdf) parsepng(r io.Reader, readdpi bool) (info *ImageInfoType) {
 	return f.parsepngstream(buf, readdpi)
 }
 
-func (f *Fpdf) readBeInt32(buf *bytes.Buffer) (val int32) {
-	err := binary.Read(buf, binary.BigEndian, &val)
+func (f *Fpdf) readBeInt32(r io.Reader) (val int32) {
+	err := binary.Read(r, binary.BigEndian, &val)
 	if err != nil {
 		f.err = err
 	}
 	return
 }
 
-func (f *Fpdf) readByte(buf *bytes.Buffer) (val byte) {
-	err := binary.Read(buf, binary.BigEndian, &val)
+func (f *Fpdf) readByte(r io.Reader) (val byte) {
+	err := binary.Read(r, binary.BigEndian, &val)
 	if err != nil {
 		f.err = err
 	}
@@ -2968,12 +2968,12 @@ func (f *Fpdf) out(s string) {
 }
 
 // Add a buffered line to the document
-func (f *Fpdf) outbuf(b *bytes.Buffer) {
+func (f *Fpdf) outbuf(r io.Reader) {
 	if f.state == 2 {
-		f.pages[f.page].ReadFrom(b)
+		f.pages[f.page].ReadFrom(r)
 		f.pages[f.page].WriteString("\n")
 	} else {
-		f.buffer.ReadFrom(b)
+		f.buffer.ReadFrom(r)
 		f.buffer.WriteString("\n")
 	}
 }
@@ -2990,8 +2990,8 @@ func (f *Fpdf) RawWriteStr(str string) {
 // generation buffer. This is a low-level function that is not required for
 // normal PDF construction. An understanding of the PDF specification is needed
 // to use this method correctly.
-func (f *Fpdf) RawWriteBuf(buf *bytes.Buffer) {
-	f.outbuf(buf)
+func (f *Fpdf) RawWriteBuf(r io.Reader) {
+	f.outbuf(r)
 }
 
 // Add a formatted line to the document

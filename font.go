@@ -144,22 +144,22 @@ type segmentType struct {
 	data   []byte
 }
 
-func segmentRead(f *os.File) (s segmentType, err error) {
-	if err = binary.Read(f, binary.LittleEndian, &s.marker); err != nil {
+func segmentRead(r io.Reader) (s segmentType, err error) {
+	if err = binary.Read(r, binary.LittleEndian, &s.marker); err != nil {
 		return
 	}
 	if s.marker != 128 {
 		err = fmt.Errorf("font file is not a valid binary Type1")
 		return
 	}
-	if err = binary.Read(f, binary.LittleEndian, &s.tp); err != nil {
+	if err = binary.Read(r, binary.LittleEndian, &s.tp); err != nil {
 		return
 	}
-	if err = binary.Read(f, binary.LittleEndian, &s.size); err != nil {
+	if err = binary.Read(r, binary.LittleEndian, &s.size); err != nil {
 		return
 	}
 	s.data = make([]byte, s.size)
-	_, err = f.Read(s.data)
+	_, err = r.Read(s.data)
 	return
 }
 
