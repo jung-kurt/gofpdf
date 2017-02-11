@@ -93,7 +93,7 @@ func sliceCompress(data []byte) []byte {
 
 // Returns an uncompressed copy of the specified zlib-compressed byte array
 func sliceUncompress(data []byte) (outData []byte, err error) {
-	inBuf := bytes.NewBuffer(data)
+	inBuf := bytes.NewReader(data)
 	r, err := zlib.NewReader(inBuf)
 	defer r.Close()
 	if err == nil {
