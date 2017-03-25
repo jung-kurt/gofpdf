@@ -93,7 +93,7 @@ that are passed to them; in these cases additional methods have been exported
 to provide similar functionality. Font definition files are produced in JSON
 rather than PHP.
 
-# #Example PDFs
+## Example PDFs
 
 A side effect of running "go test ./..." is the production of a number of
 example PDFs. These can be found in the gofpdf/pdf directory after the tests
