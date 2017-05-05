@@ -9,7 +9,7 @@
 Package gofpdf implements a PDF document generator with high level support for
 text, drawing and images.
 
-##Features
+## Features
 
 * Choice of measurement unit, page format and margins
 * Page header and footer management
@@ -38,7 +38,7 @@ explained in [issue 109](https://github.com/jung-kurt/gofpdf/issues/109). Howeve
 UTF-8 runes to code page encodings for languages that have fewer than 256
 glyphs.
 
-##Installation
+## Installation
 
 
 To install the package on your system, run
@@ -53,7 +53,7 @@ Later, to receive updates, run
 go get -u -v github.com/jung-kurt/gofpdf/...
 ```
 
-##Quick Start
+## Quick Start
 
 
 The following Go code generates a simple PDF file.
@@ -69,7 +69,7 @@ err := pdf.OutputFileAndClose("hello.pdf")
 See the functions in the [fpdf_test.go](https://github.com/jung-kurt/gofpdf/blob/master/fpdf_test.go) file (shown as examples in this
 documentation) for more advanced PDF examples.
 
-##Errors
+## Errors
 
 
 If an error occurs in an Fpdf method, an internal error field is set. After
@@ -84,7 +84,7 @@ method. At any time during the life cycle of the Fpdf instance, the error state
 can be determined with a call to Ok() or Err(). The error itself can be
 retrieved with a call to Error().
 
-##Conversion Notes
+## Conversion Notes
 
 
 This package is a relatively straightforward translation from the original [FPDF](http://www.fpdf.org/) library written in PHP (despite the caveat in the introduction to [Effective
@@ -102,7 +102,7 @@ that are passed to them; in these cases additional methods have been exported
 to provide similar functionality. Font definition files are produced in JSON
 rather than PHP.
 
-##Example PDFs
+## Example PDFs
 
 
 A side effect of running "go test ./..." is the production of a number of
@@ -126,7 +126,7 @@ the internal creation timestamps must be the same. To do this, the methods
 SetCatalogSort() and SetCreationDate() need to be called for both files. This
 is done automatically for all examples.
 
-##Nonstandard Fonts
+## Nonstandard Fonts
 
 
 Nothing special is required to use the standard PDF fonts (courier, helvetica,
@@ -149,14 +149,14 @@ standard fonts, SetFont() to begin using it. Most examples, including the
 package example, demonstrate this method. Good sources of free, open-source
 fonts include [Google Fonts](http://www.google.com/fonts/) and [DejaVu Fonts](http://dejavu-fonts.org/).
 
-##Related Packages
+## Related Packages
 
 
 The [draw2d](https://github.com/llgcode/draw2d) package is a two dimensional
 vector graphics library that can generate output in different forms. It uses
 gofpdf for its document production mode.
 
-##Contributing Changes
+## Contributing Changes
 
 
 gofpdf is a global community effort and you are invited to make it even better.
@@ -179,13 +179,13 @@ Here are guidelines for making submissions. Your change should
 [Pull requests](https://help.github.com/articles/using-pull-requests/) work
 nicely as a means of contributing your changes.
 
-##License
+## License
 
 
 gofpdf is released under the MIT License. It is copyrighted by Kurt Jung and
 the contributors acknowledged below.
 
-##Acknowledgments
+## Acknowledgments
 
 
 This package's code and documentation are closely derived from the [FPDF](http://www.fpdf.org/) library created by Olivier Plathey, and a number of font and
@@ -217,7 +217,7 @@ for setting DPI manually and then having it properly taken into account when
 calculating image size. Paulo Coutinho provided support for static embedded
 fonts. Bruno Michel has provided valuable assistance with the code.
 
-##Roadmap
+## Roadmap
 
 * Handle UTF-8 source text natively. Until then, automatic translation of
 UTF-8 runes to code page bytes is provided.

@@ -4,7 +4,7 @@
 autoreadme -f -template README.md.template
 # Improve the appearance of the markdown document with features unavailable in godoc
 cat README.md | tr '\n' '\v' | sed \
-  -e 's/\v##\([^\v]*\)/\v##\1\v\v/g' \
+  -e 's/\v##\([^\v]*\)/\v## \1\v\v/g' \
   -e 's/\v• /* /g' \
   -e 's/\(http:\/\/www\.google\.com\/fonts\/\)/[Google Fonts](\1)/g' \
   -e 's/\(http:\/\/dejavu-fonts\.org\/\)/[DejaVu Fonts](\1)/g' \
