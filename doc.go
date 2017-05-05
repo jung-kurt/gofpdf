@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2014 Kurt Jung (Gmail: kurt.w.jung)
+ * Copyright (c) 2013-2017 Kurt Jung (Gmail: kurt.w.jung)
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -53,9 +53,14 @@ Features
 • Barcodes
 
 gofpdf has no dependencies other than the Go standard library. All tests pass
-on Linux, Mac and Windows platforms. Like FPDF version 1.7, from which gofpdf
-is derived, this package does not yet support UTF-8 fonts. However, support is
-provided to translate UTF-8 runes to code page encodings.
+on Linux, Mac and Windows platforms.
+
+Like FPDF version 1.7, from which gofpdf is derived, this package does not yet
+support UTF-8 fonts. In particular, languages that require more than one code
+page such as Chinese, Japanese, and Arabic are not currently supported. This is
+explained in issue 109. However, support is provided to automatically translate
+UTF-8 runes to code page encodings for languages that have fewer than 256
+glyphs.
 
 Installation
 
