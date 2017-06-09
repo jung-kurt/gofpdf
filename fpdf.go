@@ -3028,6 +3028,11 @@ func (f *Fpdf) SetCreationDate(tm time.Time) {
 	f.creationDate = tm
 }
 
+// SetJavascript adds Adobe JavaScript to the document.
+func (f *Fpdf) SetJavascript(script string) {
+	f.javascript = &script
+}
+
 func (f *Fpdf) putpages() {
 	var wPt, hPt float64
 	var pageSize SizeType
@@ -3475,6 +3480,25 @@ func (f *Fpdf) putGradients() {
 	}
 }
 
+func (f *Fpdf) putjavascript() {
+	if f.javascript == nil {
+		return
+	}
+
+	f.newobj()
+	f.nJs = f.n
+	f.out("<<")
+	f.outf("/Names [(EmbeddedJS) %d 0 R]", f.n+1)
+	f.out(">>")
+	f.out("endobj")
+	f.newobj()
+	f.out("<<")
+	f.out("/S /JavaScript")
+	f.outf("/JS %s", f.textstring(*f.javascript))
+	f.out(">>")
+	f.out("endobj")
+}
+
 func (f *Fpdf) putresources() {
 	if f.err != nil {
 		return
@@ -3495,6 +3519,7 @@ func (f *Fpdf) putresources() {
 	f.putresourcedict()
 	f.out(">>")
 	f.out("endobj")
+	f.putjavascript()
 	if f.protect.encrypted {
 		f.newobj()
 		f.protect.objNum = f.n
@@ -3572,6 +3597,10 @@ func (f *Fpdf) putcatalog() {
 	}
 	// Layers
 	f.layerPutCatalog()
+	// JavaScript
+	if f.javascript != nil {
+		f.outf("/Names <</JavaScript %d 0 R>>", f.nJs)
+	}
 }
 
 func (f *Fpdf) putheader() {

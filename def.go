@@ -247,6 +247,8 @@ type Fpdf struct {
 	protect          protectType               // document protection structure
 	layer            layerRecType              // manages optional layers in document
 	catalogSort      bool                      // sort resource catalogs in document
+	nJs              int                       // JavaScript object number
+	javascript       *string                   // JavaScript code to include in the PDF
 	colorFlag        bool                      // indicates whether fill and text colors are different
 	color            struct {
 		// Composite values of colors
