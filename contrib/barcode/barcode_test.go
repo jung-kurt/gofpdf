@@ -1,6 +1,8 @@
 package barcode_test
 
 import (
+	"testing"
+
 	"github.com/boombuler/barcode/code128"
 	"github.com/boombuler/barcode/qr"
 	"github.com/jung-kurt/gofpdf"
@@ -149,4 +151,10 @@ func ExampleRegisterPdf417() {
 	example.Summary(err, fileStr)
 	// Output:
 	// Successfully generated ../../pdf/contrib_barcode_RegisterPdf417.pdf
+}
+
+// This test ensures that no panic arises when an invalid barcode is registered.
+func TestRegisterCode128(t *testing.T) {
+	pdf := createPdf()
+	barcode.RegisterCode128(pdf, "Invalid character: é")
 }
