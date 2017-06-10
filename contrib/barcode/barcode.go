@@ -20,6 +20,11 @@ package barcode
 import (
 	"bytes"
 	"errors"
+	"image/jpeg"
+	"io"
+	"strconv"
+	"sync"
+
 	"github.com/boombuler/barcode"
 	"github.com/boombuler/barcode/aztec"
 	"github.com/boombuler/barcode/codabar"
@@ -31,10 +36,6 @@ import (
 	"github.com/boombuler/barcode/twooffive"
 	"github.com/jung-kurt/gofpdf"
 	"github.com/ruudk/golang-pdf417"
-	"image/jpeg"
-	"io"
-	"strconv"
-	"sync"
 )
 
 // barcodes represents the barcodes that have been registered through this
@@ -197,6 +198,7 @@ func RegisterTwoOfFive(pdf barcodePdf, code string, interleaved bool) string {
 func registerBarcode(pdf barcodePdf, bcode barcode.Barcode, err error) string {
 	if err != nil {
 		pdf.SetError(err)
+		return ""
 	}
 
 	return Register(bcode)
