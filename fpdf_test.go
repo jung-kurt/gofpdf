@@ -1857,3 +1857,17 @@ func ExampleFpdf_Rect() {
 	// Output:
 	// Successfully generated pdf/Fpdf_WrappedTableCells.pdf
 }
+
+// This example demonstrates including JavaScript in the document.
+func ExampleFpdf_SetJavascript() {
+	pdf := gofpdf.New("P", "mm", "A4", "")
+	pdf.SetJavascript("print(true);")
+	pdf.AddPage()
+	pdf.SetFont("Arial", "", 12)
+	pdf.Write(10, "Auto-print.")
+	fileStr := example.Filename("Fpdf_SetJavascript")
+	err := pdf.OutputFileAndClose(fileStr)
+	example.Summary(err, fileStr)
+	// Output:
+	// Successfully generated pdf/Fpdf_SetJavascript.pdf
+}
