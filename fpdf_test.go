@@ -28,6 +28,7 @@ import (
 	"path/filepath"
 	"strconv"
 	"strings"
+	"testing"
 
 	"github.com/jung-kurt/gofpdf"
 	"github.com/jung-kurt/gofpdf/internal/example"
@@ -53,6 +54,28 @@ func cleanup() {
 			}
 			return
 		})
+}
+
+// TestIssue0116 addresses issue 116 in which library silently fails after
+// calling CellFormat when no font has been set.
+func TestIssue0116(t *testing.T) {
+	var pdf *gofpdf.Fpdf
+
+	pdf = gofpdf.New("P", "mm", "A4", "")
+	pdf.AddPage()
+	pdf.SetFont("Arial", "B", 16)
+	pdf.Cell(40, 10, "OK")
+	if pdf.Error() != nil {
+		t.Fatalf("not expecting error when rendering text")
+	}
+
+	pdf = gofpdf.New("P", "mm", "A4", "")
+	pdf.AddPage()
+	pdf.Cell(40, 10, "Not OK") // Font not set
+	if pdf.Error() == nil {
+		t.Fatalf("expecting error when rendering text without having set font")
+	}
+
 }
 
 type fontResourceType struct {

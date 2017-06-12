@@ -1793,6 +1793,9 @@ func (f *Fpdf) SetAcceptPageBreakFunc(fnc func() bool) {
 // current position moves to the right or to the next line. It is possible to
 // put a link on the text.
 //
+// An error will be returned if a call to SetFont() has not already taken
+// place before this method is called.
+//
 // If automatic page breaking is enabled and the cell goes beyond the limit, a
 // page break is done before outputting.
 //
@@ -1823,11 +1826,18 @@ func (f *Fpdf) SetAcceptPageBreakFunc(fnc func() bool) {
 //
 // linkStr is a target URL or empty for no external link. A non--zero value for
 // link takes precedence over linkStr.
-func (f *Fpdf) CellFormat(w, h float64, txtStr string, borderStr string, ln int, alignStr string, fill bool, link int, linkStr string) {
+func (f *Fpdf) CellFormat(w, h float64, txtStr string, borderStr string, ln int,
+	alignStr string, fill bool, link int, linkStr string) {
 	// dbg("CellFormat. h = %.2f, borderStr = %s", h, borderStr)
 	if f.err != nil {
 		return
 	}
+
+	if f.currentFont.Name == "" {
+		f.err = fmt.Errorf("font has not been set; unable to render text")
+		return
+	}
+
 	borderStr = strings.ToUpper(borderStr)
 	k := f.k
 	if f.y+h > f.pageBreakTrigger && !f.inHeader && !f.inFooter && f.acceptPageBreak() {
