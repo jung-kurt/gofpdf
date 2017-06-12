@@ -3033,7 +3033,7 @@ func SetDefaultCreationDate(tm time.Time) {
 // SetCreationDate fixes the document's internal CreationDate value. By
 // default, the time when the document is generated is used for this value.
 // This method is typically only used for testing purposes to facilitate PDF
-// comparsion. Specify a zero-value time to revert to the default behavior.
+// comparison. Specify a zero-value time to revert to the default behavior.
 func (f *Fpdf) SetCreationDate(tm time.Time) {
 	f.creationDate = tm
 }
