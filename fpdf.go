@@ -366,8 +366,15 @@ func (f *Fpdf) SetHeaderFunc(fnc func()) {
 // access to the Fpdf instance and other document generation variables.
 //
 // This method is demonstrated in the example for AddPage().
+// Deprecated: Use SetFooterFuncLpi instead.
 func (f *Fpdf) SetFooterFunc(fnc func()) {
 	f.footerFnc = fnc
+}
+
+// SetFooterFuncLpi work like SetFooterFnc it's just add Last Page information,
+// true mean this is the last page.
+func (f *Fpdf) SetFooterFuncLpi(fnc func(bool)) {
+	f.footerFncLpi = fnc
 }
 
 // SetTopMargin defines the top margin. The method can be called before
@@ -538,11 +545,19 @@ func (f *Fpdf) Close() {
 		}
 	}
 	// Page footer
-	if f.footerFnc != nil {
+	if f.footerFnc != nil && f.footerFncLpi == nil {
 		f.inFooter = true
 		f.footerFnc()
 		f.inFooter = false
 	}
+
+	// Page footer
+	if f.footerFncLpi != nil {
+		f.inFooter = true
+		f.footerFncLpi(true) // Last Page.
+		f.inFooter = false
+	}
+
 	// Close page
 	f.endpage()
 	// Close document
@@ -592,10 +607,16 @@ func (f *Fpdf) AddPageFormat(orientationStr string, size SizeType) {
 	tc := f.color.text
 	cf := f.colorFlag
 	if f.page > 0 {
-		// Page footer
-		if f.footerFnc != nil {
+		// Page footer avoid double call on footer.
+		if f.footerFnc != nil && f.footerFncLpi == nil {
 			f.inFooter = true
 			f.footerFnc()
+			f.inFooter = false
+
+		}
+		if f.footerFncLpi != nil {
+			f.inFooter = true
+			f.footerFncLpi(false) //not last page.
 			f.inFooter = false
 		}
 		// Close page
