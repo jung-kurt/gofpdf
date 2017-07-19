@@ -116,11 +116,11 @@ func TestFooterFuncLpi(t *testing.T) {
 	}
 	w := &bytes.Buffer{}
 	if err := pdf.Output(w); err != nil {
-		t.Errorf("got err:%v want nil")
+		t.Errorf("unexpected err: %s", err)
 	}
 	b := w.Bytes()
 	if bytes.Contains(b, []byte(oldFooterFnc)) {
-		t.Errorf("Not expecting %s render on pdf when FooterFncLpi is set", oldFooterFnc)
+		t.Errorf("not expecting %s render on pdf when FooterFncLpi is set", oldFooterFnc)
 	}
 	got := bytes.Count(b, []byte("bothPages"))
 	if got != 2 {
@@ -128,16 +128,16 @@ func TestFooterFuncLpi(t *testing.T) {
 	}
 	got = bytes.Count(b, []byte(firstPageOnly))
 	if got != 1 {
-		t.Errorf("footer %s should render only on first page got:%d", firstPageOnly, got)
+		t.Errorf("footer %s should render only on first page got: %d", firstPageOnly, got)
 	}
 	got = bytes.Count(b, []byte(lastPageOnly))
 	if got != 1 {
-		t.Errorf("footer %s should render only on first page got:%d", lastPageOnly, got)
+		t.Errorf("footer %s should render only on first page got: %d", lastPageOnly, got)
 	}
 	f := bytes.Index(b, []byte(firstPageOnly))
 	l := bytes.Index(b, []byte(lastPageOnly))
 	if f > l {
-		t.Errorf("index %s : %d should less than indec of %s : %d", f, l)
+		t.Errorf("index %d (%s) should less than index %d (%s)", f, firstPageOnly, l, lastPageOnly)
 	}
 }
 
