@@ -379,8 +379,6 @@ func (f *Fpdf) SetFooterFunc(fnc func()) {
 // implementation in Fpdf is empty, so you have to provide an appropriate
 // function if you want page footers. fnc will typically be a closure that has
 // access to the Fpdf instance and other document generation variables.
-//
-// This method is demonstrated in the example for AddPage().
 func (f *Fpdf) SetFooterFuncLpi(fnc func(lastPage bool)) {
 	f.footerFncLpi = fnc
 	f.footerFnc = nil
