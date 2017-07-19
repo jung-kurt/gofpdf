@@ -363,11 +363,27 @@ func (f *Fpdf) SetHeaderFunc(fnc func()) {
 // Close() and should not be called directly by the application. The
 // implementation in Fpdf is empty, so you have to provide an appropriate
 // function if you want page footers. fnc will typically be a closure that has
-// access to the Fpdf instance and other document generation variables.
+// access to the Fpdf instance and other document generation variables. See
+// SetFooterFuncLpi for a similar function that passes a last page indicator.
 //
 // This method is demonstrated in the example for AddPage().
 func (f *Fpdf) SetFooterFunc(fnc func()) {
 	f.footerFnc = fnc
+	f.footerFncLpi = nil
+}
+
+// SetFooterFuncLpi sets the function that lets the application render the page
+// footer. The specified function is automatically called by AddPage() and
+// Close() and should not be called directly by the application. It is passed a
+// boolean that is true if the last page of the document is being rendered. The
+// implementation in Fpdf is empty, so you have to provide an appropriate
+// function if you want page footers. fnc will typically be a closure that has
+// access to the Fpdf instance and other document generation variables.
+//
+// This method is demonstrated in the example for AddPage().
+func (f *Fpdf) SetFooterFuncLpi(fnc func(lastPage bool)) {
+	f.footerFncLpi = fnc
+	f.footerFnc = nil
 }
 
 // SetTopMargin defines the top margin. The method can be called before
@@ -538,11 +554,14 @@ func (f *Fpdf) Close() {
 		}
 	}
 	// Page footer
+	f.inFooter = true
 	if f.footerFnc != nil {
-		f.inFooter = true
 		f.footerFnc()
-		f.inFooter = false
+	} else if f.footerFncLpi != nil {
+		f.footerFncLpi(true)
 	}
+	f.inFooter = false
+
 	// Close page
 	f.endpage()
 	// Close document
@@ -592,12 +611,15 @@ func (f *Fpdf) AddPageFormat(orientationStr string, size SizeType) {
 	tc := f.color.text
 	cf := f.colorFlag
 	if f.page > 0 {
-		// Page footer
+		f.inFooter = true
+		// Page footer avoid double call on footer.
 		if f.footerFnc != nil {
-			f.inFooter = true
 			f.footerFnc()
-			f.inFooter = false
+
+		} else if f.footerFncLpi != nil {
+			f.footerFncLpi(false) // not last page.
 		}
+		f.inFooter = false
 		// Close page
 		f.endpage()
 	}

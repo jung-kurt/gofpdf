@@ -221,6 +221,7 @@ type Fpdf struct {
 	headerFnc        func()                    // function provided by app and called to write header
 	inFooter         bool                      // flag set when processing footer
 	footerFnc        func()                    // function provided by app and called to write footer
+	footerFncLpi     func(bool)                // function provided by app and called to write footer with last page flag
 	zoomMode         string                    // zoom display mode
 	layoutMode       string                    // layout display mode
 	title            string                    // title
