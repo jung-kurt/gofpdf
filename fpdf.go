@@ -3731,14 +3731,14 @@ func (f *Fpdf) enddoc() {
 	}
 	// Bookmarks
 	f.putbookmarks()
+	// Metadata
+	f.putxmp()
 	// 	Info
 	f.newobj()
 	f.out("<<")
 	f.putinfo()
 	f.out(">>")
 	f.out("endobj")
-	// Metadata
-	f.putxmp()
 	// 	Catalog
 	f.newobj()
 	f.out("<<")
