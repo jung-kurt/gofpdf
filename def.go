@@ -224,6 +224,7 @@ type Fpdf struct {
 	footerFncLpi     func(bool)                // function provided by app and called to write footer with last page flag
 	zoomMode         string                    // zoom display mode
 	layoutMode       string                    // layout display mode
+	xmp              []byte                    // XMP metadata
 	title            string                    // title
 	subject          string                    // subject
 	author           string                    // author
