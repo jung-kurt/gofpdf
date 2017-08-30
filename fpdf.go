@@ -510,6 +510,11 @@ func (f *Fpdf) SetCreator(creatorStr string, isUTF8 bool) {
 	f.creator = creatorStr
 }
 
+// SetXmpMetadata defines XMP metadata that will be embedded with the document.
+func (f *Fpdf) SetXmpMetadata(xmpStream []byte) {
+	f.xmp = xmpStream
+}
+
 // AliasNbPages defines an alias for the total number of pages. It will be
 // substituted as the document is closed. An empty string is replaced with the
 // string "{nb}".
@@ -3650,6 +3655,16 @@ func (f *Fpdf) puttrailer() {
 	}
 }
 
+func (f *Fpdf) putxmp() {
+	if len(f.xmp) == 0 {
+		return
+	}
+	f.newobj()
+	f.outf("<< /Type /Metadata /Subtype /XML /Length %d >>", len(f.xmp))
+	f.putstream(f.xmp)
+	f.out("endobj")
+}
+
 func (f *Fpdf) putbookmarks() {
 	nb := len(f.outlines)
 	if nb > 0 {
@@ -3722,6 +3737,8 @@ func (f *Fpdf) enddoc() {
 	f.putinfo()
 	f.out(">>")
 	f.out("endobj")
+	// Metadata
+	f.putxmp()
 	// 	Catalog
 	f.newobj()
 	f.out("<<")
