@@ -104,7 +104,7 @@ func referenceCompare(fileStr string) (err error) {
 	err = os.MkdirAll(refDirStr, 0755)
 	if err == nil {
 		refFileStr = filepath.Join(refDirStr, baseFileStr)
-		err = gofpdf.ComparePDFFiles(fileStr, refFileStr)
+		err = gofpdf.ComparePDFFiles(fileStr, refFileStr, false)
 	}
 	return
 }
