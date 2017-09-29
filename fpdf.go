@@ -132,6 +132,7 @@ func fpdfNew(orientationStr, unitStr, sizeStr, fontDirStr string, size SizeType)
 	f.stdPageSizes["a1"] = SizeType{1683.78, 2383.94}
 	f.stdPageSizes["letter"] = SizeType{612, 792}
 	f.stdPageSizes["legal"] = SizeType{612, 1008}
+	f.stdPageSizes["tabloid"] = SizeType{792, 1224}
 	if size.Wd > 0 && size.Ht > 0 {
 		f.defPageSize = size
 	} else {
@@ -215,7 +216,7 @@ func NewCustom(init *InitType) (f *Fpdf) {
 // string will be replaced with "mm".
 //
 // sizeStr specifies the page size. Acceptable values are "A3", "A4", "A5",
-// "Letter", or "Legal". An empty string will be replaced with "A4".
+// "Letter", "Legal", or "Tabloid". An empty string will be replaced with "A4".
 //
 // fontDirStr specifies the file system location in which font resources will
 // be found. An empty string is replaced with ".". This argument only needs to
