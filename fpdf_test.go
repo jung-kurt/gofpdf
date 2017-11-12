@@ -2046,3 +2046,17 @@ func ExampleFpdf_SetJavascript() {
 	// Output:
 	// Successfully generated pdf/Fpdf_SetJavascript.pdf
 }
+
+// This example demonstrates spot color use
+func ExampleFpdf_AddSpotColor() {
+	pdf := gofpdf.New("P", "mm", "A4", "")
+	pdf.AddSpotColor("PANTONE 145 CVC", 0, 42, 100, 25)
+	pdf.AddPage()
+	pdf.SetFillSpotColor("PANTONE 145 CVC", 90)
+	pdf.Rect(80, 40, 50, 50, "F")
+	fileStr := example.Filename("Fpdf_AddSpotColor")
+	err := pdf.OutputFileAndClose(fileStr)
+	example.Summary(err, fileStr)
+	// Output:
+	// Successfully generated pdf/Fpdf_AddSpotColor.pdf
+}

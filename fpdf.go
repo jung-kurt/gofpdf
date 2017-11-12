@@ -180,6 +180,7 @@ func fpdfNew(orientationStr, unitStr, sizeStr, fontDirStr string, size SizeType)
 	}
 	// Enable compression
 	f.SetCompression(!gl.noCompress)
+	f.spotColorMap = make(map[string]spotColorType)
 	f.blendList = make([]blendModeType, 0, 8)
 	f.blendList = append(f.blendList, blendModeType{}) // blendList[0] is unused (1-based)
 	f.blendMap = make(map[string]int)
@@ -721,13 +722,6 @@ func (f *Fpdf) PageNo() int {
 	return f.page
 }
 
-type clrType struct {
-	r, g, b    float64
-	ir, ig, ib int
-	gray       bool
-	str        string
-}
-
 func colorComp(v int) (int, float64) {
 	if v < 0 {
 		v = 0
@@ -737,10 +731,11 @@ func colorComp(v int) (int, float64) {
 	return v, float64(v) / 255.0
 }
 
-func colorValue(r, g, b int, grayStr, fullStr string) (clr clrType) {
+func rgbColorValue(r, g, b int, grayStr, fullStr string) (clr colorType) {
 	clr.ir, clr.r = colorComp(r)
 	clr.ig, clr.g = colorComp(g)
 	clr.ib, clr.b = colorComp(b)
+	clr.mode = colorModeRGB
 	clr.gray = clr.ir == clr.ig && clr.r == clr.b
 	if len(grayStr) > 0 {
 		if clr.gray {
@@ -759,13 +754,15 @@ func colorValue(r, g, b int, grayStr, fullStr string) (clr clrType) {
 // The method can be called before the first page is created. The value is
 // retained from page to page.
 func (f *Fpdf) SetDrawColor(r, g, b int) {
-	f.color.draw = colorValue(r, g, b, "G", "RG")
+	f.color.draw = rgbColorValue(r, g, b, "G", "RG")
 	if f.page > 0 {
 		f.out(f.color.draw.str)
 	}
 }
 
-// GetDrawColor returns the current draw color as RGB components (0 - 255).
+// GetDrawColor returns the most recently set draw color as RGB components (0 -
+// 255). This will not be the current value if a draw color of some other type
+// (for example, spot) has been more recently set.
 func (f *Fpdf) GetDrawColor() (int, int, int) {
 	return f.color.draw.ir, f.color.draw.ig, f.color.draw.ib
 }
@@ -775,14 +772,16 @@ func (f *Fpdf) GetDrawColor() (int, int, int) {
 // -255). The method can be called before the first page is created and the
 // value is retained from page to page.
 func (f *Fpdf) SetFillColor(r, g, b int) {
-	f.color.fill = colorValue(r, g, b, "g", "rg")
+	f.color.fill = rgbColorValue(r, g, b, "g", "rg")
 	f.colorFlag = f.color.fill.str != f.color.text.str
 	if f.page > 0 {
 		f.out(f.color.fill.str)
 	}
 }
 
-// GetFillColor returns the current fill color as RGB components (0 - 255).
+// GetFillColor returns the most recently set fill color as RGB components (0 -
+// 255). This will not be the current value if a fill color of some other type
+// (for example, spot) has been more recently set.
 func (f *Fpdf) GetFillColor() (int, int, int) {
 	return f.color.fill.ir, f.color.fill.ig, f.color.fill.ib
 }
@@ -791,11 +790,13 @@ func (f *Fpdf) GetFillColor() (int, int, int) {
 // components (0 - 255). The method can be called before the first page is
 // created. The value is retained from page to page.
 func (f *Fpdf) SetTextColor(r, g, b int) {
-	f.color.text = colorValue(r, g, b, "g", "rg")
+	f.color.text = rgbColorValue(r, g, b, "g", "rg")
 	f.colorFlag = f.color.fill.str != f.color.text.str
 }
 
-// GetTextColor returns the current text color as RGB components (0 - 255).
+// GetTextColor returns the most recently set text color as RGB components (0 -
+// 255). This will not be the current value if a text color of some other type
+// (for example, spot) has been more recently set.
 func (f *Fpdf) GetTextColor() (int, int, int) {
 	return f.color.text.ir, f.color.text.ig, f.color.text.ib
 }
@@ -1183,8 +1184,8 @@ func (f *Fpdf) gradientClipEnd() {
 
 func (f *Fpdf) gradient(tp int, r1, g1, b1 int, r2, g2, b2 int, x1, y1 float64, x2, y2 float64, r float64) {
 	pos := len(f.gradientList)
-	clr1 := colorValue(r1, g1, b1, "", "")
-	clr2 := colorValue(r2, g2, b2, "", "")
+	clr1 := rgbColorValue(r1, g1, b1, "", "")
+	clr2 := rgbColorValue(r2, g2, b2, "", "")
 	f.gradientList = append(f.gradientList, gradientType{tp, clr1.str, clr2.str,
 		x1, y1, x2, y2, r, 0})
 	f.outf("/Sh%d sh", pos)
@@ -3477,6 +3478,7 @@ func (f *Fpdf) putresourcedict() {
 	}
 	// Layers
 	f.layerPutResourceDict()
+	f.spotColorPutResourceDict()
 }
 
 func (f *Fpdf) putBlendModes() {
@@ -3542,6 +3544,7 @@ func (f *Fpdf) putresources() {
 	f.layerPutLayers()
 	f.putBlendModes()
 	f.putGradients()
+	f.putSpotColors()
 	f.putfonts()
 	if f.err != nil {
 		return

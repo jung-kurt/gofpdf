@@ -39,6 +39,34 @@ type gradientType struct {
 	objNum            int
 }
 
+type colorMode int
+
+const (
+	colorModeRGB colorMode = iota
+	colorModeSpot
+	colorModeCMYK
+)
+
+type colorType struct {
+	r, g, b    float64
+	ir, ig, ib int
+	mode       colorMode
+	spotStr    string // name of current spot color
+	gray       bool
+	str        string
+}
+
+// SpotColorType specifies a named spot color value
+type spotColorType struct {
+	id, objID int
+	val       cmykColorType
+}
+
+// CMYKColorType specifies an ink-based CMYK color value
+type cmykColorType struct {
+	c, m, y, k byte // 0% to 100%
+}
+
 // SizeType fields Wd and Ht specify the horizontal and vertical extents of a
 // document element such as a page.
 type SizeType struct {
@@ -254,8 +282,9 @@ type Fpdf struct {
 	colorFlag        bool                      // indicates whether fill and text colors are different
 	color            struct {
 		// Composite values of colors
-		draw, fill, text clrType
+		draw, fill, text colorType
 	}
+	spotColorMap map[string]spotColorType // Map of named ink-based colors
 }
 
 type encType struct {
