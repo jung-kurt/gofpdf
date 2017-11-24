@@ -1931,19 +1931,19 @@ func (f *Fpdf) CellFormat(w, h float64, txtStr string, borderStr string, ln int,
 	if len(txtStr) > 0 {
 		var dx, dy float64
 		// Horizontal alignment
-		if strings.Index(alignStr, "R") != -1 {
+		if strings.Contains(alignStr, "R") {
 			dx = w - f.cMargin - f.GetStringWidth(txtStr)
-		} else if strings.Index(alignStr, "C") != -1 {
+		} else if strings.Contains(alignStr, "C") {
 			dx = (w - f.GetStringWidth(txtStr)) / 2
 		} else {
 			dx = f.cMargin
 		}
 		// Vertical alignment
-		if strings.Index(alignStr, "T") != -1 {
+		if strings.Contains(alignStr, "T") {
 			dy = (f.fontSize - h) / 2.0
-		} else if strings.Index(alignStr, "B") != -1 {
+		} else if strings.Contains(alignStr, "B") {
 			dy = (h - f.fontSize) / 2.0
-		} else if strings.Index(alignStr, "A") != -1 {
+		} else if strings.Contains(alignStr, "A") {
 			var descent float64
 			d := f.currentFont.Desc
 			if d.Descent == 0 {
