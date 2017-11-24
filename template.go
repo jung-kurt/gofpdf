@@ -254,9 +254,7 @@ func templateChainDependencies(template Template) []Template {
 	requires := template.Templates()
 	chain := make([]Template, len(requires)*2)
 	for _, req := range requires {
-		for _, sub := range templateChainDependencies(req) {
-			chain = append(chain, sub)
-		}
+		chain = append(chain, templateChainDependencies(req)...)
 	}
 	chain = append(chain, template)
 	return chain
