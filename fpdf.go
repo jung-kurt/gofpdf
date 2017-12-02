@@ -59,7 +59,9 @@ func (b *fmtBuffer) printf(fmtStr string, args ...interface{}) {
 func fpdfNew(orientationStr, unitStr, sizeStr, fontDirStr string, size SizeType) (f *Fpdf) {
 	f = new(Fpdf)
 	if orientationStr == "" {
-		orientationStr = "P"
+		orientationStr = "p"
+	} else {
+		orientationStr = strings.ToLower(orientationStr)
 	}
 	if unitStr == "" {
 		unitStr = "mm"
@@ -143,7 +145,6 @@ func fpdfNew(orientationStr, unitStr, sizeStr, fontDirStr string, size SizeType)
 	}
 	f.curPageSize = f.defPageSize
 	// Page orientation
-	orientationStr = strings.ToLower(orientationStr)
 	switch orientationStr {
 	case "p", "portrait":
 		f.defOrientation = "P"

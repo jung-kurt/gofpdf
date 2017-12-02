@@ -191,7 +191,7 @@ func lorem() string {
 // finally retrieved with the output call where it can be handled by the
 // application.
 func Example() {
-	pdf := gofpdf.New("P", "mm", "A4", "")
+	pdf := gofpdf.New(gofpdf.OrientationPortrait, "mm", "A4", "")
 	pdf.AddPage()
 	pdf.SetFont("Arial", "B", 16)
 	pdf.Cell(40, 10, "Hello World!")
