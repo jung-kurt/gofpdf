@@ -39,6 +39,11 @@ type gradientType struct {
 	objNum            int
 }
 
+const (
+	OrientationPortrait  = "portrait"
+	OrientationLandscape = "landscape"
+)
+
 type colorMode int
 
 const (

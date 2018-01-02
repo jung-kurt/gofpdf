@@ -27,7 +27,9 @@ func ExampleRegister() {
 
 	if err == nil {
 		key := barcode.Register(bcode)
-		barcode.Barcode(pdf, key, 15, 15, 100, 10, false)
+		var width float64 = 100
+		var height float64 = 10.0
+		barcode.BarcodeUnscalable(pdf, key, 15, 15, &width, &height, false)
 	}
 
 	err = pdf.OutputFileAndClose(fileStr)
@@ -40,7 +42,9 @@ func ExampleRegisterCodabar() {
 	pdf := createPdf()
 
 	key := barcode.RegisterCode128(pdf, "codabar")
-	barcode.Barcode(pdf, key, 15, 15, 100, 10, false)
+	var width float64 = 100
+	var height float64 = 10
+	barcode.BarcodeUnscalable(pdf, key, 15, 15, &width, &height, false)
 
 	fileStr := example.Filename("contrib_barcode_RegisterCodabar")
 	err := pdf.OutputFileAndClose(fileStr)
@@ -118,7 +122,7 @@ func ExampleRegisterQR() {
 	pdf := createPdf()
 
 	key := barcode.RegisterQR(pdf, "qrcode", qr.H, qr.Unicode)
-	barcode.Barcode(pdf, key, 15, 15, 20, 20, false)
+	barcode.Barcode(pdf, key, 15, 15, 100, 10, false)
 
 	fileStr := example.Filename("contrib_barcode_RegisterQR")
 	err := pdf.OutputFileAndClose(fileStr)
@@ -131,7 +135,7 @@ func ExampleRegisterTwoOfFive() {
 	pdf := createPdf()
 
 	key := barcode.RegisterTwoOfFive(pdf, "1234567895", true)
-	barcode.Barcode(pdf, key, 15, 15, 100, 20, false)
+	barcode.Barcode(pdf, key, 15, 15, 100, 10, false)
 
 	fileStr := example.Filename("contrib_barcode_RegisterTwoOfFive")
 	err := pdf.OutputFileAndClose(fileStr)
@@ -144,7 +148,7 @@ func ExampleRegisterPdf417() {
 	pdf := createPdf()
 
 	key := barcode.RegisterPdf417(pdf, "1234567895", 10, 5)
-	barcode.Barcode(pdf, key, 15, 15, 100, 20, false)
+	barcode.Barcode(pdf, key, 15, 15, 100, 10, false)
 
 	fileStr := example.Filename("contrib_barcode_RegisterPdf417")
 	err := pdf.OutputFileAndClose(fileStr)
@@ -157,4 +161,41 @@ func ExampleRegisterPdf417() {
 func TestRegisterCode128(t *testing.T) {
 	pdf := createPdf()
 	barcode.RegisterCode128(pdf, "Invalid character: é")
+}
+
+// Shows that the barcode may be scaled or not by providing optional heights and widths.
+func TestBarcodeUnscalable(t *testing.T) {
+	pdf := createPdf()
+
+	key := barcode.RegisterCode128(pdf, "code128")
+	var width float64 = 100
+	var height float64 = 10
+	barcode.BarcodeUnscalable(pdf, key, 15, 15, &width, &height, false)
+	barcode.BarcodeUnscalable(pdf, key, 15, 35, nil, &height, false)
+	barcode.BarcodeUnscalable(pdf, key, 15, 55, &width, nil, false)
+	barcode.BarcodeUnscalable(pdf, key, 15, 75, nil, nil, false)
+
+	fileStr := example.Filename("contrib_barcode_Barcode")
+	err := pdf.OutputFileAndClose(fileStr)
+	example.Summary(err, fileStr)
+	// Output:
+	// Successfully generated ../../pdf/contrib_barcode_Barcode.pdf
+}
+
+// Shows that the width and height returned by the function match that of the barcode
+func TestGetUnscaledBarcodeDimensions(t *testing.T) {
+	pdf := createPdf()
+
+	key := barcode.RegisterQR(pdf, "qrcode", qr.H, qr.Unicode)
+	barcode.BarcodeUnscalable(pdf, key, 15, 15, nil, nil, false)
+	w, h := barcode.GetUnscaledBarcodeDimensions(pdf, key)
+
+	pdf.SetDrawColor(255, 0, 0)
+	pdf.Line(15, 15, 15+w, 15+h)
+
+	fileStr := example.Filename("contrib_barcode_GetBarcodeDimensions")
+	err := pdf.OutputFileAndClose(fileStr)
+	example.Summary(err, fileStr)
+	// Output:
+	// Successfully generated ../../pdf/contrib_barcode_GetBarcodeDimensions.pdf
 }
