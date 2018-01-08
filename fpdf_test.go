@@ -2063,7 +2063,7 @@ func ExampleFpdf_AddSpotColor() {
 
 // This example demonstrates how to use `RegisterAlias` to create a table of
 // contents.
-func ExampleFpdf_TableOfContents() {
+func ExampleFpdf_RegisterAlias() {
 	pdf := gofpdf.New("P", "mm", "A4", "")
 	pdf.SetFont("Arial", "", 12)
 	pdf.AddPage()
@@ -2085,9 +2085,9 @@ func ExampleFpdf_TableOfContents() {
 		pdf.Write(10, fmt.Sprintf("Section %d", i))
 	}
 
-	fileStr := example.Filename("Fpdf_TableOfContents")
+	fileStr := example.Filename("Fpdf_RegisterAlias")
 	err := pdf.OutputFileAndClose(fileStr)
 	example.Summary(err, fileStr)
 	// Output:
-	// Successfully generated pdf/Fpdf_TableOfContents.pdf
+	// Successfully generated pdf/Fpdf_RegisterAlias.pdf
 }
