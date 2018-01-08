@@ -88,6 +88,7 @@ func fpdfNew(orientationStr, unitStr, sizeStr, fontDirStr string, size SizeType)
 	f.pageLinks = append(f.pageLinks, make([]linkType, 0, 0)) // pageLinks[0] is unused (1-based)
 	f.links = make([]intLinkType, 0, 8)
 	f.links = append(f.links, intLinkType{}) // links[0] is unused (1-based)
+	f.aliasMap = make(map[string]string)
 	f.inHeader = false
 	f.inFooter = false
 	f.lasth = 0
@@ -3071,6 +3072,26 @@ func (f *Fpdf) SetJavascript(script string) {
 	f.javascript = &script
 }
 
+// RegisterAlias adds an (alias, replacement) pair to the document so we can
+// replace all occurrences of that alias after writing but before the
+// document is closed.
+func (f *Fpdf) RegisterAlias(alias, replacement string) {
+	f.aliasMap[alias] = replacement
+}
+
+func (f *Fpdf) replaceAliases() {
+	for alias, replacement := range f.aliasMap {
+		for n := 1; n <= f.page; n++ {
+			s := f.pages[n].String()
+			if strings.Contains(s, alias) {
+				s = strings.Replace(s, alias, replacement, -1)
+				f.pages[n].Truncate(0)
+				f.pages[n].WriteString(s)
+			}
+		}
+	}
+}
+
 func (f *Fpdf) putpages() {
 	var wPt, hPt float64
 	var pageSize SizeType
@@ -3079,16 +3100,9 @@ func (f *Fpdf) putpages() {
 	nb := f.page
 	if len(f.aliasNbPagesStr) > 0 {
 		// Replace number of pages
-		nbStr := sprintf("%d", nb)
-		for n := 1; n <= nb; n++ {
-			s := f.pages[n].String()
-			if strings.Contains(s, f.aliasNbPagesStr) {
-				s = strings.Replace(s, f.aliasNbPagesStr, nbStr, -1)
-				f.pages[n].Truncate(0)
-				f.pages[n].WriteString(s)
-			}
-		}
+		f.RegisterAlias(f.aliasNbPagesStr, sprintf("%d", nb))
 	}
+	f.replaceAliases()
 	if f.defOrientation == "P" {
 		wPt = f.defPageSize.Wd * f.k
 		hPt = f.defPageSize.Ht * f.k

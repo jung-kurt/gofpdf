@@ -40,7 +40,10 @@ type gradientType struct {
 }
 
 const (
-	OrientationPortrait  = "portrait"
+	// OrientationPortrait represents the portrait orientation.
+	OrientationPortrait = "portrait"
+
+	// OrientationLandscape represents the landscape orientation.
 	OrientationLandscape = "landscape"
 )
 
@@ -243,6 +246,7 @@ type Fpdf struct {
 	fontSize         float64                   // current font size in user unit
 	ws               float64                   // word spacing
 	images           map[string]*ImageInfoType // array of used images
+	aliasMap         map[string]string         // map of alias->replacement
 	pageLinks        [][]linkType              // pageLinks[page][link], both 1-based
 	links            []intLinkType             // array of internal links
 	outlines         []outlineType             // array of outlines
