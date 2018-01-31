@@ -217,8 +217,10 @@ basic HTML functionality with aligned text. Kent Quirk implemented
 backwards-compatible support for reading DPI from images that support it, and
 for setting DPI manually and then having it properly taken into account when
 calculating image size. Paulo Coutinho provided support for static embedded
-fonts. Dan Meyers added support for embedded JavaScript. Bruno Michel has
-provided valuable assistance with the code.
+fonts. Dan Meyers added support for embedded JavaScript. David Fish added a
+generic alias-replacement function to enable, among other things, Table of
+Contents functionality. Bruno Michel has provided valuable assistance with the
+code.
 
 ## Roadmap
 
