@@ -3199,7 +3199,7 @@ func (f *Fpdf) putfonts() {
 			fileList = append(fileList, file)
 		}
 		if f.catalogSort {
-			sort.Strings(fileList)
+			sort.SliceStable(fileList, func(i, j int) bool { return fileList[i] < fileList[j] })
 		}
 		for _, file = range fileList {
 			info = f.fontFiles[file]
@@ -3249,7 +3249,7 @@ func (f *Fpdf) putfonts() {
 			keyList = append(keyList, key)
 		}
 		if f.catalogSort {
-			sort.Strings(keyList)
+			sort.SliceStable(keyList, func(i, j int) bool { return keyList[i] < keyList[j] })
 		}
 		for _, key = range keyList {
 			font = f.fonts[key]
@@ -3350,7 +3350,7 @@ func (f *Fpdf) putimages() {
 		keyList = append(keyList, key)
 	}
 	if f.catalogSort {
-		sort.Strings(keyList)
+		sort.SliceStable(keyList, func(i, j int) bool { return f.images[keyList[i]].w < f.images[keyList[j]].w })
 	}
 	for _, key = range keyList {
 		f.putimage(f.images[key])
@@ -3430,7 +3430,7 @@ func (f *Fpdf) putxobjectdict() {
 			keyList = append(keyList, key)
 		}
 		if f.catalogSort {
-			sort.Strings(keyList)
+			sort.SliceStable(keyList, func(i, j int) bool { return f.images[keyList[i]].i < f.images[keyList[j]].i })
 		}
 		for _, key = range keyList {
 			image = f.images[key]
@@ -3464,7 +3464,7 @@ func (f *Fpdf) putresourcedict() {
 			keyList = append(keyList, key)
 		}
 		if f.catalogSort {
-			sort.Strings(keyList)
+			sort.SliceStable(keyList, func(i, j int) bool { return f.fonts[keyList[i]].I < f.fonts[keyList[j]].I })
 		}
 		for _, key = range keyList {
 			font = f.fonts[key]
