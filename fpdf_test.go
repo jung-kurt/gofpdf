@@ -29,6 +29,7 @@ import (
 	"strconv"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/jung-kurt/gofpdf"
 	"github.com/jung-kurt/gofpdf/internal/example"
@@ -2090,4 +2091,55 @@ func ExampleFpdf_RegisterAlias() {
 	example.Summary(err, fileStr)
 	// Output:
 	// Successfully generated pdf/Fpdf_RegisterAlias.pdf
+}
+
+// This example demonstrates the generation of graph grids.
+func ExampleNewGrid() {
+	pdf := gofpdf.New("P", "mm", "A4", "")
+	pdf.SetFont("Arial", "", 12)
+	pdf.AddPage()
+
+	gr := gofpdf.NewGrid(10, 10, 190, 133)
+	gr.TickmarksExtentX(0, 10, 4)
+	gr.TickmarksExtentY(0, 10, 3)
+	gr.Grid(pdf)
+
+	gr = gofpdf.NewGrid(10, 154, 190, 133)
+	gr.TickmarksExtentX(0, 1, 12)
+	gr.XDiv = 5
+	gr.TickmarksContainY(0, 1.1)
+	gr.YDiv = 20
+	// Replace X label formatter with month abbreviation
+	gr.XTickStr = func(val float64, precision int) string {
+		return time.Month(math.Mod(val, 12) + 1).String()[0:3]
+	}
+	gr.Grid(pdf)
+	dot := func(x, y float64) {
+		pdf.Circle(gr.X(x), gr.Y(y), 0.5, "F")
+	}
+	pts := []float64{0.39, 0.457, 0.612, 0.84, 0.998, 1.037, 1.015, 0.918, 0.772, 0.659, 0.593, 0.164}
+	for month, val := range pts {
+		dot(float64(month)+0.5, val)
+	}
+	pdf.SetDrawColor(0, 0, 0)
+	pdf.SetLineWidth(0.1)
+	gr.Plot(pdf, 0.5, 11.5, 50, func(x float64) float64 {
+		// http://www.xuru.org/rt/PR.asp
+		return 0.227 * math.Exp(-0.0373*x*x+0.471*x)
+	})
+	pdf.SetXY(gr.X(0.5), gr.Y(1.35))
+	pdf.SetFontSize(14)
+	pdf.Write(0, "Solar energy (MWh) per month, 2016")
+	pdf.AddPage()
+
+	gr = gofpdf.NewGrid(10, 10, 190, 277)
+	gr.TickmarksContainX(2.3, 3.4)
+	gr.TickmarksContainY(10.4, 56.8)
+	gr.Grid(pdf)
+
+	fileStr := example.Filename("Fpdf_Grid")
+	err := pdf.OutputFileAndClose(fileStr)
+	example.Summary(err, fileStr)
+	// Output:
+	// Successfully generated pdf/Fpdf_Grid.pdf
 }

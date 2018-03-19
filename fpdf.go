@@ -400,6 +400,15 @@ func (f *Fpdf) SetRightMargin(margin float64) {
 	f.rMargin = margin
 }
 
+// GetAutoPageBreak returns true if automatic pages breaks are enabled, false
+// otherwise. This is followed by the triggering limit from the bottom of the
+// page. This value applies only if automatic page breaks are enabled.
+func (f *Fpdf) GetAutoPageBreak() (auto bool, margin float64) {
+	auto = f.autoPageBreak
+	margin = f.bMargin
+	return
+}
+
 // SetAutoPageBreak enables or disables the automatic page breaking mode. When
 // enabling, the second parameter is the distance from the bottom of the page
 // that defines the triggering limit. By default, the mode is on and the margin
