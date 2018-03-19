@@ -353,7 +353,7 @@ func (g GridType) Grid(pdf *Fpdf) {
 }
 
 // Plot plots a series of count line segments from xMin to xMax. It repeatedly
-// calls fnc(x) to retreive the y value associate with x. The currently
+// calls fnc(x) to retrieve the y value associate with x. The currently
 // selected line drawing attributes are used.
 func (g GridType) Plot(pdf *Fpdf, xMin, xMax float64, count int, fnc func(x float64) (y float64)) {
 	if count > 0 {

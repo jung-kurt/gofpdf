@@ -52,6 +52,8 @@ Features
 
 • Barcodes
 
+• Charting facility
+
 gofpdf has no dependencies other than the Go standard library. All tests pass
 on Linux, Mac and Windows platforms.
 
