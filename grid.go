@@ -44,7 +44,7 @@ func StateGet(pdf *Fpdf) (st StateType) {
 
 // StatePut sets the common state values contained in the state structure
 // specified by st.
-func StatePut(pdf *Fpdf, st StateType) {
+func (st StateType) Put(pdf *Fpdf) {
 	pdf.SetDrawColor(st.clrDraw.R, st.clrDraw.G, st.clrDraw.B)
 	pdf.SetFillColor(st.clrFill.R, st.clrFill.G, st.clrFill.B)
 	pdf.SetTextColor(st.clrText.R, st.clrText.G, st.clrText.B)
@@ -346,7 +346,7 @@ func (g GridType) Grid(pdf *Fpdf) {
 		}
 
 		// Restore drawing attributes
-		StatePut(pdf, st)
+		st.Put(pdf)
 
 	}
 
