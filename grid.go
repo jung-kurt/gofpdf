@@ -360,7 +360,7 @@ func (g GridType) Plot(pdf *Fpdf, xMin, xMax float64, count int, fnc func(x floa
 		var x, delta, drawX0, drawY0, drawX1, drawY1 float64
 		delta = (xMax - xMin) / float64(count)
 		x = xMin
-		for j := 0; j < count; j++ {
+		for j := 0; j <= count; j++ {
 			if j == 0 {
 				drawX1 = g.X(x)
 				drawY1 = g.Y(fnc(x))
