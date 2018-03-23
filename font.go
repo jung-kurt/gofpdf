@@ -331,7 +331,8 @@ func makeFontEncoding(encList encListType, refEncFileStr string) (diffStr string
 	return
 }
 
-func makeDefinitionFile(fileStr, tpStr, encodingFileStr string, embed bool, encList encListType, info fontInfoType) (err error) {
+func makeDefinitionFile(fileStr, tpStr, encodingFileStr string, embed bool, encList encListType, info fontInfoType) error {
+	var err error
 	var def fontDefType
 	def.Tp = tpStr
 	def.Name = info.FontName
@@ -347,7 +348,7 @@ func makeDefinitionFile(fileStr, tpStr, encodingFileStr string, embed bool, encL
 	// fmt.Printf("reference [%s]\n", filepath.Join(filepath.Dir(encodingFileStr), "cp1252.map"))
 	def.Diff, err = makeFontEncoding(encList, filepath.Join(filepath.Dir(encodingFileStr), "cp1252.map"))
 	if err != nil {
-		return
+		return err
 	}
 	def.File = info.File
 	def.Size1 = int(info.Size1)
@@ -357,16 +358,24 @@ func makeDefinitionFile(fileStr, tpStr, encodingFileStr string, embed bool, encL
 	var buf []byte
 	buf, err = json.Marshal(def)
 	if err != nil {
-		return
+		return err
 	}
 	var f *os.File
 	f, err = os.Create(fileStr)
 	if err != nil {
-		return
+		return err
 	}
 	defer f.Close()
-	f.Write(buf)
-	return
+	_, err = f.Write(buf)
+	if err != nil {
+		return err
+	}
+	err = f.Close()
+	if err != nil {
+		return err
+	}
+
+	return err
 }
 
 // MakeFont generates a font definition file in JSON format. A definition file
@@ -392,13 +401,12 @@ func makeDefinitionFile(fileStr, tpStr, encodingFileStr string, embed bool, encL
 // process. Use nil to turn off messages.
 //
 // embed is true if the font is to be embedded in the PDF files.
-func MakeFont(fontFileStr, encodingFileStr, dstDirStr string, msgWriter io.Writer, embed bool) (err error) {
+func MakeFont(fontFileStr, encodingFileStr, dstDirStr string, msgWriter io.Writer, embed bool) error {
 	if msgWriter == nil {
 		msgWriter = ioutil.Discard
 	}
 	if !fileExist(fontFileStr) {
-		err = fmt.Errorf("font file not found: %s", fontFileStr)
-		return
+		return fmt.Errorf("font file not found: %s", fontFileStr)
 	}
 	extStr := strings.ToLower(fontFileStr[len(fontFileStr)-3:])
 	// printf("Font file extension [%s]\n", extStr)
@@ -408,26 +416,24 @@ func MakeFont(fontFileStr, encodingFileStr, dstDirStr string, msgWriter io.Write
 	} else if extStr == "pfb" {
 		tpStr = "Type1"
 	} else {
-		err = fmt.Errorf("unrecognized font file extension: %s", extStr)
-		return
+		return fmt.Errorf("unrecognized font file extension: %s", extStr)
 	}
-	var encList encListType
 	var info fontInfoType
-	encList, err = loadMap(encodingFileStr)
+	encList, err := loadMap(encodingFileStr)
 	if err != nil {
-		return
+		return err
 	}
 	// printf("Encoding table\n")
 	// dump(encList)
 	if tpStr == "TrueType" {
 		info, err = getInfoFromTrueType(fontFileStr, msgWriter, embed, encList)
 		if err != nil {
-			return
+			return err
 		}
 	} else {
 		info, err = getInfoFromType1(fontFileStr, msgWriter, embed, encList)
 		if err != nil {
-			return
+			return err
 		}
 	}
 	baseStr := baseNoExt(fontFileStr)
@@ -438,19 +444,25 @@ func MakeFont(fontFileStr, encodingFileStr, dstDirStr string, msgWriter io.Write
 		zFileStr := filepath.Join(dstDirStr, info.File)
 		f, err = os.Create(zFileStr)
 		if err != nil {
-			return
+			return err
 		}
 		defer f.Close()
 		cmp := zlib.NewWriter(f)
-		cmp.Write(info.Data)
-		cmp.Close()
+		_, err = cmp.Write(info.Data)
+		if err != nil {
+			return err
+		}
+		err = cmp.Close()
+		if err != nil {
+			return err
+		}
 		fmt.Fprintf(msgWriter, "Font file compressed: %s\n", zFileStr)
 	}
 	defFileStr := filepath.Join(dstDirStr, baseStr+".json")
 	err = makeDefinitionFile(defFileStr, tpStr, encodingFileStr, embed, encList, info)
 	if err != nil {
-		return
+		return err
 	}
 	fmt.Fprintf(msgWriter, "Font definition file successfully generated: %s\n", defFileStr)
-	return
+	return nil
 }
