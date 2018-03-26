@@ -7,20 +7,20 @@ import (
 func unused(args ...interface{}) {
 }
 
-// RGBType holds fields for red, green and blue color components
+// RGBType holds fields for red, green and blue color components (0..255)
 type RGBType struct {
 	R, G, B int
 }
 
-// RGBAType holds fields for red, green and blue color components and an alpha
-// transparency value
+// RGBAType holds fields for red, green and blue color components (0..255) and
+// an alpha transparency value (0..1)
 type RGBAType struct {
 	R, G, B int
 	Alpha   float64
 }
 
 // StateType holds various commonly used drawing values for convenient
-// retrieval and restore methods
+// retrieval (StateGet()) and restore (Put) methods.
 type StateType struct {
 	clrDraw, clrText, clrFill RGBType
 	lineWd                    float64
@@ -42,7 +42,7 @@ func StateGet(pdf *Fpdf) (st StateType) {
 	return
 }
 
-// StatePut sets the common state values contained in the state structure
+// Put sets the common state values contained in the state structure
 // specified by st.
 func (st StateType) Put(pdf *Fpdf) {
 	pdf.SetDrawColor(st.clrDraw.R, st.clrDraw.G, st.clrDraw.B)
