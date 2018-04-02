@@ -1,6 +1,7 @@
 package gofpdf
 
 import (
+	"math"
 	"strconv"
 )
 
@@ -142,6 +143,12 @@ func NewGrid(x, y, w, h float64) (grid GridType) {
 	return
 }
 
+// WdAbs returns the absolute value of dataWd, specified in logical data units,
+// that has been converted to the unit of measure specified in New().
+func (g GridType) WdAbs(dataWd float64) float64 {
+	return math.Abs(g.xm * dataWd)
+}
+
 // Wd converts dataWd, specified in logical data units, to the unit of measure
 // specified in New().
 func (g GridType) Wd(dataWd float64) float64 {
@@ -152,6 +159,12 @@ func (g GridType) Wd(dataWd float64) float64 {
 // current page.
 func (g GridType) X(dataX float64) float64 {
 	return g.xm*dataX + g.xb
+}
+
+// HtAbs returns the absolute value of dataHt, specified in logical data units,
+// that has been converted to the unit of measure specified in New().
+func (g GridType) HtAbs(dataHt float64) float64 {
+	return math.Abs(g.ym * dataHt)
 }
 
 // Ht converts dataHt, specified in logical data units, to the unit of measure
