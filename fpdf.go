@@ -96,9 +96,9 @@ func fpdfNew(orientationStr, unitStr, sizeStr, fontDirStr string, size SizeType)
 	f.fontStyle = ""
 	f.SetFontSize(12)
 	f.underline = false
-	f.SetDrawColor(0, 0, 0)
-	f.SetFillColor(0, 0, 0)
-	f.SetTextColor(0, 0, 0)
+	f.setDrawColor(0, 0, 0)
+	f.setFillColor(0, 0, 0)
+	f.setTextColor(0, 0, 0)
 	f.colorFlag = false
 	f.ws = 0
 	f.fontpath = fontDirStr
@@ -765,6 +765,12 @@ func rgbColorValue(r, g, b int, grayStr, fullStr string) (clr colorType) {
 // The method can be called before the first page is created. The value is
 // retained from page to page.
 func (f *Fpdf) SetDrawColor(r, g, b int) {
+	if r != f.color.draw.ir || g != f.color.draw.ig || b != f.color.draw.ib {
+		f.setDrawColor(r, g, b)
+	}
+}
+
+func (f *Fpdf) setDrawColor(r, g, b int) {
 	f.color.draw = rgbColorValue(r, g, b, "G", "RG")
 	if f.page > 0 {
 		f.out(f.color.draw.str)
@@ -783,6 +789,12 @@ func (f *Fpdf) GetDrawColor() (int, int, int) {
 // -255). The method can be called before the first page is created and the
 // value is retained from page to page.
 func (f *Fpdf) SetFillColor(r, g, b int) {
+	if r != f.color.fill.ir || g != f.color.fill.ig || b != f.color.fill.ib {
+		f.setFillColor(r, g, b)
+	}
+}
+
+func (f *Fpdf) setFillColor(r, g, b int) {
 	f.color.fill = rgbColorValue(r, g, b, "g", "rg")
 	f.colorFlag = f.color.fill.str != f.color.text.str
 	if f.page > 0 {
@@ -801,6 +813,12 @@ func (f *Fpdf) GetFillColor() (int, int, int) {
 // components (0 - 255). The method can be called before the first page is
 // created. The value is retained from page to page.
 func (f *Fpdf) SetTextColor(r, g, b int) {
+	if r != f.color.text.ir || g != f.color.text.ig || b != f.color.text.ib {
+		f.setTextColor(r, g, b)
+	}
+}
+
+func (f *Fpdf) setTextColor(r, g, b int) {
 	f.color.text = rgbColorValue(r, g, b, "g", "rg")
 	f.colorFlag = f.color.fill.str != f.color.text.str
 }
@@ -832,6 +850,12 @@ func (f *Fpdf) GetStringWidth(s string) float64 {
 // The method can be called before the first page is created. The value is
 // retained from page to page.
 func (f *Fpdf) SetLineWidth(width float64) {
+	if f.lineWidth != width {
+		f.setLineWidth(width)
+	}
+}
+
+func (f *Fpdf) setLineWidth(width float64) {
 	f.lineWidth = width
 	if f.page > 0 {
 		f.outf("%.2f w", width*f.k)
