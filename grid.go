@@ -75,7 +75,9 @@ type GridType struct {
 	// Tickmarks
 	xTicks, yTicks []float64
 	// Labels are inside of graph boundary
-	XInside, YInside bool
+	XLabelIn, YLabelIn bool
+	// Labels on X-axis should be rotated
+	XLabelRotate bool
 	// Formatters; use nil to eliminate labels
 	XTickStr, YTickStr TickFormatFncType
 	// Subdivisions between tickmarks
@@ -133,8 +135,9 @@ func NewGrid(x, y, w, h float64) (grid GridType) {
 	grid.TextSize = 7 // Points
 	grid.TickmarksExtentX(0, 1, 1)
 	grid.TickmarksExtentY(0, 1, 1)
-	grid.XInside = false
-	grid.YInside = false
+	grid.XLabelIn = false
+	grid.YLabelIn = false
+	grid.XLabelRotate = false
 	grid.XDiv = 10
 	grid.YDiv = 10
 	grid.ClrText = RGBAType{R: 0, G: 0, B: 0, Alpha: 1}
@@ -258,16 +261,10 @@ func lineAttr(pdf *Fpdf, clr RGBAType, lineWd float64) {
 // Grid generates a graph-paperlike set of grid lines on the current page.
 func (g GridType) Grid(pdf *Fpdf) {
 	var st StateType
-	// const textSz = 8
-	// var halfTextSz = g.TextSize / 2
 	var yLen, xLen int
 	var textSz, halfTextSz, yMin, yMax, xMin, xMax, yDiv, xDiv float64
 	var str string
 	var strOfs, strWd, tp, bt, lf, rt, drawX, drawY float64
-
-	textSz = pdf.PointToUnitConvert(g.TextSize)
-	halfTextSz = textSz / 2
-	strOfs = pdf.GetStringWidth("I")
 
 	xLen = len(g.xTicks)
 	yLen = len(g.yTicks)
@@ -284,8 +281,12 @@ func (g GridType) Grid(pdf *Fpdf) {
 			pdf.Line(x1, y1, x2, y2)
 		}
 
+		textSz = pdf.PointToUnitConvert(g.TextSize)
+		halfTextSz = textSz / 2
+
 		pdf.SetAutoPageBreak(false, 0)
 		pdf.SetFontUnitSize(textSz)
+		strOfs = pdf.GetStringWidth("0")
 		pdf.SetFillColor(255, 255, 255)
 		pdf.SetCellMargin(0)
 
@@ -341,15 +342,25 @@ func (g GridType) Grid(pdf *Fpdf) {
 				str = g.XTickStr(x, g.xPrecision)
 				strWd = pdf.GetStringWidth(str)
 				drawX = g.X(x)
-				pdf.TransformBegin()
-				pdf.TransformRotate(90, drawX, drawY)
-				if g.XInside {
-					pdf.SetXY(drawX+strOfs, drawY-halfTextSz)
+				if g.XLabelRotate {
+					pdf.TransformBegin()
+					pdf.TransformRotate(90, drawX, drawY)
+					if g.XLabelIn {
+						pdf.SetXY(drawX+strOfs, drawY-halfTextSz)
+					} else {
+						pdf.SetXY(drawX-strOfs-strWd, drawY-halfTextSz)
+					}
+					pdf.CellFormat(strWd, textSz, str, "", 0, "L", true, 0, "")
+					pdf.TransformEnd()
 				} else {
-					pdf.SetXY(drawX-strOfs-strWd, drawY-halfTextSz)
+					drawX -= strWd / 2.0
+					if g.XLabelIn {
+						pdf.SetXY(drawX, drawY-textSz-strOfs)
+					} else {
+						pdf.SetXY(drawX, drawY+strOfs)
+					}
+					pdf.CellFormat(strWd, textSz, str, "", 0, "L", true, 0, "")
 				}
-				pdf.CellFormat(strWd, textSz, str, "", 0, "L", true, 0, "")
-				pdf.TransformEnd()
 			}
 		}
 
@@ -360,7 +371,7 @@ func (g GridType) Grid(pdf *Fpdf) {
 				// str = strconv.FormatFloat(y, 'f', g.yPrecision, 64)
 				str = g.YTickStr(y, g.yPrecision)
 				strWd = pdf.GetStringWidth(str)
-				if g.YInside {
+				if g.YLabelIn {
 					pdf.SetXY(drawX+strOfs, g.Y(y)-halfTextSz)
 				} else {
 					pdf.SetXY(lf-strOfs-strWd, g.Y(y)-halfTextSz)

@@ -2105,6 +2105,7 @@ func ExampleNewGrid() {
 	gr.Grid(pdf)
 
 	gr = gofpdf.NewGrid(13, 154, 187, 128)
+	gr.XLabelRotate = true
 	gr.TickmarksExtentX(0, 1, 12)
 	gr.XDiv = 5
 	gr.TickmarksContainY(0, 1.1)
@@ -2121,12 +2122,14 @@ func ExampleNewGrid() {
 	for month, val := range pts {
 		dot(float64(month)+0.5, val)
 	}
-	pdf.SetDrawColor(0, 0, 0)
-	pdf.SetLineWidth(0.1)
+	pdf.SetDrawColor(255, 64, 64)
+	pdf.SetAlpha(0.5, "Normal")
+	pdf.SetLineWidth(1.2)
 	gr.Plot(pdf, 0.5, 11.5, 50, func(x float64) float64 {
 		// http://www.xuru.org/rt/PR.asp
 		return 0.227 * math.Exp(-0.0373*x*x+0.471*x)
 	})
+	pdf.SetAlpha(1.0, "Normal")
 	pdf.SetXY(gr.X(0.5), gr.Y(1.35))
 	pdf.SetFontSize(14)
 	pdf.Write(0, "Solar energy (MWh) per month, 2016")
