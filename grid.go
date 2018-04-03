@@ -266,7 +266,7 @@ func (g GridType) Grid(pdf *Fpdf) {
 	var strOfs, strWd, tp, bt, lf, rt, drawX, drawY float64
 
 	textSz = pdf.PointToUnitConvert(g.TextSize)
-	halfTextSz = textSz / 4
+	halfTextSz = textSz / 2
 	strOfs = pdf.GetStringWidth("I")
 
 	xLen = len(g.xTicks)
