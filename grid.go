@@ -74,6 +74,8 @@ type GridType struct {
 	xm, xb, ym, yb float64
 	// Tickmarks
 	xTicks, yTicks []float64
+	// Labels are inside of graph boundary
+	XInside, YInside bool
 	// Formatters; use nil to eliminate labels
 	XTickStr, YTickStr TickFormatFncType
 	// Subdivisions between tickmarks
@@ -131,6 +133,8 @@ func NewGrid(x, y, w, h float64) (grid GridType) {
 	grid.TextSize = 7 // Points
 	grid.TickmarksExtentX(0, 1, 1)
 	grid.TickmarksExtentY(0, 1, 1)
+	grid.XInside = false
+	grid.YInside = false
 	grid.XDiv = 10
 	grid.YDiv = 10
 	grid.ClrText = RGBAType{R: 0, G: 0, B: 0, Alpha: 1}
@@ -262,9 +266,8 @@ func (g GridType) Grid(pdf *Fpdf) {
 	var strOfs, strWd, tp, bt, lf, rt, drawX, drawY float64
 
 	textSz = pdf.PointToUnitConvert(g.TextSize)
-	halfTextSz = textSz / 2
+	halfTextSz = textSz / 4
 	strOfs = pdf.GetStringWidth("I")
-	unused(strOfs)
 
 	xLen = len(g.xTicks)
 	yLen = len(g.yTicks)
@@ -333,14 +336,18 @@ func (g GridType) Grid(pdf *Fpdf) {
 
 		// X labels
 		if g.XTickStr != nil {
-			drawY = bt // g.Y(yMin)
+			drawY = bt
 			for _, x := range g.xTicks {
-				str = g.XTickStr(x, g.xPrecision) // strconv.FormatFloat(x, 'f', g.xPrecision, 64)
+				str = g.XTickStr(x, g.xPrecision)
 				strWd = pdf.GetStringWidth(str)
 				drawX = g.X(x)
 				pdf.TransformBegin()
 				pdf.TransformRotate(90, drawX, drawY)
-				pdf.SetXY(drawX+strOfs, drawY-halfTextSz)
+				if g.XInside {
+					pdf.SetXY(drawX+strOfs, drawY-halfTextSz)
+				} else {
+					pdf.SetXY(drawX-strOfs-strWd, drawY-halfTextSz)
+				}
 				pdf.CellFormat(strWd, textSz, str, "", 0, "L", true, 0, "")
 				pdf.TransformEnd()
 			}
@@ -348,12 +355,16 @@ func (g GridType) Grid(pdf *Fpdf) {
 
 		// Y labels
 		if g.YTickStr != nil {
-			drawX = lf + strOfs // g.X(xMin) + strOfs
+			drawX = lf
 			for _, y := range g.yTicks {
 				// str = strconv.FormatFloat(y, 'f', g.yPrecision, 64)
 				str = g.YTickStr(y, g.yPrecision)
 				strWd = pdf.GetStringWidth(str)
-				pdf.SetXY(drawX, g.Y(y)-halfTextSz)
+				if g.YInside {
+					pdf.SetXY(drawX+strOfs, g.Y(y)-halfTextSz)
+				} else {
+					pdf.SetXY(lf-strOfs-strWd, g.Y(y)-halfTextSz)
+				}
 				pdf.CellFormat(strWd, textSz, str, "", 0, "L", true, 0, "")
 			}
 		}

@@ -2099,12 +2099,12 @@ func ExampleNewGrid() {
 	pdf.SetFont("Arial", "", 12)
 	pdf.AddPage()
 
-	gr := gofpdf.NewGrid(10, 10, 190, 133)
+	gr := gofpdf.NewGrid(13, 10, 187, 130)
 	gr.TickmarksExtentX(0, 10, 4)
 	gr.TickmarksExtentY(0, 10, 3)
 	gr.Grid(pdf)
 
-	gr = gofpdf.NewGrid(10, 154, 190, 133)
+	gr = gofpdf.NewGrid(13, 154, 187, 128)
 	gr.TickmarksExtentX(0, 1, 12)
 	gr.XDiv = 5
 	gr.TickmarksContainY(0, 1.1)
@@ -2132,7 +2132,7 @@ func ExampleNewGrid() {
 	pdf.Write(0, "Solar energy (MWh) per month, 2016")
 	pdf.AddPage()
 
-	gr = gofpdf.NewGrid(10, 10, 190, 277)
+	gr = gofpdf.NewGrid(13, 10, 187, 274)
 	gr.TickmarksContainX(2.3, 3.4)
 	gr.TickmarksContainY(10.4, 56.8)
 	gr.Grid(pdf)
