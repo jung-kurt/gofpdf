@@ -186,6 +186,24 @@ func (g GridType) Y(dataY float64) float64 {
 	return g.ym*dataY + g.yb
 }
 
+// XRange returns the minimum and maximum values for the current tickmark
+// sequence. These correspond to the data values of the graph's left and right
+// edges.
+func (g GridType) XRange() (min, max float64) {
+	min = g.xTicks[0]
+	max = g.xTicks[len(g.xTicks)-1]
+	return
+}
+
+// YRange returns the minimum and maximum values for the current tickmark
+// sequence. These correspond to the data values of the graph's bottom and top
+// edges.
+func (g GridType) YRange() (min, max float64) {
+	min = g.yTicks[0]
+	max = g.yTicks[len(g.yTicks)-1]
+	return
+}
+
 // TickmarksContainX sets the tickmarks to be shown by Grid() in the horizontal
 // dimension. The argument min and max specify the minimum and maximum values
 // to be contained within the grid. The tickmark values that are generated are
