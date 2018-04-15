@@ -350,6 +350,15 @@ func (f *Fpdf) SetFontLoader(loader FontLoader) {
 	f.fontLoader = loader
 }
 
+// SetHeaderFuncMode sets the function that lets the application render the
+// page header. See SetHeaderFunc() for more details. The value for homeMode
+// should be set to true to have the current position set to the left and top
+// margin after the header function is called.
+func (f *Fpdf) SetHeaderFuncMode(fnc func(), homeMode bool) {
+	f.headerFnc = fnc
+	f.headerHomeMode = homeMode
+}
+
 // SetHeaderFunc sets the function that lets the application render the page
 // header. The specified function is automatically called by AddPage() and
 // should not be called directly by the application. The implementation in Fpdf
@@ -676,6 +685,9 @@ func (f *Fpdf) AddPageFormat(orientationStr string, size SizeType) {
 		f.inHeader = true
 		f.headerFnc()
 		f.inHeader = false
+		if f.headerHomeMode {
+			f.SetHomeXY()
+		}
 	}
 	// 	Restore line width
 	if f.lineWidth != lw {
@@ -2700,6 +2712,13 @@ func (f *Fpdf) SetY(y float64) {
 	} else {
 		f.y = f.h + y
 	}
+}
+
+// SetHomeXY is a convenience method that sets the current position to the left
+// and top margins.
+func (f *Fpdf) SetHomeXY() {
+	f.SetY(f.tMargin)
+	f.SetX(f.lMargin)
 }
 
 // SetXY defines the abscissa and ordinate of the current position. If the

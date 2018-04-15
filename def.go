@@ -321,6 +321,7 @@ type Fpdf struct {
 	pageBreakTrigger float64                   // threshold used to trigger page breaks
 	inHeader         bool                      // flag set when processing header
 	headerFnc        func()                    // function provided by app and called to write header
+	headerHomeMode   bool                      // set position to home after headerFnc is called
 	inFooter         bool                      // flag set when processing footer
 	footerFnc        func()                    // function provided by app and called to write footer
 	footerFncLpi     func(bool)                // function provided by app and called to write footer with last page flag
