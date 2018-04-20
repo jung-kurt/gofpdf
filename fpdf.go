@@ -2990,7 +2990,7 @@ func (f *Fpdf) parsepng(r io.Reader, readdpi bool) (info *ImageInfoType) {
 
 func (f *Fpdf) readBeInt32(r io.Reader) (val int32) {
 	err := binary.Read(r, binary.BigEndian, &val)
-	if err != nil {
+	if err != nil && err != io.EOF {
 		f.err = err
 	}
 	return
