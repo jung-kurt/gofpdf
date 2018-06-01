@@ -2819,6 +2819,11 @@ func (f *Fpdf) getpagesizestr(sizeStr string) (size SizeType) {
 	return
 }
 
+// GetPageSizeStr returns the SizeType for the given sizeStr (that is A4, A3, etc..)
+func (f *Fpdf) GetPageSizeStr(sizeStr string) (size SizeType) {
+	return f.getpagesizestr(sizeStr)
+}
+
 func (f *Fpdf) _getpagesize(size SizeType) SizeType {
 	if size.Wd > size.Ht {
 		size.Wd, size.Ht = size.Ht, size.Wd
