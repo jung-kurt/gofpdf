@@ -2421,7 +2421,7 @@ func (f *Fpdf) ImageTypeFromMime(mimeStr string) (tp string) {
 	return
 }
 
-func (f *Fpdf) imageOut(info *ImageInfoType, x, y, w, h float64, flow bool, link int, linkStr string) {
+func (f *Fpdf) imageOut(info *ImageInfoType, x, y, w, h float64, allowNegativeX, flow bool, link int, linkStr string) {
 	// Automatic width and height calculation if needed
 	if w == 0 && h == 0 {
 		// Put image at 96 dpi
@@ -2464,8 +2464,10 @@ func (f *Fpdf) imageOut(info *ImageInfoType, x, y, w, h float64, flow bool, link
 		y = f.y
 		f.y += h
 	}
-	if x < 0 {
-		x = f.x
+	if !allowNegativeX {
+		if x < 0 {
+			x = f.x
+		}
 	}
 	// dbg("h %.2f", h)
 	// q 85.04 0 0 NaN 28.35 NaN cm /I2 Do Q
@@ -2531,7 +2533,7 @@ func (f *Fpdf) ImageOptions(imageNameStr string, x, y, w, h float64, flow bool, 
 	if f.err != nil {
 		return
 	}
-	f.imageOut(info, x, y, w, h, flow, link, linkStr)
+	f.imageOut(info, x, y, w, h, options.AllowNegativePosition, flow, link, linkStr)
 	return
 }
 
@@ -2559,9 +2561,13 @@ func (f *Fpdf) RegisterImageReader(imgName, tp string, r io.Reader) (info *Image
 // to true (understanding that not all images will have this info
 // available). However, for backwards compatibility with previous
 // versions of the API, it defaults to false.
+//
+// AllowNegativePosition can be set to true in order to prevent the default
+// coercion of negative x values to the current x position.
 type ImageOptions struct {
-	ImageType string
-	ReadDpi   bool
+	ImageType             string
+	ReadDpi               bool
+	AllowNegativePosition bool
 }
 
 // RegisterImageOptionsReader registers an image, reading it from Reader r, adding it
