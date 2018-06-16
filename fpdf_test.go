@@ -716,7 +716,7 @@ func ExampleFpdf_Image() {
 
 // This example demonstrates how the AllowNegativePosition field of the
 // ImageOption struct can be used to affect horizontal image placement.
-func ExampleFpdf_ImageOption() {
+func ExampleFpdf_ImageOptions() {
 	var opt gofpdf.ImageOptions
 
 	pdf := gofpdf.New("P", "mm", "A4", "")
@@ -727,11 +727,11 @@ func ExampleFpdf_ImageOption() {
 	pdf.ImageOptions(example.ImageFile("logo.png"), -10, 10, 30, 0, false, opt, 0, "")
 	opt.AllowNegativePosition = true
 	pdf.ImageOptions(example.ImageFile("logo.png"), -10, 50, 30, 0, false, opt, 0, "")
-	fileStr := example.Filename("Fpdf_ImageOption")
+	fileStr := example.Filename("Fpdf_ImageOptions")
 	err := pdf.OutputFileAndClose(fileStr)
 	example.Summary(err, fileStr)
 	// Output:
-	// Successfully generated pdf/Fpdf_ImageOption.pdf
+	// Successfully generated pdf/Fpdf_ImageOptions.pdf
 }
 
 // This examples demonstrates Landscape mode with images.
