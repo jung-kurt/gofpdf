@@ -20,6 +20,11 @@ package barcode
 import (
 	"bytes"
 	"errors"
+	"image/jpeg"
+	"io"
+	"strconv"
+	"sync"
+
 	"github.com/boombuler/barcode"
 	"github.com/boombuler/barcode/aztec"
 	"github.com/boombuler/barcode/codabar"
@@ -31,10 +36,6 @@ import (
 	"github.com/boombuler/barcode/twooffive"
 	"github.com/jung-kurt/gofpdf"
 	"github.com/ruudk/golang-pdf417"
-	"image/jpeg"
-	"io"
-	"strconv"
-	"sync"
 )
 
 // barcodes represents the barcodes that have been registered through this
@@ -55,12 +56,9 @@ type barcodePdf interface {
 	SetError(err error)
 }
 
-// Barcode puts a registered barcode in the current page.
-//
-// The size should be specified in the units used to create the PDF document.
-//
-// Positioning with x, y and flow is inherited from Fpdf.Image().
-func Barcode(pdf barcodePdf, code string, x, y, w, h float64, flow bool) {
+// printBarcode internally prints the scaled or unscaled barcode to the PDF. Used by both
+// Barcode() and BarcodeUnscalable().
+func printBarcode(pdf barcodePdf, code string, x, y float64, w, h *float64, flow bool) {
 	barcodes.Lock()
 	unscaled, ok := barcodes.cache[code]
 	barcodes.Unlock()
@@ -75,10 +73,18 @@ func Barcode(pdf barcodePdf, code string, x, y, w, h float64, flow bool) {
 	info := pdf.GetImageInfo(bname)
 
 	if info == nil {
+		scaleToWidth := unscaled.Bounds().Dx()
+		scaleToHeight := unscaled.Bounds().Dy()
+		if w != nil {
+			scaleToWidth = int(convertTo96Dpi(pdf, *w))
+		}
+		if h != nil {
+			scaleToHeight = int(convertTo96Dpi(pdf, *h))
+		}
 		bcode, err := barcode.Scale(
 			unscaled,
-			int(convertTo96Dpi(pdf, w)),
-			int(convertTo96Dpi(pdf, h)),
+			scaleToWidth,
+			scaleToHeight,
 		)
 
 		if err != nil {
@@ -94,6 +100,43 @@ func Barcode(pdf barcodePdf, code string, x, y, w, h float64, flow bool) {
 	}
 
 	pdf.Image(bname, x, y, 0, 0, flow, "jpg", 0, "")
+
+}
+
+// BarcodeUnscalable puts a registered barcode in the current page.
+//
+// Its arguments work in the same way as that of Barcode(). However, it allows for an unscaled
+// barcode in the width and/or height dimensions. This can be useful if you want to prevent
+// side effects of upscaling.
+func BarcodeUnscalable(pdf barcodePdf, code string, x, y float64, w, h *float64, flow bool) {
+	printBarcode(pdf, code, x, y, w, h, flow)
+}
+
+// Barcode puts a registered barcode in the current page.
+//
+// The size should be specified in the units used to create the PDF document.
+// If width or height are left unspecfied, the barcode is not scaled in the unspecified dimensions.
+//
+// Positioning with x, y and flow is inherited from Fpdf.Image().
+func Barcode(pdf barcodePdf, code string, x, y, w, h float64, flow bool) {
+	printBarcode(pdf, code, x, y, &w, &h, flow)
+}
+
+// GetUnscaledBarcodeDimensions returns the width and height of the
+// unscaled barcode associated with the given code.
+func GetUnscaledBarcodeDimensions(pdf barcodePdf, code string) (w, h float64) {
+	barcodes.Lock()
+	unscaled, ok := barcodes.cache[code]
+	barcodes.Unlock()
+
+	if !ok {
+		err := errors.New("Barcode not found")
+		pdf.SetError(err)
+		return
+	}
+
+	return convertFrom96Dpi(pdf, float64(unscaled.Bounds().Dx())),
+		convertFrom96Dpi(pdf, float64(unscaled.Bounds().Dy()))
 }
 
 // Register registers a barcode but does not put it on the page. Use Barcode()
@@ -197,6 +240,7 @@ func RegisterTwoOfFive(pdf barcodePdf, code string, interleaved bool) string {
 func registerBarcode(pdf barcodePdf, bcode barcode.Barcode, err error) string {
 	if err != nil {
 		pdf.SetError(err)
+		return ""
 	}
 
 	return Register(bcode)
@@ -245,4 +289,10 @@ func registerScaledBarcode(pdf barcodePdf, code string, bcode barcode.Barcode) e
 // could be problematic for barcode scanners.
 func convertTo96Dpi(pdf barcodePdf, value float64) float64 {
 	return value * pdf.GetConversionRatio() / 72 * 96
+}
+
+// convertFrom96Dpi converts the given value, which is based on a 96 DPI value
+// required for an Image, to a 72 DPI value like the rest of the PDF document.
+func convertFrom96Dpi(pdf barcodePdf, value float64) float64 {
+	return value / pdf.GetConversionRatio() * 72 / 96
 }

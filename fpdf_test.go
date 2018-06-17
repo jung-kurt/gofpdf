@@ -28,6 +28,8 @@ import (
 	"path/filepath"
 	"strconv"
 	"strings"
+	"testing"
+	"time"
 
 	"github.com/jung-kurt/gofpdf"
 	"github.com/jung-kurt/gofpdf/internal/example"
@@ -55,6 +57,91 @@ func cleanup() {
 		})
 }
 
+// TestIssue0116 addresses issue 116 in which library silently fails after
+// calling CellFormat when no font has been set.
+func TestIssue0116(t *testing.T) {
+	var pdf *gofpdf.Fpdf
+
+	pdf = gofpdf.New("P", "mm", "A4", "")
+	pdf.AddPage()
+	pdf.SetFont("Arial", "B", 16)
+	pdf.Cell(40, 10, "OK")
+	if pdf.Error() != nil {
+		t.Fatalf("not expecting error when rendering text")
+	}
+
+	pdf = gofpdf.New("P", "mm", "A4", "")
+	pdf.AddPage()
+	pdf.Cell(40, 10, "Not OK") // Font not set
+	if pdf.Error() == nil {
+		t.Fatalf("expecting error when rendering text without having set font")
+	}
+}
+
+// Test to make sure the footer is not call twice and SetFooterFuncLpi can work
+// without SetFooterFunc.
+func TestFooterFuncLpi(t *testing.T) {
+	pdf := gofpdf.New("P", "mm", "A4", "")
+	var (
+		oldFooterFnc  = "oldFooterFnc"
+		bothPages     = "bothPages"
+		firstPageOnly = "firstPageOnly"
+		lastPageOnly  = "lastPageOnly"
+	)
+
+	// This set just for testing, only set SetFooterFuncLpi.
+	pdf.SetFooterFunc(func() {
+		pdf.SetY(-15)
+		pdf.SetFont("Arial", "I", 8)
+		pdf.CellFormat(0, 10, oldFooterFnc,
+			"", 0, "C", false, 0, "")
+	})
+	pdf.SetFooterFuncLpi(func(lastPage bool) {
+		pdf.SetY(-15)
+		pdf.SetFont("Arial", "I", 8)
+		pdf.CellFormat(0, 10, bothPages, "", 0, "L", false, 0, "")
+		if !lastPage {
+			pdf.CellFormat(0, 10, firstPageOnly, "", 0, "C", false, 0, "")
+		} else {
+			pdf.CellFormat(0, 10, lastPageOnly, "", 0, "C", false, 0, "")
+		}
+	})
+	pdf.AddPage()
+	pdf.SetFont("Arial", "B", 16)
+	for j := 1; j <= 40; j++ {
+		pdf.CellFormat(0, 10, fmt.Sprintf("Printing line number %d", j),
+			"", 1, "", false, 0, "")
+	}
+	if pdf.Error() != nil {
+		t.Fatalf("not expecting error when rendering text")
+	}
+	w := &bytes.Buffer{}
+	if err := pdf.Output(w); err != nil {
+		t.Errorf("unexpected err: %s", err)
+	}
+	b := w.Bytes()
+	if bytes.Contains(b, []byte(oldFooterFnc)) {
+		t.Errorf("not expecting %s render on pdf when FooterFncLpi is set", oldFooterFnc)
+	}
+	got := bytes.Count(b, []byte("bothPages"))
+	if got != 2 {
+		t.Errorf("footer %s should render on two page got:%d", bothPages, got)
+	}
+	got = bytes.Count(b, []byte(firstPageOnly))
+	if got != 1 {
+		t.Errorf("footer %s should render only on first page got: %d", firstPageOnly, got)
+	}
+	got = bytes.Count(b, []byte(lastPageOnly))
+	if got != 1 {
+		t.Errorf("footer %s should render only on first page got: %d", lastPageOnly, got)
+	}
+	f := bytes.Index(b, []byte(firstPageOnly))
+	l := bytes.Index(b, []byte(lastPageOnly))
+	if f > l {
+		t.Errorf("index %d (%s) should less than index %d (%s)", f, firstPageOnly, l, lastPageOnly)
+	}
+}
+
 type fontResourceType struct {
 }
 
@@ -78,13 +165,21 @@ func strDelimit(str string, sepstr string, sepcount int) string {
 	return str
 }
 
+func loremList() []string {
+	return []string{
+		"Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod " +
+			"tempor incididunt ut labore et dolore magna aliqua.",
+		"Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut " +
+			"aliquip ex ea commodo consequat.",
+		"Duis aute irure dolor in reprehenderit in voluptate velit esse cillum " +
+			"dolore eu fugiat nulla pariatur.",
+		"Excepteur sint occaecat cupidatat non proident, sunt in culpa qui " +
+			"officia deserunt mollit anim id est laborum.",
+	}
+}
+
 func lorem() string {
-	return "Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod " +
-		"tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis " +
-		"nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis " +
-		"aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat " +
-		"nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui " +
-		"officia deserunt mollit anim id est laborum."
+	return strings.Join(loremList(), " ")
 }
 
 // This example demonstrates the generation of a simple PDF document. Note that
@@ -97,7 +192,7 @@ func lorem() string {
 // finally retrieved with the output call where it can be handled by the
 // application.
 func Example() {
-	pdf := gofpdf.New("P", "mm", "A4", "")
+	pdf := gofpdf.New(gofpdf.OrientationPortrait, "mm", "A4", "")
 	pdf.AddPage()
 	pdf.SetFont("Arial", "B", 16)
 	pdf.Cell(40, 10, "Hello World!")
@@ -111,14 +206,15 @@ func Example() {
 // This example demonsrates the generation of headers, footers and page breaks.
 func ExampleFpdf_AddPage() {
 	pdf := gofpdf.New("P", "mm", "A4", "")
-	pdf.SetHeaderFunc(func() {
+	pdf.SetTopMargin(30)
+	pdf.SetHeaderFuncMode(func() {
 		pdf.Image(example.ImageFile("logo.png"), 10, 6, 30, 0, false, "", 0, "")
 		pdf.SetY(5)
 		pdf.SetFont("Arial", "B", 15)
 		pdf.Cell(80, 0, "")
 		pdf.CellFormat(30, 10, "Title", "1", 0, "C", false, 0, "")
 		pdf.Ln(20)
-	})
+	}, true)
 	pdf.SetFooterFunc(func() {
 		pdf.SetY(-15)
 		pdf.SetFont("Arial", "I", 8)
@@ -319,6 +415,87 @@ func ExampleFpdf_SetLeftMargin() {
 	example.Summary(err, fileStr)
 	// Output:
 	// Successfully generated pdf/Fpdf_SetLeftMargin_multicolumn.pdf
+}
+
+// This example demonstrates word-wrapped table cells
+func ExampleFpdf_SplitLines_tables() {
+	const (
+		colCount = 3
+		colWd    = 60.0
+		marginH  = 15.0
+		lineHt   = 5.5
+		cellGap  = 2.0
+	)
+	// var colStrList [colCount]string
+	type cellType struct {
+		str  string
+		list [][]byte
+		ht   float64
+	}
+	var (
+		cellList [colCount]cellType
+		cell     cellType
+	)
+
+	pdf := gofpdf.New("P", "mm", "A4", "") // 210 x 297
+	header := [colCount]string{"Column A", "Column B", "Column C"}
+	alignList := [colCount]string{"L", "C", "R"}
+	strList := loremList()
+	pdf.SetMargins(marginH, 15, marginH)
+	pdf.SetFont("Arial", "", 14)
+	pdf.AddPage()
+
+	// Headers
+	pdf.SetTextColor(224, 224, 224)
+	pdf.SetFillColor(64, 64, 64)
+	for colJ := 0; colJ < colCount; colJ++ {
+		pdf.CellFormat(colWd, 10, header[colJ], "1", 0, "CM", true, 0, "")
+	}
+	pdf.Ln(-1)
+	pdf.SetTextColor(24, 24, 24)
+	pdf.SetFillColor(255, 255, 255)
+
+	// Rows
+	y := pdf.GetY()
+	count := 0
+	for rowJ := 0; rowJ < 2; rowJ++ {
+		maxHt := lineHt
+		// Cell height calculation loop
+		for colJ := 0; colJ < colCount; colJ++ {
+			count++
+			if count > len(strList) {
+				count = 1
+			}
+			cell.str = strings.Join(strList[0:count], " ")
+			cell.list = pdf.SplitLines([]byte(cell.str), colWd-cellGap-cellGap)
+			cell.ht = float64(len(cell.list)) * lineHt
+			if cell.ht > maxHt {
+				maxHt = cell.ht
+			}
+			cellList[colJ] = cell
+		}
+		// Cell render loop
+		x := marginH
+		for colJ := 0; colJ < colCount; colJ++ {
+			pdf.Rect(x, y, colWd, maxHt+cellGap+cellGap, "D")
+			cell = cellList[colJ]
+			cellY := y + cellGap + (maxHt-cell.ht)/2
+			for splitJ := 0; splitJ < len(cell.list); splitJ++ {
+				pdf.SetXY(x+cellGap, cellY)
+				pdf.CellFormat(colWd-cellGap-cellGap, lineHt, string(cell.list[splitJ]), "", 0,
+					alignList[colJ], false, 0, "")
+				cellY += lineHt
+			}
+			x += colWd
+		}
+		y += maxHt + cellGap + cellGap
+	}
+
+	fileStr := example.Filename("Fpdf_SplitLines_tables")
+	err := pdf.OutputFileAndClose(fileStr)
+	example.Summary(err, fileStr)
+	// Output:
+	// Successfully generated pdf/Fpdf_SplitLines_tables.pdf
 }
 
 // This example demonstrates various table styles.
@@ -535,6 +712,26 @@ func ExampleFpdf_Image() {
 	example.Summary(err, fileStr)
 	// Output:
 	// Successfully generated pdf/Fpdf_Image.pdf
+}
+
+// This example demonstrates how the AllowNegativePosition field of the
+// ImageOption struct can be used to affect horizontal image placement.
+func ExampleFpdf_ImageOptions() {
+	var opt gofpdf.ImageOptions
+
+	pdf := gofpdf.New("P", "mm", "A4", "")
+	pdf.AddPage()
+	pdf.SetFont("Arial", "", 11)
+	pdf.SetX(60)
+	opt.ImageType = "png"
+	pdf.ImageOptions(example.ImageFile("logo.png"), -10, 10, 30, 0, false, opt, 0, "")
+	opt.AllowNegativePosition = true
+	pdf.ImageOptions(example.ImageFile("logo.png"), -10, 50, 30, 0, false, opt, 0, "")
+	fileStr := example.Filename("Fpdf_ImageOptions")
+	err := pdf.OutputFileAndClose(fileStr)
+	example.Summary(err, fileStr)
+	// Output:
+	// Successfully generated pdf/Fpdf_ImageOptions.pdf
 }
 
 // This examples demonstrates Landscape mode with images.
@@ -1856,4 +2053,117 @@ func ExampleFpdf_Rect() {
 	example.Summary(err, fileStr)
 	// Output:
 	// Successfully generated pdf/Fpdf_WrappedTableCells.pdf
+}
+
+// This example demonstrates including JavaScript in the document.
+func ExampleFpdf_SetJavascript() {
+	pdf := gofpdf.New("P", "mm", "A4", "")
+	pdf.SetJavascript("print(true);")
+	pdf.AddPage()
+	pdf.SetFont("Arial", "", 12)
+	pdf.Write(10, "Auto-print.")
+	fileStr := example.Filename("Fpdf_SetJavascript")
+	err := pdf.OutputFileAndClose(fileStr)
+	example.Summary(err, fileStr)
+	// Output:
+	// Successfully generated pdf/Fpdf_SetJavascript.pdf
+}
+
+// This example demonstrates spot color use
+func ExampleFpdf_AddSpotColor() {
+	pdf := gofpdf.New("P", "mm", "A4", "")
+	pdf.AddSpotColor("PANTONE 145 CVC", 0, 42, 100, 25)
+	pdf.AddPage()
+	pdf.SetFillSpotColor("PANTONE 145 CVC", 90)
+	pdf.Rect(80, 40, 50, 50, "F")
+	fileStr := example.Filename("Fpdf_AddSpotColor")
+	err := pdf.OutputFileAndClose(fileStr)
+	example.Summary(err, fileStr)
+	// Output:
+	// Successfully generated pdf/Fpdf_AddSpotColor.pdf
+}
+
+// This example demonstrates how to use `RegisterAlias` to create a table of
+// contents.
+func ExampleFpdf_RegisterAlias() {
+	pdf := gofpdf.New("P", "mm", "A4", "")
+	pdf.SetFont("Arial", "", 12)
+	pdf.AddPage()
+
+	// Write the table of contents. We use aliases instead of the page number
+	// because we don't know which page the section will begin on.
+	numSections := 3
+	for i := 1; i <= numSections; i++ {
+		pdf.Cell(0, 10, fmt.Sprintf("Section %d begins on page {%d}", i, i))
+		pdf.Ln(10)
+	}
+
+	// Write the sections. Before we start writing, we use `RegisterAlias` to
+	// ensure that the alias written in the table of contents will be replaced
+	// by the current page number.
+	for i := 1; i <= numSections; i++ {
+		pdf.AddPage()
+		pdf.RegisterAlias(fmt.Sprintf("{%d}", i), fmt.Sprintf("%d", pdf.PageNo()))
+		pdf.Write(10, fmt.Sprintf("Section %d", i))
+	}
+
+	fileStr := example.Filename("Fpdf_RegisterAlias")
+	err := pdf.OutputFileAndClose(fileStr)
+	example.Summary(err, fileStr)
+	// Output:
+	// Successfully generated pdf/Fpdf_RegisterAlias.pdf
+}
+
+// This example demonstrates the generation of graph grids.
+func ExampleNewGrid() {
+	pdf := gofpdf.New("P", "mm", "A4", "")
+	pdf.SetFont("Arial", "", 12)
+	pdf.AddPage()
+
+	gr := gofpdf.NewGrid(13, 10, 187, 130)
+	gr.TickmarksExtentX(0, 10, 4)
+	gr.TickmarksExtentY(0, 10, 3)
+	gr.Grid(pdf)
+
+	gr = gofpdf.NewGrid(13, 154, 187, 128)
+	gr.XLabelRotate = true
+	gr.TickmarksExtentX(0, 1, 12)
+	gr.XDiv = 5
+	gr.TickmarksContainY(0, 1.1)
+	gr.YDiv = 20
+	// Replace X label formatter with month abbreviation
+	gr.XTickStr = func(val float64, precision int) string {
+		return time.Month(math.Mod(val, 12) + 1).String()[0:3]
+	}
+	gr.Grid(pdf)
+	dot := func(x, y float64) {
+		pdf.Circle(gr.X(x), gr.Y(y), 0.5, "F")
+	}
+	pts := []float64{0.39, 0.457, 0.612, 0.84, 0.998, 1.037, 1.015, 0.918, 0.772, 0.659, 0.593, 0.164}
+	for month, val := range pts {
+		dot(float64(month)+0.5, val)
+	}
+	pdf.SetDrawColor(255, 64, 64)
+	pdf.SetAlpha(0.5, "Normal")
+	pdf.SetLineWidth(1.2)
+	gr.Plot(pdf, 0.5, 11.5, 50, func(x float64) float64 {
+		// http://www.xuru.org/rt/PR.asp
+		return 0.227 * math.Exp(-0.0373*x*x+0.471*x)
+	})
+	pdf.SetAlpha(1.0, "Normal")
+	pdf.SetXY(gr.X(0.5), gr.Y(1.35))
+	pdf.SetFontSize(14)
+	pdf.Write(0, "Solar energy (MWh) per month, 2016")
+	pdf.AddPage()
+
+	gr = gofpdf.NewGrid(13, 10, 187, 274)
+	gr.TickmarksContainX(2.3, 3.4)
+	gr.TickmarksContainY(10.4, 56.8)
+	gr.Grid(pdf)
+
+	fileStr := example.Filename("Fpdf_Grid")
+	err := pdf.OutputFileAndClose(fileStr)
+	example.Summary(err, fileStr)
+	// Output:
+	// Successfully generated pdf/Fpdf_Grid.pdf
 }

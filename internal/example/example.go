@@ -104,7 +104,7 @@ func referenceCompare(fileStr string) (err error) {
 	err = os.MkdirAll(refDirStr, 0755)
 	if err == nil {
 		refFileStr = filepath.Join(refDirStr, baseFileStr)
-		err = gofpdf.ComparePDFFiles(fileStr, refFileStr)
+		err = gofpdf.ComparePDFFiles(fileStr, refFileStr, false)
 	}
 	return
 }
@@ -114,6 +114,22 @@ func referenceCompare(fileStr string) (err error) {
 // filename printed to standard output with a success message. If the specified
 // error is not nil, its String() value is printed to standard output.
 func Summary(err error, fileStr string) {
+	if err == nil {
+		fileStr = filepath.ToSlash(fileStr)
+		fmt.Printf("Successfully generated %s\n", fileStr)
+	} else {
+		fmt.Println(err)
+	}
+}
+
+// SummaryCompare generates a predictable report for use by test examples. If
+// the specified error is nil, the generated file is compared with a reference
+// copy for byte-for-byte equality. If the files match, then the filename
+// delimiters are normalized and the filename printed to standard output with a
+// success message. If the files do not match, this condition is reported on
+// standard output. If the specified error is not nil, its String() value is
+// printed to standard output.
+func SummaryCompare(err error, fileStr string) {
 	if err == nil {
 		err = referenceCompare(fileStr)
 	}

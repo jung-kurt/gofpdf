@@ -4,7 +4,7 @@
 autoreadme -f -template README.md.template
 # Improve the appearance of the markdown document with features unavailable in godoc
 cat README.md | tr '\n' '\v' | sed \
-  -e 's/\v##\([^\v]*\)/\v##\1\v\v/g' \
+  -e 's/\v##\([^\v]*\)/\v## \1\v\v/g' \
   -e 's/\v• /* /g' \
   -e 's/\(http:\/\/www\.google\.com\/fonts\/\)/[Google Fonts](\1)/g' \
   -e 's/\(http:\/\/dejavu-fonts\.org\/\)/[DejaVu Fonts](\1)/g' \
@@ -18,5 +18,6 @@ cat README.md | tr '\n' '\v' | sed \
   -e 's/test.coverage.(\(https:\/\/blog\.golang\.org\/cover\))/[test coverage](\1)/g' \
   -e 's/Pull.requests.(\(https:\/\/help\.github\.com\/articles\/using\-pull\-requests\/\))/[Pull requests](\1)/g' \
   -e 's/Your change should\v/Your change should\v\v/g' \
+  -e 's/issue 109/[issue 109](https:\/\/github.com\/jung-kurt\/gofpdf\/issues\/109)/g' \
   | tr '\v' '\n' > _0 
 mv _0 README.md

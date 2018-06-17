@@ -59,7 +59,9 @@ func (b *fmtBuffer) printf(fmtStr string, args ...interface{}) {
 func fpdfNew(orientationStr, unitStr, sizeStr, fontDirStr string, size SizeType) (f *Fpdf) {
 	f = new(Fpdf)
 	if orientationStr == "" {
-		orientationStr = "P"
+		orientationStr = "p"
+	} else {
+		orientationStr = strings.ToLower(orientationStr)
 	}
 	if unitStr == "" {
 		unitStr = "mm"
@@ -86,6 +88,7 @@ func fpdfNew(orientationStr, unitStr, sizeStr, fontDirStr string, size SizeType)
 	f.pageLinks = append(f.pageLinks, make([]linkType, 0, 0)) // pageLinks[0] is unused (1-based)
 	f.links = make([]intLinkType, 0, 8)
 	f.links = append(f.links, intLinkType{}) // links[0] is unused (1-based)
+	f.aliasMap = make(map[string]string)
 	f.inHeader = false
 	f.inFooter = false
 	f.lasth = 0
@@ -93,9 +96,9 @@ func fpdfNew(orientationStr, unitStr, sizeStr, fontDirStr string, size SizeType)
 	f.fontStyle = ""
 	f.SetFontSize(12)
 	f.underline = false
-	f.SetDrawColor(0, 0, 0)
-	f.SetFillColor(0, 0, 0)
-	f.SetTextColor(0, 0, 0)
+	f.setDrawColor(0, 0, 0)
+	f.setFillColor(0, 0, 0)
+	f.setTextColor(0, 0, 0)
 	f.colorFlag = false
 	f.ws = 0
 	f.fontpath = fontDirStr
@@ -132,6 +135,7 @@ func fpdfNew(orientationStr, unitStr, sizeStr, fontDirStr string, size SizeType)
 	f.stdPageSizes["a1"] = SizeType{1683.78, 2383.94}
 	f.stdPageSizes["letter"] = SizeType{612, 792}
 	f.stdPageSizes["legal"] = SizeType{612, 1008}
+	f.stdPageSizes["tabloid"] = SizeType{792, 1224}
 	if size.Wd > 0 && size.Ht > 0 {
 		f.defPageSize = size
 	} else {
@@ -142,7 +146,6 @@ func fpdfNew(orientationStr, unitStr, sizeStr, fontDirStr string, size SizeType)
 	}
 	f.curPageSize = f.defPageSize
 	// Page orientation
-	orientationStr = strings.ToLower(orientationStr)
 	switch orientationStr {
 	case "p", "portrait":
 		f.defOrientation = "P"
@@ -179,6 +182,7 @@ func fpdfNew(orientationStr, unitStr, sizeStr, fontDirStr string, size SizeType)
 	}
 	// Enable compression
 	f.SetCompression(!gl.noCompress)
+	f.spotColorMap = make(map[string]spotColorType)
 	f.blendList = make([]blendModeType, 0, 8)
 	f.blendList = append(f.blendList, blendModeType{}) // blendList[0] is unused (1-based)
 	f.blendMap = make(map[string]int)
@@ -215,7 +219,7 @@ func NewCustom(init *InitType) (f *Fpdf) {
 // string will be replaced with "mm".
 //
 // sizeStr specifies the page size. Acceptable values are "A3", "A4", "A5",
-// "Letter", or "Legal". An empty string will be replaced with "A4".
+// "Letter", "Legal", or "Tabloid". An empty string will be replaced with "A4".
 //
 // fontDirStr specifies the file system location in which font resources will
 // be found. An empty string is replaced with ".". This argument only needs to
@@ -346,6 +350,15 @@ func (f *Fpdf) SetFontLoader(loader FontLoader) {
 	f.fontLoader = loader
 }
 
+// SetHeaderFuncMode sets the function that lets the application render the
+// page header. See SetHeaderFunc() for more details. The value for homeMode
+// should be set to true to have the current position set to the left and top
+// margin after the header function is called.
+func (f *Fpdf) SetHeaderFuncMode(fnc func(), homeMode bool) {
+	f.headerFnc = fnc
+	f.headerHomeMode = homeMode
+}
+
 // SetHeaderFunc sets the function that lets the application render the page
 // header. The specified function is automatically called by AddPage() and
 // should not be called directly by the application. The implementation in Fpdf
@@ -363,11 +376,25 @@ func (f *Fpdf) SetHeaderFunc(fnc func()) {
 // Close() and should not be called directly by the application. The
 // implementation in Fpdf is empty, so you have to provide an appropriate
 // function if you want page footers. fnc will typically be a closure that has
-// access to the Fpdf instance and other document generation variables.
+// access to the Fpdf instance and other document generation variables. See
+// SetFooterFuncLpi for a similar function that passes a last page indicator.
 //
 // This method is demonstrated in the example for AddPage().
 func (f *Fpdf) SetFooterFunc(fnc func()) {
 	f.footerFnc = fnc
+	f.footerFncLpi = nil
+}
+
+// SetFooterFuncLpi sets the function that lets the application render the page
+// footer. The specified function is automatically called by AddPage() and
+// Close() and should not be called directly by the application. It is passed a
+// boolean that is true if the last page of the document is being rendered. The
+// implementation in Fpdf is empty, so you have to provide an appropriate
+// function if you want page footers. fnc will typically be a closure that has
+// access to the Fpdf instance and other document generation variables.
+func (f *Fpdf) SetFooterFuncLpi(fnc func(lastPage bool)) {
+	f.footerFncLpi = fnc
+	f.footerFnc = nil
 }
 
 // SetTopMargin defines the top margin. The method can be called before
@@ -380,6 +407,15 @@ func (f *Fpdf) SetTopMargin(margin float64) {
 // creating the first page.
 func (f *Fpdf) SetRightMargin(margin float64) {
 	f.rMargin = margin
+}
+
+// GetAutoPageBreak returns true if automatic pages breaks are enabled, false
+// otherwise. This is followed by the triggering limit from the bottom of the
+// page. This value applies only if automatic page breaks are enabled.
+func (f *Fpdf) GetAutoPageBreak() (auto bool, margin float64) {
+	auto = f.autoPageBreak
+	margin = f.bMargin
+	return
 }
 
 // SetAutoPageBreak enables or disables the automatic page breaking mode. When
@@ -496,6 +532,11 @@ func (f *Fpdf) SetCreator(creatorStr string, isUTF8 bool) {
 	f.creator = creatorStr
 }
 
+// SetXmpMetadata defines XMP metadata that will be embedded with the document.
+func (f *Fpdf) SetXmpMetadata(xmpStream []byte) {
+	f.xmp = xmpStream
+}
+
 // AliasNbPages defines an alias for the total number of pages. It will be
 // substituted as the document is closed. An empty string is replaced with the
 // string "{nb}".
@@ -538,11 +579,14 @@ func (f *Fpdf) Close() {
 		}
 	}
 	// Page footer
+	f.inFooter = true
 	if f.footerFnc != nil {
-		f.inFooter = true
 		f.footerFnc()
-		f.inFooter = false
+	} else if f.footerFncLpi != nil {
+		f.footerFncLpi(true)
 	}
+	f.inFooter = false
+
 	// Close page
 	f.endpage()
 	// Close document
@@ -592,12 +636,15 @@ func (f *Fpdf) AddPageFormat(orientationStr string, size SizeType) {
 	tc := f.color.text
 	cf := f.colorFlag
 	if f.page > 0 {
-		// Page footer
+		f.inFooter = true
+		// Page footer avoid double call on footer.
 		if f.footerFnc != nil {
-			f.inFooter = true
 			f.footerFnc()
-			f.inFooter = false
+
+		} else if f.footerFncLpi != nil {
+			f.footerFncLpi(false) // not last page.
 		}
+		f.inFooter = false
 		// Close page
 		f.endpage()
 	}
@@ -638,6 +685,9 @@ func (f *Fpdf) AddPageFormat(orientationStr string, size SizeType) {
 		f.inHeader = true
 		f.headerFnc()
 		f.inHeader = false
+		if f.headerHomeMode {
+			f.SetHomeXY()
+		}
 	}
 	// 	Restore line width
 	if f.lineWidth != lw {
@@ -695,13 +745,6 @@ func (f *Fpdf) PageNo() int {
 	return f.page
 }
 
-type clrType struct {
-	r, g, b    float64
-	ir, ig, ib int
-	gray       bool
-	str        string
-}
-
 func colorComp(v int) (int, float64) {
 	if v < 0 {
 		v = 0
@@ -711,10 +754,11 @@ func colorComp(v int) (int, float64) {
 	return v, float64(v) / 255.0
 }
 
-func colorValue(r, g, b int, grayStr, fullStr string) (clr clrType) {
+func rgbColorValue(r, g, b int, grayStr, fullStr string) (clr colorType) {
 	clr.ir, clr.r = colorComp(r)
 	clr.ig, clr.g = colorComp(g)
 	clr.ib, clr.b = colorComp(b)
+	clr.mode = colorModeRGB
 	clr.gray = clr.ir == clr.ig && clr.r == clr.b
 	if len(grayStr) > 0 {
 		if clr.gray {
@@ -733,13 +777,21 @@ func colorValue(r, g, b int, grayStr, fullStr string) (clr clrType) {
 // The method can be called before the first page is created. The value is
 // retained from page to page.
 func (f *Fpdf) SetDrawColor(r, g, b int) {
-	f.color.draw = colorValue(r, g, b, "G", "RG")
+	if r != f.color.draw.ir || g != f.color.draw.ig || b != f.color.draw.ib {
+		f.setDrawColor(r, g, b)
+	}
+}
+
+func (f *Fpdf) setDrawColor(r, g, b int) {
+	f.color.draw = rgbColorValue(r, g, b, "G", "RG")
 	if f.page > 0 {
 		f.out(f.color.draw.str)
 	}
 }
 
-// GetDrawColor returns the current draw color as RGB components (0 - 255).
+// GetDrawColor returns the most recently set draw color as RGB components (0 -
+// 255). This will not be the current value if a draw color of some other type
+// (for example, spot) has been more recently set.
 func (f *Fpdf) GetDrawColor() (int, int, int) {
 	return f.color.draw.ir, f.color.draw.ig, f.color.draw.ib
 }
@@ -749,14 +801,22 @@ func (f *Fpdf) GetDrawColor() (int, int, int) {
 // -255). The method can be called before the first page is created and the
 // value is retained from page to page.
 func (f *Fpdf) SetFillColor(r, g, b int) {
-	f.color.fill = colorValue(r, g, b, "g", "rg")
+	if r != f.color.fill.ir || g != f.color.fill.ig || b != f.color.fill.ib {
+		f.setFillColor(r, g, b)
+	}
+}
+
+func (f *Fpdf) setFillColor(r, g, b int) {
+	f.color.fill = rgbColorValue(r, g, b, "g", "rg")
 	f.colorFlag = f.color.fill.str != f.color.text.str
 	if f.page > 0 {
 		f.out(f.color.fill.str)
 	}
 }
 
-// GetFillColor returns the current fill color as RGB components (0 - 255).
+// GetFillColor returns the most recently set fill color as RGB components (0 -
+// 255). This will not be the current value if a fill color of some other type
+// (for example, spot) has been more recently set.
 func (f *Fpdf) GetFillColor() (int, int, int) {
 	return f.color.fill.ir, f.color.fill.ig, f.color.fill.ib
 }
@@ -765,11 +825,19 @@ func (f *Fpdf) GetFillColor() (int, int, int) {
 // components (0 - 255). The method can be called before the first page is
 // created. The value is retained from page to page.
 func (f *Fpdf) SetTextColor(r, g, b int) {
-	f.color.text = colorValue(r, g, b, "g", "rg")
+	if r != f.color.text.ir || g != f.color.text.ig || b != f.color.text.ib {
+		f.setTextColor(r, g, b)
+	}
+}
+
+func (f *Fpdf) setTextColor(r, g, b int) {
+	f.color.text = rgbColorValue(r, g, b, "g", "rg")
 	f.colorFlag = f.color.fill.str != f.color.text.str
 }
 
-// GetTextColor returns the current text color as RGB components (0 - 255).
+// GetTextColor returns the most recently set text color as RGB components (0 -
+// 255). This will not be the current value if a text color of some other type
+// (for example, spot) has been more recently set.
 func (f *Fpdf) GetTextColor() (int, int, int) {
 	return f.color.text.ir, f.color.text.ig, f.color.text.ib
 }
@@ -794,6 +862,12 @@ func (f *Fpdf) GetStringWidth(s string) float64 {
 // The method can be called before the first page is created. The value is
 // retained from page to page.
 func (f *Fpdf) SetLineWidth(width float64) {
+	if f.lineWidth != width {
+		f.setLineWidth(width)
+	}
+}
+
+func (f *Fpdf) setLineWidth(width float64) {
 	f.lineWidth = width
 	if f.page > 0 {
 		f.outf("%.2f w", width*f.k)
@@ -1157,8 +1231,8 @@ func (f *Fpdf) gradientClipEnd() {
 
 func (f *Fpdf) gradient(tp int, r1, g1, b1 int, r2, g2, b2 int, x1, y1 float64, x2, y2 float64, r float64) {
 	pos := len(f.gradientList)
-	clr1 := colorValue(r1, g1, b1, "", "")
-	clr2 := colorValue(r2, g2, b2, "", "")
+	clr1 := rgbColorValue(r1, g1, b1, "", "")
+	clr2 := rgbColorValue(r2, g2, b2, "", "")
 	f.gradientList = append(f.gradientList, gradientType{tp, clr1.str, clr2.str,
 		x1, y1, x2, y2, r, 0})
 	f.outf("/Sh%d sh", pos)
@@ -1793,6 +1867,9 @@ func (f *Fpdf) SetAcceptPageBreakFunc(fnc func() bool) {
 // current position moves to the right or to the next line. It is possible to
 // put a link on the text.
 //
+// An error will be returned if a call to SetFont() has not already taken
+// place before this method is called.
+//
 // If automatic page breaking is enabled and the cell goes beyond the limit, a
 // page break is done before outputting.
 //
@@ -1823,11 +1900,18 @@ func (f *Fpdf) SetAcceptPageBreakFunc(fnc func() bool) {
 //
 // linkStr is a target URL or empty for no external link. A non--zero value for
 // link takes precedence over linkStr.
-func (f *Fpdf) CellFormat(w, h float64, txtStr string, borderStr string, ln int, alignStr string, fill bool, link int, linkStr string) {
+func (f *Fpdf) CellFormat(w, h float64, txtStr string, borderStr string, ln int,
+	alignStr string, fill bool, link int, linkStr string) {
 	// dbg("CellFormat. h = %.2f, borderStr = %s", h, borderStr)
 	if f.err != nil {
 		return
 	}
+
+	if f.currentFont.Name == "" {
+		f.err = fmt.Errorf("font has not been set; unable to render text")
+		return
+	}
+
 	borderStr = strings.ToUpper(borderStr)
 	k := f.k
 	if f.y+h > f.pageBreakTrigger && !f.inHeader && !f.inFooter && f.acceptPageBreak() {
@@ -1894,19 +1978,19 @@ func (f *Fpdf) CellFormat(w, h float64, txtStr string, borderStr string, ln int,
 	if len(txtStr) > 0 {
 		var dx, dy float64
 		// Horizontal alignment
-		if strings.Index(alignStr, "R") != -1 {
+		if strings.Contains(alignStr, "R") {
 			dx = w - f.cMargin - f.GetStringWidth(txtStr)
-		} else if strings.Index(alignStr, "C") != -1 {
+		} else if strings.Contains(alignStr, "C") {
 			dx = (w - f.GetStringWidth(txtStr)) / 2
 		} else {
 			dx = f.cMargin
 		}
 		// Vertical alignment
-		if strings.Index(alignStr, "T") != -1 {
+		if strings.Contains(alignStr, "T") {
 			dy = (f.fontSize - h) / 2.0
-		} else if strings.Index(alignStr, "B") != -1 {
+		} else if strings.Contains(alignStr, "B") {
 			dy = (h - f.fontSize) / 2.0
-		} else if strings.Index(alignStr, "A") != -1 {
+		} else if strings.Contains(alignStr, "A") {
 			var descent float64
 			d := f.currentFont.Desc
 			if d.Descent == 0 {
@@ -2337,7 +2421,7 @@ func (f *Fpdf) ImageTypeFromMime(mimeStr string) (tp string) {
 	return
 }
 
-func (f *Fpdf) imageOut(info *ImageInfoType, x, y, w, h float64, flow bool, link int, linkStr string) {
+func (f *Fpdf) imageOut(info *ImageInfoType, x, y, w, h float64, allowNegativeX, flow bool, link int, linkStr string) {
 	// Automatic width and height calculation if needed
 	if w == 0 && h == 0 {
 		// Put image at 96 dpi
@@ -2380,8 +2464,10 @@ func (f *Fpdf) imageOut(info *ImageInfoType, x, y, w, h float64, flow bool, link
 		y = f.y
 		f.y += h
 	}
-	if x < 0 {
-		x = f.x
+	if !allowNegativeX {
+		if x < 0 {
+			x = f.x
+		}
 	}
 	// dbg("h %.2f", h)
 	// q 85.04 0 0 NaN 28.35 NaN cm /I2 Do Q
@@ -2447,7 +2533,7 @@ func (f *Fpdf) ImageOptions(imageNameStr string, x, y, w, h float64, flow bool, 
 	if f.err != nil {
 		return
 	}
-	f.imageOut(info, x, y, w, h, flow, link, linkStr)
+	f.imageOut(info, x, y, w, h, options.AllowNegativePosition, flow, link, linkStr)
 	return
 }
 
@@ -2475,9 +2561,13 @@ func (f *Fpdf) RegisterImageReader(imgName, tp string, r io.Reader) (info *Image
 // to true (understanding that not all images will have this info
 // available). However, for backwards compatibility with previous
 // versions of the API, it defaults to false.
+//
+// AllowNegativePosition can be set to true in order to prevent the default
+// coercion of negative x values to the current x position.
 type ImageOptions struct {
-	ImageType string
-	ReadDpi   bool
+	ImageType             string
+	ReadDpi               bool
+	AllowNegativePosition bool
 }
 
 // RegisterImageOptionsReader registers an image, reading it from Reader r, adding it
@@ -2630,6 +2720,13 @@ func (f *Fpdf) SetY(y float64) {
 	}
 }
 
+// SetHomeXY is a convenience method that sets the current position to the left
+// and top margins.
+func (f *Fpdf) SetHomeXY() {
+	f.SetY(f.tMargin)
+	f.SetX(f.lMargin)
+}
+
 // SetXY defines the abscissa and ordinate of the current position. If the
 // passed values are negative, they are relative respectively to the right and
 // bottom of the page.
@@ -2726,6 +2823,11 @@ func (f *Fpdf) getpagesizestr(sizeStr string) (size SizeType) {
 		f.err = fmt.Errorf("unknown page size %s", sizeStr)
 	}
 	return
+}
+
+// GetPageSizeStr returns the SizeType for the given sizeStr (that is A4, A3, etc..)
+func (f *Fpdf) GetPageSizeStr(sizeStr string) (size SizeType) {
+	return f.getpagesizestr(sizeStr)
 }
 
 func (f *Fpdf) _getpagesize(size SizeType) SizeType {
@@ -2899,7 +3001,7 @@ func (f *Fpdf) parsepng(r io.Reader, readdpi bool) (info *ImageInfoType) {
 
 func (f *Fpdf) readBeInt32(r io.Reader) (val int32) {
 	err := binary.Read(r, binary.BigEndian, &val)
-	if err != nil {
+	if err != nil && err != io.EOF {
 		f.err = err
 	}
 	return
@@ -3023,9 +3125,34 @@ func SetDefaultCreationDate(tm time.Time) {
 // SetCreationDate fixes the document's internal CreationDate value. By
 // default, the time when the document is generated is used for this value.
 // This method is typically only used for testing purposes to facilitate PDF
-// comparsion. Specify a zero-value time to revert to the default behavior.
+// comparison. Specify a zero-value time to revert to the default behavior.
 func (f *Fpdf) SetCreationDate(tm time.Time) {
 	f.creationDate = tm
+}
+
+// SetJavascript adds Adobe JavaScript to the document.
+func (f *Fpdf) SetJavascript(script string) {
+	f.javascript = &script
+}
+
+// RegisterAlias adds an (alias, replacement) pair to the document so we can
+// replace all occurrences of that alias after writing but before the
+// document is closed.
+func (f *Fpdf) RegisterAlias(alias, replacement string) {
+	f.aliasMap[alias] = replacement
+}
+
+func (f *Fpdf) replaceAliases() {
+	for alias, replacement := range f.aliasMap {
+		for n := 1; n <= f.page; n++ {
+			s := f.pages[n].String()
+			if strings.Contains(s, alias) {
+				s = strings.Replace(s, alias, replacement, -1)
+				f.pages[n].Truncate(0)
+				f.pages[n].WriteString(s)
+			}
+		}
+	}
 }
 
 func (f *Fpdf) putpages() {
@@ -3036,16 +3163,9 @@ func (f *Fpdf) putpages() {
 	nb := f.page
 	if len(f.aliasNbPagesStr) > 0 {
 		// Replace number of pages
-		nbStr := sprintf("%d", nb)
-		for n := 1; n <= nb; n++ {
-			s := f.pages[n].String()
-			if strings.Contains(s, f.aliasNbPagesStr) {
-				s = strings.Replace(s, f.aliasNbPagesStr, nbStr, -1)
-				f.pages[n].Truncate(0)
-				f.pages[n].WriteString(s)
-			}
-		}
+		f.RegisterAlias(f.aliasNbPagesStr, sprintf("%d", nb))
 	}
+	f.replaceAliases()
 	if f.defOrientation == "P" {
 		wPt = f.defPageSize.Wd * f.k
 		hPt = f.defPageSize.Ht * f.k
@@ -3142,7 +3262,7 @@ func (f *Fpdf) putfonts() {
 			fileList = append(fileList, file)
 		}
 		if f.catalogSort {
-			sort.Strings(fileList)
+			sort.SliceStable(fileList, func(i, j int) bool { return fileList[i] < fileList[j] })
 		}
 		for _, file = range fileList {
 			info = f.fontFiles[file]
@@ -3192,7 +3312,7 @@ func (f *Fpdf) putfonts() {
 			keyList = append(keyList, key)
 		}
 		if f.catalogSort {
-			sort.Strings(keyList)
+			sort.SliceStable(keyList, func(i, j int) bool { return keyList[i] < keyList[j] })
 		}
 		for _, key = range keyList {
 			font = f.fonts[key]
@@ -3293,7 +3413,7 @@ func (f *Fpdf) putimages() {
 		keyList = append(keyList, key)
 	}
 	if f.catalogSort {
-		sort.Strings(keyList)
+		sort.SliceStable(keyList, func(i, j int) bool { return f.images[keyList[i]].w < f.images[keyList[j]].w })
 	}
 	for _, key = range keyList {
 		f.putimage(f.images[key])
@@ -3373,7 +3493,7 @@ func (f *Fpdf) putxobjectdict() {
 			keyList = append(keyList, key)
 		}
 		if f.catalogSort {
-			sort.Strings(keyList)
+			sort.SliceStable(keyList, func(i, j int) bool { return f.images[keyList[i]].i < f.images[keyList[j]].i })
 		}
 		for _, key = range keyList {
 			image = f.images[key]
@@ -3407,7 +3527,7 @@ func (f *Fpdf) putresourcedict() {
 			keyList = append(keyList, key)
 		}
 		if f.catalogSort {
-			sort.Strings(keyList)
+			sort.SliceStable(keyList, func(i, j int) bool { return f.fonts[keyList[i]].I < f.fonts[keyList[j]].I })
 		}
 		for _, key = range keyList {
 			font = f.fonts[key]
@@ -3436,6 +3556,7 @@ func (f *Fpdf) putresourcedict() {
 	}
 	// Layers
 	f.layerPutResourceDict()
+	f.spotColorPutResourceDict()
 }
 
 func (f *Fpdf) putBlendModes() {
@@ -3475,6 +3596,25 @@ func (f *Fpdf) putGradients() {
 	}
 }
 
+func (f *Fpdf) putjavascript() {
+	if f.javascript == nil {
+		return
+	}
+
+	f.newobj()
+	f.nJs = f.n
+	f.out("<<")
+	f.outf("/Names [(EmbeddedJS) %d 0 R]", f.n+1)
+	f.out(">>")
+	f.out("endobj")
+	f.newobj()
+	f.out("<<")
+	f.out("/S /JavaScript")
+	f.outf("/JS %s", f.textstring(*f.javascript))
+	f.out(">>")
+	f.out("endobj")
+}
+
 func (f *Fpdf) putresources() {
 	if f.err != nil {
 		return
@@ -3482,6 +3622,7 @@ func (f *Fpdf) putresources() {
 	f.layerPutLayers()
 	f.putBlendModes()
 	f.putGradients()
+	f.putSpotColors()
 	f.putfonts()
 	if f.err != nil {
 		return
@@ -3495,6 +3636,7 @@ func (f *Fpdf) putresources() {
 	f.putresourcedict()
 	f.out(">>")
 	f.out("endobj")
+	f.putjavascript()
 	if f.protect.encrypted {
 		f.newobj()
 		f.protect.objNum = f.n
@@ -3572,6 +3714,10 @@ func (f *Fpdf) putcatalog() {
 	}
 	// Layers
 	f.layerPutCatalog()
+	// JavaScript
+	if f.javascript != nil {
+		f.outf("/Names <</JavaScript %d 0 R>>", f.nJs)
+	}
 }
 
 func (f *Fpdf) putheader() {
@@ -3589,6 +3735,16 @@ func (f *Fpdf) puttrailer() {
 		f.outf("/Encrypt %d 0 R", f.protect.objNum)
 		f.out("/ID [()()]")
 	}
+}
+
+func (f *Fpdf) putxmp() {
+	if len(f.xmp) == 0 {
+		return
+	}
+	f.newobj()
+	f.outf("<< /Type /Metadata /Subtype /XML /Length %d >>", len(f.xmp))
+	f.putstream(f.xmp)
+	f.out("endobj")
 }
 
 func (f *Fpdf) putbookmarks() {
@@ -3657,6 +3813,8 @@ func (f *Fpdf) enddoc() {
 	}
 	// Bookmarks
 	f.putbookmarks()
+	// Metadata
+	f.putxmp()
 	// 	Info
 	f.newobj()
 	f.out("<<")

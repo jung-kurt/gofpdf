@@ -153,6 +153,11 @@ func strIf(cnd bool, aStr, bStr string) string {
 	return bStr
 }
 
+// doNothing returns the passed string with no translation.
+func doNothing(s string) string {
+	return s
+}
+
 // Dump the internals of the specified values
 // func dump(fileStr string, a ...interface{}) {
 // 	fl, err := os.OpenFile(fileStr, os.O_CREATE|os.O_APPEND|os.O_WRONLY, 0600)
@@ -219,9 +224,7 @@ func UnicodeTranslator(r io.Reader) (f func(string) string, err error) {
 	if err == nil {
 		f = repClosure(m)
 	} else {
-		f = func(s string) string {
-			return s
-		}
+		f = doNothing
 	}
 	return
 }
@@ -241,9 +244,7 @@ func UnicodeTranslatorFromFile(fileStr string) (f func(string) string, err error
 		f, err = UnicodeTranslator(fl)
 		fl.Close()
 	} else {
-		f = func(s string) string {
-			return s
-		}
+		f = doNothing
 	}
 	return
 }
@@ -260,21 +261,22 @@ func UnicodeTranslatorFromFile(fileStr string) (f func(string) string, err error
 // If an error occurs reading the descriptor, the returned function is valid
 // but does not perform any rune translation.
 //
-// The CellFormat (4) example demonstrates this method.
+// The CellFormat_codepage example demonstrates this method.
 func (f *Fpdf) UnicodeTranslatorFromDescriptor(cpStr string) (rep func(string) string) {
 	var str string
 	var ok bool
-	if f.err != nil {
-		return
-	}
-	if len(cpStr) == 0 {
-		cpStr = "cp1252"
-	}
-	str, ok = embeddedMapList[cpStr]
-	if ok {
-		rep, f.err = UnicodeTranslator(strings.NewReader(str))
+	if f.err == nil {
+		if len(cpStr) == 0 {
+			cpStr = "cp1252"
+		}
+		str, ok = embeddedMapList[cpStr]
+		if ok {
+			rep, f.err = UnicodeTranslator(strings.NewReader(str))
+		} else {
+			rep, f.err = UnicodeTranslatorFromFile(filepath.Join(f.fontpath, cpStr) + ".map")
+		}
 	} else {
-		rep, f.err = UnicodeTranslatorFromFile(filepath.Join(f.fontpath, cpStr) + ".map")
+		rep = doNothing
 	}
 	return
 }

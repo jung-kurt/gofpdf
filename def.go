@@ -39,6 +39,107 @@ type gradientType struct {
 	objNum            int
 }
 
+const (
+	// OrientationPortrait represents the portrait orientation.
+	OrientationPortrait = "portrait"
+
+	// OrientationLandscape represents the landscape orientation.
+	OrientationLandscape = "landscape"
+)
+
+const (
+	// UnitPoint represents the size unit point
+	UnitPoint = "pt"
+	// UnitMillimeter represents the size unit millimeter
+	UnitMillimeter = "mm"
+	// UnitCentimeter represents the size unit centimeter
+	UnitCentimeter = "cm"
+	// UnitInch represents the size unit inch
+	UnitInch = "inch"
+)
+
+const (
+	// PageSizeA3 represents DIN/ISO A3 page size
+	PageSizeA3 = "A3"
+	// PageSizeA4 represents DIN/ISO A4 page size
+	PageSizeA4 = "A4"
+	// PageSizeA5 represents DIN/ISO A5 page size
+	PageSizeA5 = "A5"
+	// PageSizeLetter represents US Letter page size
+	PageSizeLetter = "Letter"
+	// PageSizeLegal represents US Legal page size
+	PageSizeLegal = "Legal"
+)
+
+const (
+	// BorderNone set no border
+	BorderNone = ""
+	// BorderFull sets a full border
+	BorderFull = "1"
+	// BorderLeft sets the border on the left side
+	BorderLeft = "L"
+	// BorderTop sets the border at the top
+	BorderTop = "T"
+	// BorderRight sets the border on the right side
+	BorderRight = "R"
+	// BorderBottom sets the border on the bottom
+	BorderBottom = "B"
+)
+
+const (
+	// LineBreakNone disables linebreak
+	LineBreakNone = 0
+	// LineBreakNormal enables normal linebreak
+	LineBreakNormal = 1
+	// LineBreakBelow enables linebreak below
+	LineBreakBelow = 2
+)
+
+const (
+	// AlignLeft left aligns the cell
+	AlignLeft = "L"
+	// AlignRight right aligns the cell
+	AlignRight = "R"
+	// AlignCenter centers the cell
+	AlignCenter = "C"
+	// AlignTop aligns the cell to the top
+	AlignTop = "T"
+	// AlignBottom aligns the cell to the bottom
+	AlignBottom = "B"
+	// AlignMiddle aligns the cell to the middle
+	AlignMiddle = "M"
+	// AlignBaseline aligns the cell to the baseline
+	AlignBaseline = "B"
+)
+
+type colorMode int
+
+const (
+	colorModeRGB colorMode = iota
+	colorModeSpot
+	colorModeCMYK
+)
+
+type colorType struct {
+	r, g, b    float64
+	ir, ig, ib int
+	mode       colorMode
+	spotStr    string // name of current spot color
+	gray       bool
+	str        string
+}
+
+// SpotColorType specifies a named spot color value
+type spotColorType struct {
+	id, objID int
+	val       cmykColorType
+}
+
+// CMYKColorType specifies an ink-based CMYK color value
+type cmykColorType struct {
+	c, m, y, k byte // 0% to 100%
+}
+
 // SizeType fields Wd and Ht specify the horizontal and vertical extents of a
 // document element such as a page.
 type SizeType struct {
@@ -210,6 +311,7 @@ type Fpdf struct {
 	fontSize         float64                   // current font size in user unit
 	ws               float64                   // word spacing
 	images           map[string]*ImageInfoType // array of used images
+	aliasMap         map[string]string         // map of alias->replacement
 	pageLinks        [][]linkType              // pageLinks[page][link], both 1-based
 	links            []intLinkType             // array of internal links
 	outlines         []outlineType             // array of outlines
@@ -219,10 +321,13 @@ type Fpdf struct {
 	pageBreakTrigger float64                   // threshold used to trigger page breaks
 	inHeader         bool                      // flag set when processing header
 	headerFnc        func()                    // function provided by app and called to write header
+	headerHomeMode   bool                      // set position to home after headerFnc is called
 	inFooter         bool                      // flag set when processing footer
 	footerFnc        func()                    // function provided by app and called to write footer
+	footerFncLpi     func(bool)                // function provided by app and called to write footer with last page flag
 	zoomMode         string                    // zoom display mode
 	layoutMode       string                    // layout display mode
+	xmp              []byte                    // XMP metadata
 	title            string                    // title
 	subject          string                    // subject
 	author           string                    // author
@@ -247,11 +352,14 @@ type Fpdf struct {
 	protect          protectType               // document protection structure
 	layer            layerRecType              // manages optional layers in document
 	catalogSort      bool                      // sort resource catalogs in document
+	nJs              int                       // JavaScript object number
+	javascript       *string                   // JavaScript code to include in the PDF
 	colorFlag        bool                      // indicates whether fill and text colors are different
 	color            struct {
 		// Composite values of colors
-		draw, fill, text clrType
+		draw, fill, text colorType
 	}
+	spotColorMap map[string]spotColorType // Map of named ink-based colors
 }
 
 type encType struct {
