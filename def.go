@@ -360,6 +360,21 @@ type Fpdf struct {
 		draw, fill, text colorType
 	}
 	spotColorMap map[string]spotColorType // Map of named ink-based colors
+
+	signature           bool   //Digital signature
+	signObjID           int    //Digital signature object ID.
+	signatureData       map[string]interface{} //Digital signature data.
+	signatureMaxLength  int    //11742 Digital signature max length.
+	signatureAppearance *signAppearance //Data for digital signature appearance.
+	emptySignatureAppearance *signAppearance //Array of empty digital signature appearances.
+	tsaTimestamp bool   //Boolean flag to enable document timestamping with TSA.
+	tsaData      string //Timestamping data
+}
+
+type signAppearance struct {
+		page int
+		name string
+		rect string //'0 0 0 0'
 }
 
 type encType struct {
