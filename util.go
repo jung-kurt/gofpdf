@@ -17,11 +17,10 @@
 package gofpdf
 
 import (
+	"bufio"
 	"bytes"
 	"compress/zlib"
 	"fmt"
-	// "github.com/davecgh/go-spew/spew"
-	"bufio"
 	"io"
 	"math"
 	"os"
