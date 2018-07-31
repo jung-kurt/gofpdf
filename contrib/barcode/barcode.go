@@ -71,16 +71,10 @@ func printBarcode(pdf barcodePdf, code string, x, y float64, w, h *float64, flow
 
 	bname := uniqueBarcodeName(code, x, y)
 	info := pdf.GetImageInfo(bname)
+	scaleToWidth := unscaled.Bounds().Dx()
+	scaleToHeight := unscaled.Bounds().Dy()
 
 	if info == nil {
-		scaleToWidth := unscaled.Bounds().Dx()
-		scaleToHeight := unscaled.Bounds().Dy()
-		if w != nil {
-			scaleToWidth = int(convertTo96Dpi(pdf, *w))
-		}
-		if h != nil {
-			scaleToHeight = int(convertTo96Dpi(pdf, *h))
-		}
 		bcode, err := barcode.Scale(
 			unscaled,
 			scaleToWidth,
@@ -99,7 +93,13 @@ func printBarcode(pdf barcodePdf, code string, x, y float64, w, h *float64, flow
 		}
 	}
 
-	pdf.Image(bname, x, y, 0, 0, flow, "jpg", 0, "")
+	if w != nil {
+		scaleToWidth = int(*w)
+	}
+	if h != nil {
+		scaleToHeight = int(*h)
+	}
+	pdf.Image(bname, x, y, float64(scaleToWidth), float64(scaleToHeight), flow, "jpg", 0, "")
 
 }
 
