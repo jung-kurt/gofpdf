@@ -411,13 +411,17 @@ func MakeFont(fontFileStr, encodingFileStr, dstDirStr string, msgWriter io.Write
 	extStr := strings.ToLower(fontFileStr[len(fontFileStr)-3:])
 	// printf("Font file extension [%s]\n", extStr)
 	var tpStr string
-	if extStr == "ttf" || extStr == "otf" {
+	switch extStr {
+	case "ttf":
+		fallthrough
+	case "otf":
 		tpStr = "TrueType"
-	} else if extStr == "pfb" {
+	case "pfb":
 		tpStr = "Type1"
-	} else {
+	default:
 		return fmt.Errorf("unrecognized font file extension: %s", extStr)
 	}
+
 	var info fontInfoType
 	encList, err := loadMap(encodingFileStr)
 	if err != nil {

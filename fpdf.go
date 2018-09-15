@@ -1229,7 +1229,7 @@ func (f *Fpdf) gradientClipEnd() {
 	f.out("Q")
 }
 
-func (f *Fpdf) gradient(tp int, r1, g1, b1 int, r2, g2, b2 int, x1, y1 float64, x2, y2 float64, r float64) {
+func (f *Fpdf) gradient(tp, r1, g1, b1, r2, g2, b2 int, x1, y1, x2, y2, r float64) {
 	pos := len(f.gradientList)
 	clr1 := rgbColorValue(r1, g1, b1, "", "")
 	clr2 := rgbColorValue(r2, g2, b2, "", "")
@@ -1254,7 +1254,7 @@ func (f *Fpdf) gradient(tp int, r1, g1, b1 int, r2, g2, b2 int, x1, y1 float64, 
 // anchored on the rectangle edge. Color 1 is used up to the origin of the
 // vector and color 2 is used beyond the vector's end point. Between the points
 // the colors are gradually blended.
-func (f *Fpdf) LinearGradient(x, y, w, h float64, r1, g1, b1 int, r2, g2, b2 int, x1, y1, x2, y2 float64) {
+func (f *Fpdf) LinearGradient(x, y, w, h float64, r1, g1, b1, r2, g2, b2 int, x1, y1, x2, y2 float64) {
 	f.gradientClipStart(x, y, w, h)
 	f.gradient(2, r1, g1, b1, r2, g2, b2, x1, y1, x2, y2, 0)
 	f.gradientClipEnd()
@@ -1278,7 +1278,7 @@ func (f *Fpdf) LinearGradient(x, y, w, h float64, r1, g1, b1 int, r2, g2, b2 int
 // the circle to avoid rendering problems.
 //
 // The LinearGradient() example demonstrates this method.
-func (f *Fpdf) RadialGradient(x, y, w, h float64, r1, g1, b1 int, r2, g2, b2 int, x1, y1, x2, y2, r float64) {
+func (f *Fpdf) RadialGradient(x, y, w, h float64, r1, g1, b1, r2, g2, b2 int, x1, y1, x2, y2, r float64) {
 	f.gradientClipStart(x, y, w, h)
 	f.gradient(3, r1, g1, b1, r2, g2, b2, x1, y1, x2, y2, r)
 	f.gradientClipEnd()
@@ -1502,7 +1502,7 @@ func (f *Fpdf) AddFont(familyStr, styleStr, fileStr string) {
 // jsonFileBytes contain all bytes of JSON file.
 //
 // zFileBytes contain all bytes of Z file.
-func (f *Fpdf) AddFontFromBytes(familyStr string, styleStr string, jsonFileBytes []byte, zFileBytes []byte) {
+func (f *Fpdf) AddFontFromBytes(familyStr, styleStr string, jsonFileBytes, zFileBytes []byte) {
 	if f.err != nil {
 		return
 	}
@@ -1900,7 +1900,7 @@ func (f *Fpdf) SetAcceptPageBreakFunc(fnc func() bool) {
 //
 // linkStr is a target URL or empty for no external link. A non--zero value for
 // link takes precedence over linkStr.
-func (f *Fpdf) CellFormat(w, h float64, txtStr string, borderStr string, ln int,
+func (f *Fpdf) CellFormat(w, h float64, txtStr, borderStr string, ln int,
 	alignStr string, fill bool, link int, linkStr string) {
 	// dbg("CellFormat. h = %.2f, borderStr = %s", h, borderStr)
 	if f.err != nil {
@@ -1978,19 +1978,22 @@ func (f *Fpdf) CellFormat(w, h float64, txtStr string, borderStr string, ln int,
 	if len(txtStr) > 0 {
 		var dx, dy float64
 		// Horizontal alignment
-		if strings.Contains(alignStr, "R") {
+		switch {
+		case strings.Contains(alignStr, "R"):
 			dx = w - f.cMargin - f.GetStringWidth(txtStr)
-		} else if strings.Contains(alignStr, "C") {
+		case strings.Contains(alignStr, "C"):
 			dx = (w - f.GetStringWidth(txtStr)) / 2
-		} else {
+		default:
 			dx = f.cMargin
 		}
+
 		// Vertical alignment
-		if strings.Contains(alignStr, "T") {
+		switch {
+		case strings.Contains(alignStr, "T"):
 			dy = (f.fontSize - h) / 2.0
-		} else if strings.Contains(alignStr, "B") {
+		case strings.Contains(alignStr, "B"):
 			dy = (h - f.fontSize) / 2.0
-		} else if strings.Contains(alignStr, "A") {
+		case strings.Contains(alignStr, "A"):
 			var descent float64
 			d := f.currentFont.Desc
 			if d.Descent == 0 {
@@ -2000,7 +2003,7 @@ func (f *Fpdf) CellFormat(w, h float64, txtStr string, borderStr string, ln int,
 				descent = float64(d.Descent) * f.fontSize / float64(d.Ascent-d.Descent)
 			}
 			dy = (h-f.fontSize)/2.0 - descent
-		} else {
+		default:
 			dy = 0
 		}
 		if f.colorFlag {
@@ -2369,7 +2372,7 @@ func (f *Fpdf) WriteAligned(width, lineHeight float64, textStr, alignStr string)
 	lines := f.SplitLines([]byte(textStr), width)
 
 	for _, lineBt := range lines {
-		lineStr := string(lineBt[:])
+		lineStr := string(lineBt)
 		lineWidth := f.GetStringWidth(lineStr)
 
 		switch alignStr {
@@ -3321,7 +3324,8 @@ func (f *Fpdf) putfonts() {
 			f.fonts[key] = font
 			tp := font.Tp
 			name := font.Name
-			if tp == "Core" {
+			switch tp {
+			case "Core":
 				// Core font
 				f.newobj()
 				f.out("<</Type /Font")
@@ -3332,7 +3336,9 @@ func (f *Fpdf) putfonts() {
 				}
 				f.out(">>")
 				f.out("endobj")
-			} else if tp == "Type1" || tp == "TrueType" {
+			case "Type1":
+				fallthrough
+			case "TrueType":
 				// Additional Type1 or TrueType/OpenType font
 				f.newobj()
 				f.out("<</Type /Font")
@@ -3378,14 +3384,9 @@ func (f *Fpdf) putfonts() {
 				s.printf("/FontFile%s %d 0 R>>", suffix, f.fontFiles[font.File].n)
 				f.out(s.String())
 				f.out("endobj")
-			} else {
+			default:
 				f.err = fmt.Errorf("unsupported font type: %s", tp)
 				return
-				// Allow for additional types
-				// 			$mtd = 'put'.strtolower($type);
-				// 			if(!method_exists($this,$mtd))
-				// 				$this->Error('Unsupported font type: '.$type);
-				// 			$this->$mtd($font);
 			}
 		}
 	}

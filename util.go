@@ -114,7 +114,8 @@ func utf8toutf16(s string) string {
 	for i < nb {
 		c1 := byte(s[i])
 		i++
-		if c1 >= 224 {
+		switch {
+		case c1 >= 224:
 			// 3-byte character
 			c2 := byte(s[i])
 			i++
@@ -122,13 +123,13 @@ func utf8toutf16(s string) string {
 			i++
 			res = append(res, ((c1&0x0F)<<4)+((c2&0x3C)>>2),
 				((c2&0x03)<<6)+(c3&0x3F))
-		} else if c1 >= 192 {
+		case c1 >= 192:
 			// 2-byte character
 			c2 := byte(s[i])
 			i++
 			res = append(res, ((c1 & 0x1C) >> 2),
 				((c1&0x03)<<6)+(c2&0x3F))
-		} else {
+		default:
 			// Single-byte character
 			res = append(res, 0, c1)
 		}
