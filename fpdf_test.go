@@ -78,6 +78,28 @@ func TestIssue0116(t *testing.T) {
 	}
 }
 
+// TestIssue0193 addresses issue 193 in which the error io.EOF is incorrectly
+// assigned to the FPDF instance error.
+func TestIssue0193(t *testing.T) {
+	var png []byte
+	var pdf *gofpdf.Fpdf
+	var err error
+	var rdr *bytes.Reader
+
+	png, err = ioutil.ReadFile(example.ImageFile("sweden.png"))
+	if err == nil {
+		rdr = bytes.NewReader(png)
+		pdf = gofpdf.New("P", "mm", "A4", "")
+		pdf.AddPage()
+		_ = pdf.RegisterImageOptionsReader("sweden", gofpdf.ImageOptions{ImageType: "png", ReadDpi: true}, rdr)
+		err = pdf.Error()
+	}
+	if err != nil {
+		t.Fatalf("issue 193 error: %s", err)
+	}
+
+}
+
 // Test to make sure the footer is not call twice and SetFooterFuncLpi can work
 // without SetFooterFunc.
 func TestFooterFuncLpi(t *testing.T) {
