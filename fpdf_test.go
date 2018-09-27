@@ -719,7 +719,7 @@ func ExampleFpdf_Image() {
 	pdf := gofpdf.New("P", "mm", "A4", "")
 	pdf.AddPage()
 	pdf.SetFont("Arial", "", 11)
-	pdf.Image(example.ImageFile("logo.png"), 10, 10, 30, 0, false, "", 0, "")
+	pdf.Image("https://raw.githubusercontent.com/jung-kurt/gofpdf/master/image/logo.png", 10, 10, 30, 0, false, "", 0, "")
 	pdf.Text(50, 20, "logo.png")
 	pdf.Image(example.ImageFile("logo.gif"), 10, 40, 30, 0, false, "", 0, "")
 	pdf.Text(50, 50, "logo.gif")
