@@ -34,8 +34,11 @@ import (
 	"io"
 	"io/ioutil"
 	"math"
+	"net/http"
+	"net/url"
 	"os"
 	"path"
+	"regexp"
 	"sort"
 	"strconv"
 	"strings"
@@ -47,6 +50,8 @@ var gl struct {
 	noCompress   bool // Initial zero value indicates compression
 	creationDate time.Time
 }
+
+var urlRegex = regexp.MustCompile("^https?://")
 
 type fmtBuffer struct {
 	bytes.Buffer
@@ -2643,12 +2648,29 @@ func (f *Fpdf) RegisterImageOptions(fileStr string, options ImageOptions) (info 
 		return
 	}
 
-	file, err := os.Open(fileStr)
-	if err != nil {
-		f.err = err
-		return
+	var img io.Reader
+	switch {
+	case urlRegex.MatchString(fileStr):
+		if _, err := url.ParseRequestURI(fileStr); err != nil {
+			f.err = err
+			return
+		}
+		resp, err := http.Get(fileStr)
+		if err != nil {
+			f.err = err
+			return
+		}
+		defer resp.Body.Close()
+		img = resp.Body
+	default:
+		file, err := os.Open(fileStr)
+		if err != nil {
+			f.err = err
+			return
+		}
+		defer file.Close()
+		img = file
 	}
-	defer file.Close()
 
 	// First use of this image, get info
 	if options.ImageType == "" {
@@ -2660,7 +2682,7 @@ func (f *Fpdf) RegisterImageOptions(fileStr string, options ImageOptions) (info 
 		options.ImageType = fileStr[pos+1:]
 	}
 
-	return f.RegisterImageOptionsReader(fileStr, options, file)
+	return f.RegisterImageOptionsReader(fileStr, options, img)
 }
 
 // GetImageInfo returns information about the registered image specified by
