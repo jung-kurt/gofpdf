@@ -38,6 +38,7 @@ import (
 	"net/url"
 	"os"
 	"path"
+	"regexp"
 	"sort"
 	"strconv"
 	"strings"
@@ -49,6 +50,8 @@ var gl struct {
 	noCompress   bool // Initial zero value indicates compression
 	creationDate time.Time
 }
+
+var urlRegex = regexp.MustCompile("https?://")
 
 type fmtBuffer struct {
 	bytes.Buffer
@@ -2647,7 +2650,7 @@ func (f *Fpdf) RegisterImageOptions(fileStr string, options ImageOptions) (info 
 
 	var img io.Reader
 	switch {
-	case strings.HasPrefix(fileStr, "http"):
+	case urlRegex.MatchString(fileStr):
 		if _, err := url.ParseRequestURI(fileStr); err != nil {
 			f.err = err
 			return
