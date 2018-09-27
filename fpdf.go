@@ -51,7 +51,7 @@ var gl struct {
 	creationDate time.Time
 }
 
-var urlRegex = regexp.MustCompile("https?://")
+var urlRegex = regexp.MustCompile("^https?://")
 
 type fmtBuffer struct {
 	bytes.Buffer
