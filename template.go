@@ -23,17 +23,27 @@ import (
 
 // CreateTemplate defines a new template using the current page size.
 func (f *Fpdf) CreateTemplate(fn func(*Tpl)) Template {
-	return newTpl(PointType{0, 0}, f.curPageSize, f.unitStr, f.fontDirStr, fn, f)
+	return newTpl(PointType{0, 0}, f.curPageSize, f.defOrientation, f.unitStr, f.fontDirStr, fn, f)
 }
 
 // CreateTemplateCustom starts a template, using the given bounds.
 func (f *Fpdf) CreateTemplateCustom(corner PointType, size SizeType, fn func(*Tpl)) Template {
-	return newTpl(corner, size, f.unitStr, f.fontDirStr, fn, f)
+	return newTpl(corner, size, f.defOrientation, f.unitStr, f.fontDirStr, fn, f)
+}
+
+// CreateTemplate creates a template not attached to any document (deprecated)
+func CreateTemplate(corner PointType, size SizeType, unitStr, fontDirStr string, fn func(*Tpl)) Template {
+	orientationStr := "p"
+	if size.Wd > size.Ht {
+		orientationStr = "l"
+	}
+
+	return CreateTpl(corner, size, orientationStr, unitStr, fontDirStr, fn)
 }
 
 // CreateTemplate creates a template not attached to any document
-func CreateTemplate(corner PointType, size SizeType, unitStr, fontDirStr string, fn func(*Tpl)) Template {
-	return newTpl(corner, size, unitStr, fontDirStr, fn, nil)
+func CreateTpl(corner PointType, size SizeType, orientationStr, unitStr, fontDirStr string, fn func(*Tpl)) Template {
+	return newTpl(corner, size, orientationStr, unitStr, fontDirStr, fn, nil)
 }
 
 // UseTemplate adds a template to the current page or another template,
