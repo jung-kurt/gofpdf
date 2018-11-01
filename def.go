@@ -18,6 +18,7 @@ package gofpdf
 
 import (
 	"bytes"
+	"encoding/gob"
 	"io"
 	"time"
 )
@@ -173,6 +174,101 @@ type ImageInfoType struct {
 	trns  []int
 	scale float64 // document scaling factor
 	dpi   float64
+}
+
+func (info *ImageInfoType) GobEncode() ([]byte, error) {
+	w := new(bytes.Buffer)
+	encoder := gob.NewEncoder(w)
+
+	err := encoder.Encode(info.data)
+	if err == nil {
+		err = encoder.Encode(info.smask)
+	}
+	if err == nil {
+		err = encoder.Encode(info.i)
+	}
+	if err == nil {
+		err = encoder.Encode(info.n)
+	}
+	if err == nil {
+		err = encoder.Encode(info.w)
+	}
+	if err == nil {
+		err = encoder.Encode(info.h)
+	}
+	if err == nil {
+		err = encoder.Encode(info.cs)
+	}
+	if err == nil {
+		err = encoder.Encode(info.pal)
+	}
+	if err == nil {
+		err = encoder.Encode(info.bpc)
+	}
+	if err == nil {
+		err = encoder.Encode(info.f)
+	}
+	if err == nil {
+		err = encoder.Encode(info.dp)
+	}
+	if err == nil {
+		err = encoder.Encode(info.trns)
+	}
+	if err == nil {
+		err = encoder.Encode(info.scale)
+	}
+	if err == nil {
+		err = encoder.Encode(info.dpi)
+	}
+
+	return w.Bytes(), err
+}
+
+func (info *ImageInfoType) GobDecode(buf []byte) error {
+	r := bytes.NewBuffer(buf)
+	decoder := gob.NewDecoder(r)
+
+	err := decoder.Decode(&info.data)
+	if err == nil {
+		err = decoder.Decode(&info.smask)
+	}
+	if err == nil {
+		err = decoder.Decode(&info.i)
+	}
+	if err == nil {
+		err = decoder.Decode(&info.n)
+	}
+	if err == nil {
+		err = decoder.Decode(&info.w)
+	}
+	if err == nil {
+		err = decoder.Decode(&info.h)
+	}
+	if err == nil {
+		err = decoder.Decode(&info.cs)
+	}
+	if err == nil {
+		err = decoder.Decode(&info.pal)
+	}
+	if err == nil {
+		err = decoder.Decode(&info.bpc)
+	}
+	if err == nil {
+		err = decoder.Decode(&info.f)
+	}
+	if err == nil {
+		err = decoder.Decode(&info.dp)
+	}
+	if err == nil {
+		err = decoder.Decode(&info.trns)
+	}
+	if err == nil {
+		err = decoder.Decode(&info.scale)
+	}
+	if err == nil {
+		err = decoder.Decode(&info.dpi)
+	}
+	return err
 }
 
 // PointConvert returns the value of pt, expressed in points (1/72 inch), as a

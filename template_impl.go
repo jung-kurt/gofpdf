@@ -1,5 +1,10 @@
 package gofpdf
 
+import (
+	"bytes"
+	"encoding/gob"
+)
+
 /*
  * Copyright (c) 2015 Kurt Jung (Gmail: kurt.w.jung),
  *   Marcus Downing, Jan Slabon (Setasign)
@@ -78,6 +83,60 @@ func (t *FpdfTpl) Images() map[string]*ImageInfoType {
 // Templates returns a list of templates used in this template
 func (t *FpdfTpl) Templates() []Template {
 	return t.templates
+}
+
+func (t *FpdfTpl) GobEncode() ([]byte, error) {
+	w := new(bytes.Buffer)
+	encoder := gob.NewEncoder(w)
+
+	err := encoder.Encode(t.id)
+	if err == nil {
+		err = encoder.Encode(t.corner)
+	}
+	if err == nil {
+		err = encoder.Encode(t.size)
+	}
+	if err == nil {
+		err = encoder.Encode(t.bytes)
+	}
+	if err == nil {
+		err = encoder.Encode(t.images)
+	}
+	if err == nil {
+		err = encoder.Encode(t.templates)
+	}
+
+	return w.Bytes(), err
+}
+
+func (t *FpdfTpl) GobDecode(buf []byte) error {
+	r := bytes.NewBuffer(buf)
+	decoder := gob.NewDecoder(r)
+
+	err := decoder.Decode(&t.id)
+	if err == nil {
+		err = decoder.Decode(&t.corner)
+	}
+	if err == nil {
+		err = decoder.Decode(&t.size)
+	}
+	if err == nil {
+		err = decoder.Decode(&t.bytes)
+	}
+	if err == nil {
+		err = decoder.Decode(&t.images)
+	}
+	if err == nil {
+		templates := make([]*FpdfTpl, 0)
+		err = decoder.Decode(&templates)
+		t.templates = make([]Template, len(templates))
+
+		for x := 0; x < len(templates); x++ {
+			t.templates[x] = templates[x]
+		}
+	}
+
+	return err
 }
 
 // Tpl is an Fpdf used for writing a template. It has most of the facilities of
