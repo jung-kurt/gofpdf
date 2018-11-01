@@ -31,7 +31,13 @@ func (f *Fpdf) CreateTemplateCustom(corner PointType, size SizeType, fn func(*Tp
 	return newTpl(corner, size, f.defOrientation, f.unitStr, f.fontDirStr, fn, f)
 }
 
-// CreateTemplate creates a template not attached to any document (deprecated)
+// CreateTemplate creates a template that is not attached to any document.
+//
+// This function is deprecated; it incorrectly assumes that a page with a width
+// smaller than its height is oriented in portrait mode, otherwise it assumes
+// landscape mode. This causes problems when placing the template in a master
+// document where this condition does not apply. CreateTpl() is a similar
+// function that lets you specify the orientation to avoid this problem.
 func CreateTemplate(corner PointType, size SizeType, unitStr, fontDirStr string, fn func(*Tpl)) Template {
 	orientationStr := "p"
 	if size.Wd > size.Ht {
@@ -41,7 +47,7 @@ func CreateTemplate(corner PointType, size SizeType, unitStr, fontDirStr string,
 	return CreateTpl(corner, size, orientationStr, unitStr, fontDirStr, fn)
 }
 
-// CreateTemplate creates a template not attached to any document
+// CreateTpl creates a template not attached to any document
 func CreateTpl(corner PointType, size SizeType, orientationStr, unitStr, fontDirStr string, fn func(*Tpl)) Template {
 	return newTpl(corner, size, orientationStr, unitStr, fontDirStr, fn, nil)
 }

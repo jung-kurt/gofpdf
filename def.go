@@ -268,6 +268,8 @@ type FontLoader interface {
 	Open(name string) (io.Reader, error)
 }
 
+// Pdf defines the interface used for various methods. It is implemented by the
+// main FPDF instance as well as templates.
 type Pdf interface {
 	AddFont(familyStr, styleStr, fileStr string)
 	AddFontFromBytes(familyStr, styleStr string, jsonFileBytes, zFileBytes []byte)
