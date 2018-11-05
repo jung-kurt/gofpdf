@@ -3,6 +3,7 @@ package gofpdf
 import (
 	"bytes"
 	"encoding/gob"
+	"reflect"
 )
 
 /*
@@ -136,7 +137,24 @@ func (t *FpdfTpl) GobDecode(buf []byte) error {
 		}
 	}
 
+	t.relinkPointers(t.images)
+
 	return err
+}
+
+func (t *FpdfTpl) relinkPointers(images map[string]*ImageInfoType) {
+	for gKey, _ := range images {
+		for key, _ := range t.images {
+			if reflect.DeepEqual(t.images[key], images[gKey]) {
+				t.images[key] = images[gKey]
+			}
+		}
+	}
+
+	for x := 0; x < len(t.templates); x++ {
+		innerT := t.templates[x].(*FpdfTpl)
+		innerT.relinkPointers(t.images)
+	}
 }
 
 // Tpl is an Fpdf used for writing a template. It has most of the facilities of
