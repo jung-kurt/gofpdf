@@ -124,9 +124,12 @@ func (t *FpdfTpl) GobEncode() ([]byte, error) {
 		}
 
 		if _, ok := childrenImgs[key]; ok {
-			err = encoder.Encode(nil)
+			err = encoder.Encode("p")
 		} else {
-			err = encoder.Encode(img)
+			err = encoder.Encode("o")
+			if err == nil {
+				err = encoder.Encode(img)
+			}
 		}
 	}
 	if err == nil {
@@ -161,29 +164,36 @@ func (t *FpdfTpl) GobDecode(buf []byte) error {
 	if err == nil {
 		err = decoder.Decode(&numImgs)
 	}
+
 	t.images = make(map[string]*ImageInfoType)
 	childrenImgs := t.childrenImages()
 
 	for x := 0; x < numImgs; x++ {
 		var key string
-		var img *ImageInfoType
+		var tpe string
 
 		if err == nil {
 			err = decoder.Decode(&key)
 		}
 
 		if err == nil {
-			err = decoder.Decode(&img)
+			err = decoder.Decode(&tpe)
 		}
 
 		if err == nil {
-			if img != nil {
-				t.images[key] = img
-			} else {
+			switch tpe {
+			case "p":
 				if _, ok := childrenImgs[key]; !ok {
 					err = fmt.Errorf("Encoded template is corrupt, could not find image %s", key)
 				} else {
 					t.images[key] = childrenImgs[key]
+				}
+			case "o":
+				var img *ImageInfoType
+				err = decoder.Decode(&img)
+
+				if err == nil {
+					t.images[key] = img
 				}
 			}
 		}
