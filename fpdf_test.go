@@ -19,7 +19,6 @@ package gofpdf_test
 import (
 	"bufio"
 	"bytes"
-	"encoding/gob"
 	"fmt"
 	"io"
 	"io/ioutil"
@@ -1951,18 +1950,9 @@ func ExampleFpdf_CreateTemplate() {
 	pdf.SetLineWidth(2.5)
 	pdf.SetFont("Arial", "B", 16)
 
-	template3 := new(gofpdf.FpdfTpl)
-	b := new(bytes.Buffer)
-	enc := gob.NewEncoder(b)
-
-	if err := enc.Encode(template); err != nil {
-		pdf.SetError(err)
-	}
-
-	dec := gob.NewDecoder(b)
-	if err := dec.Decode(template3); err != nil {
-		pdf.SetError(err)
-	}
+	// serialize and deserialize template
+	b, _ := template2.Serialize()
+	template3, _ := gofpdf.DeserializeTemplate(b)
 
 	pdf.AddPage()
 	pdf.UseTemplate(template3)

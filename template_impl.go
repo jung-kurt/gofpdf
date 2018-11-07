@@ -86,6 +86,23 @@ func (t *FpdfTpl) Templates() []Template {
 	return t.templates
 }
 
+// Turn a template into a byte string for later deserialization
+func (t *FpdfTpl) Serialize() ([]byte, error) {
+	b := new(bytes.Buffer)
+	enc := gob.NewEncoder(b)
+	err := enc.Encode(t)
+
+	return b.Bytes(), err
+}
+
+// Create a template from a previously serialized template
+func DeserializeTemplate(b []byte) (Template, error) {
+	tpl := new(FpdfTpl)
+	dec := gob.NewDecoder(bytes.NewBuffer(b))
+	err := dec.Decode(tpl)
+	return tpl, err
+}
+
 // returns the next layer of children images, it doesn't dig into
 // children of children. Applies template namespace to keys to ensure
 // no collisions. See UseTemplateScaled
