@@ -77,6 +77,8 @@ func fpdfNew(orientationStr, unitStr, sizeStr, fontDirStr string, size SizeType)
 	f.pages = make([]*bytes.Buffer, 0, 8)
 	f.pages = append(f.pages, bytes.NewBufferString("")) // pages[0] is unused (1-based)
 	f.pageSizes = make(map[int]SizeType)
+	f.pageBoxes = make(map[int]map[string]PageBox)
+	f.defPageBoxes = make(map[string]PageBox)
 	f.state = 0
 	f.fonts = make(map[string]fontDefType)
 	f.fontFiles = make(map[string]fontFileType)
@@ -333,6 +335,42 @@ func (f *Fpdf) GetCellMargin() float64 {
 // New().
 func (f *Fpdf) SetCellMargin(margin float64) {
 	f.cMargin = margin
+}
+
+// SetPageBox sets the page box for the current page, and any following pages.
+// Allowable types are trim, trimbox, crop, cropbox, bleed, bleedbox, art and artbox
+// box types are case insensitive.
+func (f *Fpdf) SetPageBox(t string, pb PageBox) {
+	switch strings.ToLower(t) {
+	case "trim":
+		fallthrough
+	case "trimbox":
+		t = "TrimBox"
+	case "crop":
+		fallthrough
+	case "cropbox":
+		t = "CropBox"
+	case "bleed":
+		fallthrough
+	case "bleedbox":
+		t = "BleedBox"
+	case "art":
+		fallthrough
+	case "artbox":
+		t = "ArtBox"
+	}
+
+	pb.X = pb.X * f.k
+	pb.Y = pb.Y * f.k
+	pb.Wd = (pb.Wd * f.k) + pb.X
+	pb.Ht = (pb.Ht * f.k) + pb.Y
+
+	if f.page > 0 {
+		f.pageBoxes[f.page][t] = pb
+	}
+
+	// always override. page defaults are supplied in addPage function
+	f.defPageBoxes[t] = pb
 }
 
 // SetFontLocation sets the location in the file system of the font and font
@@ -2845,6 +2883,11 @@ func (f *Fpdf) beginpage(orientationStr string, size SizeType) {
 		return
 	}
 	f.page++
+	// add the default page boxes, if any exist, to the page
+	f.pageBoxes[f.page] = make(map[string]PageBox)
+	for box, pb := range f.defPageBoxes {
+		f.pageBoxes[f.page][box] = pb
+	}
 	f.pages = append(f.pages, bytes.NewBufferString(""))
 	f.pageLinks = append(f.pageLinks, make([]linkType, 0, 0))
 	f.state = 2
@@ -3184,6 +3227,9 @@ func (f *Fpdf) putpages() {
 		pageSize, ok = f.pageSizes[n]
 		if ok {
 			f.outf("/MediaBox [0 0 %.2f %.2f]", pageSize.Wd, pageSize.Ht)
+		}
+		for t, pb := range f.pageBoxes[n] {
+			f.outf("/%s [%.2f %.2f %.2f %.2f]", t, pb.X, pb.Y, pb.Wd, pb.Ht)
 		}
 		f.out("/Resources 2 0 R")
 		// Links
