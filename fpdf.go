@@ -359,7 +359,7 @@ func (f *Fpdf) SetPageBox(t string, pb PageBox) {
 	case "artbox":
 		t = "ArtBox"
 	default:
-		f.err = fmt.Sprintf("%s is not a valid page box type")
+		f.err = fmt.Errorf("%s is not a valid page box type", t)
 		return
 	}
 
