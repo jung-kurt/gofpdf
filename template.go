@@ -18,6 +18,7 @@ package gofpdf
  */
 
 import (
+	"encoding/gob"
 	"sort"
 )
 
@@ -123,6 +124,9 @@ type Template interface {
 	Bytes() []byte
 	Images() map[string]*ImageInfoType
 	Templates() []Template
+	Serialize() ([]byte, error)
+	gob.GobDecoder
+	gob.GobEncoder
 }
 
 func (f *Fpdf) templateFontCatalog() {

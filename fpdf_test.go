@@ -1950,10 +1950,14 @@ func ExampleFpdf_CreateTemplate() {
 	pdf.SetLineWidth(2.5)
 	pdf.SetFont("Arial", "B", 16)
 
+	// serialize and deserialize template
+	b, _ := template2.Serialize()
+	template3, _ := gofpdf.DeserializeTemplate(b)
+
 	pdf.AddPage()
-	pdf.UseTemplate(template)
-	pdf.UseTemplateScaled(template, gofpdf.PointType{X: 0, Y: 30}, tplSize)
-	pdf.UseTemplateScaled(template, gofpdf.PointType{X: 0, Y: 60}, tplSize.ScaleBy(1.4))
+	pdf.UseTemplate(template3)
+	pdf.UseTemplateScaled(template3, gofpdf.PointType{X: 0, Y: 30}, tplSize)
+	pdf.UseTemplateScaled(template3, gofpdf.PointType{X: 0, Y: 60}, tplSize.ScaleBy(1.4))
 	pdf.Line(40, 210, 60, 210)
 	pdf.Text(40, 200, "Template example page 1")
 
