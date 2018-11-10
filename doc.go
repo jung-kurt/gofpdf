@@ -235,7 +235,10 @@ account when calculating image size. Paulo Coutinho provided support for static
 embedded fonts. Dan Meyers added support for embedded JavaScript. David Fish
 added a generic alias-replacement function to enable, among other things, table
 of contents functionality. Andy Bakun identified and corrected a problem in
-which the internal catalogs were not sorted stably.
+which the internal catalogs were not sorted stably. d1ngd0 added encoding and
+decoding functionality for templates, including images that are embedded in
+templates; this allows templates to be stored independently of gofpdf.
+
 
 Roadmap
 

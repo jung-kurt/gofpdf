@@ -1957,12 +1957,12 @@ func ExampleFpdf_CreateTemplate() {
 	pdf.AddPage()
 	pdf.UseTemplate(template3)
 	pdf.UseTemplateScaled(template3, gofpdf.PointType{X: 0, Y: 30}, tplSize)
-	pdf.UseTemplateScaled(template3, gofpdf.PointType{X: 0, Y: 60}, tplSize.ScaleBy(1.4))
 	pdf.Line(40, 210, 60, 210)
 	pdf.Text(40, 200, "Template example page 1")
 
 	pdf.AddPage()
 	pdf.UseTemplate(template2)
+	pdf.UseTemplateScaled(template3, gofpdf.PointType{X: 0, Y: 30}, tplSize.ScaleBy(1.4))
 	pdf.Line(60, 210, 80, 210)
 	pdf.Text(40, 200, "Template example page 2")
 

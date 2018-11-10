@@ -82,7 +82,7 @@ func (t *FpdfTpl) Templates() []Template {
 	return t.templates
 }
 
-// Turn a template into a byte string for later deserialization
+// Serialize turns a template into a byte string for later deserialization
 func (t *FpdfTpl) Serialize() ([]byte, error) {
 	b := new(bytes.Buffer)
 	enc := gob.NewEncoder(b)
@@ -91,7 +91,8 @@ func (t *FpdfTpl) Serialize() ([]byte, error) {
 	return b.Bytes(), err
 }
 
-// Create a template from a previously serialized template
+// DeserializeTemplate creaties a template from a previously serialized
+// template
 func DeserializeTemplate(b []byte) (Template, error) {
 	tpl := new(FpdfTpl)
 	dec := gob.NewDecoder(bytes.NewBuffer(b))
@@ -116,6 +117,8 @@ func (t *FpdfTpl) childrenImages() map[string]*ImageInfoType {
 	return childrenImgs
 }
 
+// GobEncode encodes the receiving template into a byte buffer. Use GobDecode
+// to decode the byte buffer back to a template.
 func (t *FpdfTpl) GobEncode() ([]byte, error) {
 	w := new(bytes.Buffer)
 	encoder := gob.NewEncoder(w)
@@ -161,6 +164,7 @@ func (t *FpdfTpl) GobEncode() ([]byte, error) {
 	return w.Bytes(), err
 }
 
+// GobDecode decodes the specified byte buffer into the receiving template.
 func (t *FpdfTpl) GobDecode(buf []byte) error {
 	r := bytes.NewBuffer(buf)
 	decoder := gob.NewDecoder(r)
