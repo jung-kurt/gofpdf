@@ -2196,20 +2196,37 @@ func pagebox(pdf *gofpdf.Fpdf, boxstr string, x, y, wd, ht float64) {
 
 // This example demonstrates the use of a page box
 func ExamplePageBox() {
+	// pdfinfo (from http://www.xpdfreader.com) reports the following for this example:
+	// ~ pdfinfo -box pdf/Fpdf_PageBox.pdf
+	// Producer:       FPDF 1.7
+	// CreationDate:   Sat Jan  1 00:00:00 2000
+	// Tagged:         no
+	// Form:           none
+	// Pages:          1
+	// Encrypted:      no
+	// Page size:      493.23 x 739.85 pts (rotated 0 degrees)
+	// MediaBox:           0.00     0.00   595.28   841.89
+	// CropBox:           51.02    51.02   544.25   790.87
+	// BleedBox:          51.02    51.02   544.25   790.87
+	// TrimBox:           51.02    51.02   544.25   790.87
+	// ArtBox:            51.02    51.02   544.25   790.87
+	// File size:      1053 bytes
+	// Optimized:      no
+	// PDF version:    1.3
 	const (
 		wd        = 210
 		ht        = 297
-		boxmargin = 5
+		fontsize  = 6
+		boxmargin = 3 * fontsize
 	)
 	pdf := gofpdf.New("P", "mm", "A4", "") // 210mm x 297mm
-	pagebox(pdf, "bleed", 0, 0, wd, ht)
-	pagebox(pdf, "trim", boxmargin, boxmargin, wd-2*boxmargin, ht-2*boxmargin)
-	pdf.SetFont("Arial", "", 12)
-	pdf.SetDrawColor(40, 40, 40)
+	pagebox(pdf, "crop", boxmargin, boxmargin, wd-2*boxmargin, ht-2*boxmargin)
+	pdf.SetFont("Arial", "", pdf.UnitToPointConvert(fontsize))
 	pdf.AddPage()
-	pdf.Rect(0, 0, wd, ht, "D")
-	pdf.Line(0, 0, wd, ht)
-	pdf.Line(0, ht, wd, 0)
+	pdf.MoveTo(fontsize, fontsize)
+	pdf.Write(fontsize, "This will be cropped from printed output")
+	pdf.MoveTo(boxmargin+fontsize, boxmargin+fontsize)
+	pdf.Write(fontsize, "This will be displayed in cropped output")
 	fileStr := example.Filename("Fpdf_PageBox")
 	err := pdf.OutputFileAndClose(fileStr)
 	example.Summary(err, fileStr)
