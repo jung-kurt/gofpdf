@@ -2194,10 +2194,6 @@ func ExampleNewGrid() {
 	// Successfully generated pdf/Fpdf_Grid.pdf
 }
 
-func pagebox(pdf *gofpdf.Fpdf, boxstr string, x, y, wd, ht float64) {
-	pdf.SetPageBox(boxstr, gofpdf.PageBox{gofpdf.SizeType{Wd: wd, Ht: ht}, gofpdf.PointType{X: x, Y: y}})
-}
-
 // This example demonstrates the use of a page box
 func ExamplePageBox() {
 	// pdfinfo (from http://www.xpdfreader.com) reports the following for this example:
@@ -2224,7 +2220,7 @@ func ExamplePageBox() {
 		boxmargin = 3 * fontsize
 	)
 	pdf := gofpdf.New("P", "mm", "A4", "") // 210mm x 297mm
-	pagebox(pdf, "crop", boxmargin, boxmargin, wd-2*boxmargin, ht-2*boxmargin)
+	pdf.SetPageBox("crop", boxmargin, boxmargin, wd-2*boxmargin, ht-2*boxmargin)
 	pdf.SetFont("Arial", "", pdf.UnitToPointConvert(fontsize))
 	pdf.AddPage()
 	pdf.MoveTo(fontsize, fontsize)

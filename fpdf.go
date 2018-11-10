@@ -337,10 +337,11 @@ func (f *Fpdf) SetCellMargin(margin float64) {
 	f.cMargin = margin
 }
 
-// SetPageBox sets the page box for the current page, and any following pages.
-// Allowable types are trim, trimbox, crop, cropbox, bleed, bleedbox, art and artbox
-// box types are case insensitive.
-func (f *Fpdf) SetPageBox(t string, pb PageBox) {
+// SetPageBoxRec sets the page box for the current page, and any following
+// pages. Allowable types are trim, trimbox, crop, cropbox, bleed, bleedbox,
+// art and artbox box types are case insensitive. See SetPageBox() for a method
+// that specifies the coordinates and extent of the page box individually.
+func (f *Fpdf) SetPageBoxRec(t string, pb PageBox) {
 	switch strings.ToLower(t) {
 	case "trim":
 		fallthrough
@@ -374,6 +375,13 @@ func (f *Fpdf) SetPageBox(t string, pb PageBox) {
 
 	// always override. page defaults are supplied in addPage function
 	f.defPageBoxes[t] = pb
+}
+
+// SetPageBox sets the page box for the current page, and any following pages.
+// Allowable types are trim, trimbox, crop, cropbox, bleed, bleedbox, art and
+// artbox box types are case insensitive.
+func (f *Fpdf) SetPageBox(t string, x, y, wd, ht float64) {
+	f.SetPageBoxRec(t, PageBox{SizeType{Wd: wd, Ht: ht}, PointType{X: x, Y: y}})
 }
 
 // SetFontLocation sets the location in the file system of the font and font

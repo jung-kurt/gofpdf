@@ -474,6 +474,7 @@ type Pdf interface {
 	Writef(h float64, fmtStr string, args ...interface{})
 }
 
+// PageBox defines the coordinates and extent of the various page box types
 type PageBox struct {
 	SizeType
 	PointType
