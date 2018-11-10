@@ -2195,7 +2195,7 @@ func ExampleNewGrid() {
 }
 
 // This example demonstrates the use of a page box
-func ExamplePageBox() {
+func ExampleFpdf_SetPageBox() {
 	// pdfinfo (from http://www.xpdfreader.com) reports the following for this example:
 	// ~ pdfinfo -box pdf/Fpdf_PageBox.pdf
 	// Producer:       FPDF 1.7
