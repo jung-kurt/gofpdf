@@ -1,5 +1,11 @@
 package gofpdf
 
+import (
+	"bytes"
+	"encoding/gob"
+	"fmt"
+)
+
 /*
  * Copyright (c) 2015 Kurt Jung (Gmail: kurt.w.jung),
  *   Marcus Downing, Jan Slabon (Setasign)
@@ -74,6 +80,155 @@ func (t *FpdfTpl) Images() map[string]*ImageInfoType {
 // Templates returns a list of templates used in this template
 func (t *FpdfTpl) Templates() []Template {
 	return t.templates
+}
+
+// Serialize turns a template into a byte string for later deserialization
+func (t *FpdfTpl) Serialize() ([]byte, error) {
+	b := new(bytes.Buffer)
+	enc := gob.NewEncoder(b)
+	err := enc.Encode(t)
+
+	return b.Bytes(), err
+}
+
+// DeserializeTemplate creaties a template from a previously serialized
+// template
+func DeserializeTemplate(b []byte) (Template, error) {
+	tpl := new(FpdfTpl)
+	dec := gob.NewDecoder(bytes.NewBuffer(b))
+	err := dec.Decode(tpl)
+	return tpl, err
+}
+
+// returns the next layer of children images, it doesn't dig into
+// children of children. Applies template namespace to keys to ensure
+// no collisions. See UseTemplateScaled
+func (t *FpdfTpl) childrenImages() map[string]*ImageInfoType {
+	childrenImgs := make(map[string]*ImageInfoType)
+
+	for x := 0; x < len(t.templates); x++ {
+		imgs := t.templates[x].Images()
+		for key, val := range imgs {
+			name := sprintf("t%d-%s", t.templates[x].ID(), key)
+			childrenImgs[name] = val
+		}
+	}
+
+	return childrenImgs
+}
+
+// GobEncode encodes the receiving template into a byte buffer. Use GobDecode
+// to decode the byte buffer back to a template.
+func (t *FpdfTpl) GobEncode() ([]byte, error) {
+	w := new(bytes.Buffer)
+	encoder := gob.NewEncoder(w)
+
+	err := encoder.Encode(t.templates)
+	childrenImgs := t.childrenImages()
+
+	if err == nil {
+		encoder.Encode(len(t.images))
+	}
+
+	for key, img := range t.images {
+		// if the image has already been saved as a child, then
+		// save nil so we don't duplicate data
+		err = encoder.Encode(key)
+
+		if err != nil {
+			break
+		}
+
+		if _, ok := childrenImgs[key]; ok {
+			err = encoder.Encode("p")
+		} else {
+			err = encoder.Encode("o")
+			if err == nil {
+				err = encoder.Encode(img)
+			}
+		}
+	}
+	if err == nil {
+		err = encoder.Encode(t.id)
+	}
+	if err == nil {
+		err = encoder.Encode(t.corner)
+	}
+	if err == nil {
+		err = encoder.Encode(t.size)
+	}
+	if err == nil {
+		err = encoder.Encode(t.bytes)
+	}
+
+	return w.Bytes(), err
+}
+
+// GobDecode decodes the specified byte buffer into the receiving template.
+func (t *FpdfTpl) GobDecode(buf []byte) error {
+	r := bytes.NewBuffer(buf)
+	decoder := gob.NewDecoder(r)
+
+	templates := make([]*FpdfTpl, 0)
+	err := decoder.Decode(&templates)
+	t.templates = make([]Template, len(templates))
+
+	for x := 0; x < len(templates); x++ {
+		t.templates[x] = templates[x]
+	}
+
+	var numImgs int
+	if err == nil {
+		err = decoder.Decode(&numImgs)
+	}
+
+	t.images = make(map[string]*ImageInfoType)
+	childrenImgs := t.childrenImages()
+
+	for x := 0; x < numImgs; x++ {
+		var key string
+		var tpe string
+
+		if err == nil {
+			err = decoder.Decode(&key)
+		}
+
+		if err == nil {
+			err = decoder.Decode(&tpe)
+		}
+
+		if err == nil {
+			switch tpe {
+			case "p":
+				if _, ok := childrenImgs[key]; !ok {
+					err = fmt.Errorf("Encoded template is corrupt, could not find image %s", key)
+				} else {
+					t.images[key] = childrenImgs[key]
+				}
+			case "o":
+				var img *ImageInfoType
+				err = decoder.Decode(&img)
+
+				if err == nil {
+					t.images[key] = img
+				}
+			}
+		}
+	}
+	if err == nil {
+		err = decoder.Decode(&t.id)
+	}
+	if err == nil {
+		err = decoder.Decode(&t.corner)
+	}
+	if err == nil {
+		err = decoder.Decode(&t.size)
+	}
+	if err == nil {
+		err = decoder.Decode(&t.bytes)
+	}
+
+	return err
 }
 
 // Tpl is an Fpdf used for writing a template. It has most of the facilities of
