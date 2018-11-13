@@ -100,6 +100,29 @@ func TestIssue0193(t *testing.T) {
 
 }
 
+// TestIssue0209 addresses issue 209
+// make SplitLines and MultiCell split at the same place
+func TestIssue0209(t *testing.T) {
+	var pdf *gofpdf.Fpdf
+
+	pdf = gofpdf.New("P", "mm", "A4", "")
+	pdf.AddPage()
+	pdf.SetFont("Arial", "", 8)
+	str := "Guochin Amandine"
+	lines := pdf.SplitLines([]byte("Guochin Amandine"), 26)
+	_, FontSize := pdf.GetFontSize()
+	y_start := pdf.GetY()
+	pdf.MultiCell(26, FontSize, str, "", "L", false)
+	y_end := pdf.GetY()
+
+	if len(lines) != 2 {
+		t.Fatalf("expect SplitLines split in two lines")
+	}
+	if int(y_end-y_start) != int(FontSize*2) {
+		t.Fatalf("expect MultiCell split in two lines %.2f != %.2f", y_end-y_start, FontSize*2)
+	}
+}
+
 // Test to make sure the footer is not call twice and SetFooterFuncLpi can work
 // without SetFooterFunc.
 func TestFooterFuncLpi(t *testing.T) {
