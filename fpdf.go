@@ -2117,7 +2117,7 @@ func (f *Fpdf) SplitLines(txt []byte, w float64) [][]byte {
 	// Function contributed by Bruno Michel
 	lines := [][]byte{}
 	cw := &f.currentFont.Cw
-	wmax := (w - 2*f.cMargin) * 1000 / f.fontSize
+	wmax := int(math.Ceil((w - 2*f.cMargin) * 1000 / f.fontSize))
 	s := bytes.Replace(txt, []byte("\r"), []byte{}, -1)
 	nb := len(s)
 	for nb > 0 && s[nb-1] == '\n' {
@@ -2127,10 +2127,10 @@ func (f *Fpdf) SplitLines(txt []byte, w float64) [][]byte {
 	sep := -1
 	i := 0
 	j := 0
-	l := 0.
+	l := 0
 	for i < nb {
 		c := s[i]
-		l += float64(cw[c])
+		l += cw[c]
 		if c == ' ' || c == '\t' || c == '\n' {
 			sep = i
 		}
@@ -2180,7 +2180,7 @@ func (f *Fpdf) MultiCell(w, h float64, txtStr, borderStr, alignStr string, fill 
 	if w == 0 {
 		w = f.w - f.rMargin - f.x
 	}
-	wmax := (w - 2*f.cMargin) * 1000 / f.fontSize
+	wmax := int(math.Ceil((w - 2*f.cMargin) * 1000 / f.fontSize))
 	s := strings.Replace(txtStr, "\r", "", -1)
 	nb := len(s)
 	// if nb > 0 && s[nb-1:nb] == "\n" {
@@ -2214,8 +2214,8 @@ func (f *Fpdf) MultiCell(w, h float64, txtStr, borderStr, alignStr string, fill 
 	sep := -1
 	i := 0
 	j := 0
-	l := 0.0
-	ls := 0.0
+	l := 0
+	ls := 0
 	ns := 0
 	nl := 1
 	for i < nb {
@@ -2244,7 +2244,7 @@ func (f *Fpdf) MultiCell(w, h float64, txtStr, borderStr, alignStr string, fill 
 			ls = l
 			ns++
 		}
-		l += float64(cw[c])
+		l += cw[c]
 		if l > wmax {
 			// Automatic line break
 			if sep == -1 {
@@ -2259,7 +2259,7 @@ func (f *Fpdf) MultiCell(w, h float64, txtStr, borderStr, alignStr string, fill 
 			} else {
 				if alignStr == "J" {
 					if ns > 1 {
-						f.ws = (wmax - ls) / 1000 * f.fontSize / float64(ns-1)
+						f.ws = float64((wmax-ls)/1000) * f.fontSize / float64(ns-1)
 					} else {
 						f.ws = 0
 					}
