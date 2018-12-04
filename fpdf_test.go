@@ -57,6 +57,13 @@ func cleanup() {
 		})
 }
 
+func TestFpdfImplementPdf(t *testing.T) {
+	// this will not compile if Fpdf and Tpl
+	// do not implement Pdf
+	var _ gofpdf.Pdf = (*gofpdf.Fpdf)(nil)
+	var _ gofpdf.Pdf = (*gofpdf.Tpl)(nil)
+}
+
 // TestIssue0116 addresses issue 116 in which library silently fails after
 // calling CellFormat when no font has been set.
 func TestIssue0116(t *testing.T) {
