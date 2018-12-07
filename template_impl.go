@@ -3,6 +3,7 @@ package gofpdf
 import (
 	"bytes"
 	"encoding/gob"
+	"errors"
 	"fmt"
 )
 
@@ -32,10 +33,15 @@ func newTpl(corner PointType, size SizeType, orientationStr, unitStr, fontDirStr
 	if copyFrom != nil {
 		tpl.loadParamsFromFpdf(copyFrom)
 	}
-	tpl.Fpdf.SetAutoPageBreak(false, 0)
 	tpl.Fpdf.AddPage()
 	fn(&tpl)
-	bytes := tpl.Fpdf.pages[tpl.Fpdf.page].Bytes()
+
+	bytes := make([][]byte, len(tpl.Fpdf.pages))
+	// skip the first page as it will always be empty
+	for x := 1; x < len(bytes); x++ {
+		bytes[x] = tpl.Fpdf.pages[x].Bytes()
+	}
+
 	templates := make([]Template, 0, len(tpl.Fpdf.templates))
 	for _, key := range templateKeyList(tpl.Fpdf.templates, true) {
 		templates = append(templates, tpl.Fpdf.templates[key])
@@ -43,7 +49,7 @@ func newTpl(corner PointType, size SizeType, orientationStr, unitStr, fontDirStr
 	images := tpl.Fpdf.images
 
 	id := GenerateTemplateID()
-	template := FpdfTpl{id, corner, size, bytes, images, templates}
+	template := FpdfTpl{id, corner, size, bytes, images, templates, tpl.Fpdf.page}
 	return &template
 }
 
@@ -52,9 +58,10 @@ type FpdfTpl struct {
 	id        int64
 	corner    PointType
 	size      SizeType
-	bytes     []byte
+	bytes     [][]byte
 	images    map[string]*ImageInfoType
 	templates []Template
+	page      int
 }
 
 // ID returns the global template identifier
@@ -69,7 +76,42 @@ func (t *FpdfTpl) Size() (corner PointType, size SizeType) {
 
 // Bytes returns the actual template data, not including resources
 func (t *FpdfTpl) Bytes() []byte {
-	return t.bytes
+	return t.bytes[t.page]
+}
+
+// FromPage creates a new template from a specific Page
+func (t *FpdfTpl) FromPage(page int) (Template, error) {
+	// pages start at 1
+	if page == 0 {
+		return nil, errors.New("Pages start at 1 No template will have a page 0")
+	}
+
+	if page > t.NumPages() {
+		return nil, fmt.Errorf("The template does not have a page %d", page)
+	}
+	// if it is already pointing to the correct page
+	// there is no need to create a new template
+	if t.page == page {
+		return t, nil
+	}
+
+	t2 := *t
+	t2.id = GenerateTemplateID()
+	t2.page = page
+	return &t2, nil
+}
+
+// FromPages creates a template slice with all the pages within a template.
+func (t *FpdfTpl) FromPages() []Template {
+	p := make([]Template, t.NumPages())
+	for x := 1; x <= t.NumPages(); x++ {
+		// the only error is when accessing a
+		// non existing template... that can't happen
+		// here
+		p[x-1], _ = t.FromPage(x)
+	}
+
+	return p
 }
 
 // Images returns a list of the images used in this template
@@ -80,6 +122,13 @@ func (t *FpdfTpl) Images() map[string]*ImageInfoType {
 // Templates returns a list of templates used in this template
 func (t *FpdfTpl) Templates() []Template {
 	return t.templates
+}
+
+// NumPages returns the number of available pages within the template. Look at FromPage and FromPages on access to that content.
+func (t *FpdfTpl) NumPages() int {
+	// the first page is empty to
+	// make the pages begin at one
+	return len(t.bytes) - 1
 }
 
 // Serialize turns a template into a byte string for later deserialization
@@ -160,6 +209,9 @@ func (t *FpdfTpl) GobEncode() ([]byte, error) {
 	if err == nil {
 		err = encoder.Encode(t.bytes)
 	}
+	if err == nil {
+		err = encoder.Encode(t.page)
+	}
 
 	return w.Bytes(), err
 }
@@ -227,6 +279,9 @@ func (t *FpdfTpl) GobDecode(buf []byte) error {
 	if err == nil {
 		err = decoder.Decode(&t.bytes)
 	}
+	if err == nil {
+		err = decoder.Decode(&t.page)
+	}
 
 	return err
 }
@@ -259,16 +314,4 @@ func (t *Tpl) loadParamsFromFpdf(f *Fpdf) {
 	t.Fpdf.fontSizePt = f.fontSizePt
 	t.Fpdf.fontStyle = f.fontStyle
 	t.Fpdf.ws = f.ws
-}
-
-// AddPage does nothing because you cannot add pages to a template
-func (t *Tpl) AddPage() {
-}
-
-// AddPageFormat does nothign because you cannot add pages to a template
-func (t *Tpl) AddPageFormat(orientationStr string, size SizeType) {
-}
-
-// SetAutoPageBreak does nothing because you cannot add pages to a template
-func (t *Tpl) SetAutoPageBreak(auto bool, margin float64) {
 }
