@@ -81,7 +81,7 @@ func loadMap(encodingFileStr string) (encList encListType, err error) {
 	return
 }
 
-// Return informations from a TrueType font
+// getInfoFromTrueType; Return informations from a TrueType font
 func getInfoFromTrueType(fileStr string, msgWriter io.Writer, embed bool, encList encListType) (info fontInfoType, err error) {
 	var ttf TtfType
 	ttf, err = TtfParse(fileStr)
@@ -166,7 +166,7 @@ func segmentRead(r io.Reader) (s segmentType, err error) {
 // -rw-r--r-- 1 root root  9532 2010-04-22 11:27 /usr/share/fonts/type1/mathml/Symbol.afm
 // -rw-r--r-- 1 root root 37744 2010-04-22 11:27 /usr/share/fonts/type1/mathml/Symbol.pfb
 
-// Return informations from a Type1 font
+// getInfoFromType1; Return informations from a Type1 font
 func getInfoFromType1(fileStr string, msgWriter io.Writer, embed bool, encList encListType) (info fontInfoType, err error) {
 	if embed {
 		var f *os.File
@@ -310,7 +310,7 @@ func makeFontDescriptor(info *fontInfoType) {
 	// dump(info.Desc.FontBBox)
 }
 
-// Build differences from reference encoding
+// makeFontEncoding; Build differences from reference encoding
 func makeFontEncoding(encList encListType, refEncFileStr string) (diffStr string, err error) {
 	var refList encListType
 	if refList, err = loadMap(refEncFileStr); err != nil {

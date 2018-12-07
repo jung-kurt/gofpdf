@@ -39,7 +39,7 @@ func sprintf(fmtStr string, args ...interface{}) string {
 	return fmt.Sprintf(fmtStr, args...)
 }
 
-// Returns true if the specified normal file exists
+// fileExist returns true if the specified normal file exists
 func fileExist(filename string) (ok bool) {
 	info, err := os.Stat(filename)
 	if err == nil {
@@ -50,7 +50,7 @@ func fileExist(filename string) (ok bool) {
 	return ok
 }
 
-// Returns the size of the specified file; ok will be false
+// fileSize returns the size of the specified file; ok will be false
 // if the file does not exist or is not an ordinary file
 func fileSize(filename string) (size int64, ok bool) {
 	info, err := os.Stat(filename)
@@ -61,14 +61,14 @@ func fileSize(filename string) (size int64, ok bool) {
 	return
 }
 
-// Returns a new buffer populated with the contents of the specified Reader
+// bufferFromReader returns a new buffer populated with the contents of the specified Reader
 func bufferFromReader(r io.Reader) (b *bytes.Buffer, err error) {
 	b = new(bytes.Buffer)
 	_, err = b.ReadFrom(r)
 	return
 }
 
-// Returns true if the two specified float slices are equal
+// slicesEqual returns true if the two specified float slices are equal
 func slicesEqual(a, b []float64) bool {
 	if len(a) != len(b) {
 		return false
@@ -81,7 +81,7 @@ func slicesEqual(a, b []float64) bool {
 	return true
 }
 
-// Returns a zlib-compressed copy of the specified byte array
+// sliceCompress returns a zlib-compressed copy of the specified byte array
 func sliceCompress(data []byte) []byte {
 	var buf bytes.Buffer
 	cmp, _ := zlib.NewWriterLevel(&buf, zlib.BestSpeed)
@@ -90,7 +90,7 @@ func sliceCompress(data []byte) []byte {
 	return buf.Bytes()
 }
 
-// Returns an uncompressed copy of the specified zlib-compressed byte array
+// sliceUncompress returns an uncompressed copy of the specified zlib-compressed byte array
 func sliceUncompress(data []byte) (outData []byte, err error) {
 	inBuf := bytes.NewReader(data)
 	r, err := zlib.NewReader(inBuf)
@@ -105,7 +105,7 @@ func sliceUncompress(data []byte) (outData []byte, err error) {
 	return
 }
 
-// Convert UTF-8 to UTF-16BE with BOM; from http://www.fpdf.org/
+// utf8toutf16; Convert UTF-8 to UTF-16BE with BOM; from http://www.fpdf.org/
 func utf8toutf16(s string) string {
 	res := make([]byte, 0, 8)
 	res = append(res, 0xFE, 0xFF)
@@ -137,7 +137,7 @@ func utf8toutf16(s string) string {
 	return string(res)
 }
 
-// Return a if cnd is true, otherwise b
+// intIf; Return a if cnd is true, otherwise b
 func intIf(cnd bool, a, b int) int {
 	if cnd {
 		return a
@@ -145,7 +145,7 @@ func intIf(cnd bool, a, b int) int {
 	return b
 }
 
-// Return aStr if cnd is true, otherwise bStr
+// strIf; Return aStr if cnd is true, otherwise bStr
 func strIf(cnd bool, aStr, bStr string) string {
 	if cnd {
 		return aStr

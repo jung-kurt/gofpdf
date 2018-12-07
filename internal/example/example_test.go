@@ -22,7 +22,7 @@ import (
 	"github.com/jung-kurt/gofpdf/internal/example"
 )
 
-// Test the Filename() and Summary() functions.
+// ExampleFilename tests the Filename() and Summary() functions.
 func ExampleFilename() {
 	fileStr := example.Filename("example")
 	example.Summary(errors.New("printer on fire"), fileStr)
