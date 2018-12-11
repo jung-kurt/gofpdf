@@ -157,13 +157,13 @@ func ExampleRegisterPdf417() {
 	// Successfully generated ../../pdf/contrib_barcode_RegisterPdf417.pdf
 }
 
-// This test ensures that no panic arises when an invalid barcode is registered.
+// TestRegisterCode128 ensures that no panic arises when an invalid barcode is registered.
 func TestRegisterCode128(t *testing.T) {
 	pdf := createPdf()
 	barcode.RegisterCode128(pdf, "Invalid character: é")
 }
 
-// Shows that the barcode may be scaled or not by providing optional heights and widths.
+// TestBarcodeUnscalable shows that the barcode may be scaled or not by providing optional heights and widths.
 func TestBarcodeUnscalable(t *testing.T) {
 	pdf := createPdf()
 
@@ -182,7 +182,7 @@ func TestBarcodeUnscalable(t *testing.T) {
 	// Successfully generated ../../pdf/contrib_barcode_Barcode.pdf
 }
 
-// Shows that the width and height returned by the function match that of the barcode
+// TestGetUnscaledBarcodeDimensions shows that the width and height returned by the function match that of the barcode
 func TestGetUnscaledBarcodeDimensions(t *testing.T) {
 	pdf := createPdf()
 

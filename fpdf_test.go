@@ -107,7 +107,7 @@ func TestIssue0193(t *testing.T) {
 
 }
 
-// TestIssue0209 addresses issue 209
+// TestIssue0209SplitLinesEqualMultiCell addresses issue 209
 // make SplitLines and MultiCell split at the same place
 func TestIssue0209SplitLinesEqualMultiCell(t *testing.T) {
 	var pdf *gofpdf.Fpdf
@@ -145,7 +145,7 @@ func TestIssue0209SplitLinesEqualMultiCell(t *testing.T) {
 	}
 }
 
-// Test to make sure the footer is not call twice and SetFooterFuncLpi can work
+// TestFooterFuncLpi tests to make sure the footer is not call twice and SetFooterFuncLpi can work
 // without SetFooterFunc.
 func TestFooterFuncLpi(t *testing.T) {
 	pdf := gofpdf.New("P", "mm", "A4", "")
@@ -222,7 +222,7 @@ func (f fontResourceType) Open(name string) (rdr io.Reader, err error) {
 	return
 }
 
-// Convert 'ABCDEFG' to, for example, 'A,BCD,EFG'
+// strDelimit converts 'ABCDEFG' to, for example, 'A,BCD,EFG'
 func strDelimit(str string, sepstr string, sepcount int) string {
 	pos := len(str) - sepcount
 	for pos > 0 {
@@ -249,7 +249,7 @@ func lorem() string {
 	return strings.Join(loremList(), " ")
 }
 
-// This example demonstrates the generation of a simple PDF document. Note that
+// Example demonstrates the generation of a simple PDF document. Note that
 // since only core fonts are used (in this case Arial, a synonym for
 // Helvetica), an empty string can be specified for the font directory in the
 // call to New(). Note also that the example.Filename() and example.Summary()
@@ -270,7 +270,7 @@ func Example() {
 	// Successfully generated pdf/basic.pdf
 }
 
-// This example demonsrates the generation of headers, footers and page breaks.
+// ExampleFpdf_AddPage demonsrates the generation of headers, footers and page breaks.
 func ExampleFpdf_AddPage() {
 	pdf := gofpdf.New("P", "mm", "A4", "")
 	pdf.SetTopMargin(30)
@@ -302,7 +302,7 @@ func ExampleFpdf_AddPage() {
 	// Successfully generated pdf/Fpdf_AddPage.pdf
 }
 
-// This example demonstrates word-wrapping, line justification and
+// ExampleFpdf_MultiCell demonstrates word-wrapping, line justification and
 // page-breaking.
 func ExampleFpdf_MultiCell() {
 	pdf := gofpdf.New("P", "mm", "A4", "")
@@ -378,7 +378,7 @@ func ExampleFpdf_MultiCell() {
 	// Successfully generated pdf/Fpdf_MultiCell.pdf
 }
 
-// This example demonstrates the generation of a PDF document that has multiple
+// ExampleFpdf_SetLeftMargin demonstrates the generation of a PDF document that has multiple
 // columns. This is accomplished with the SetLeftMargin() and Cell() methods.
 func ExampleFpdf_SetLeftMargin() {
 	var y0 float64
@@ -484,7 +484,7 @@ func ExampleFpdf_SetLeftMargin() {
 	// Successfully generated pdf/Fpdf_SetLeftMargin_multicolumn.pdf
 }
 
-// This example demonstrates word-wrapped table cells
+// ExampleFpdf_SplitLines_tables demonstrates word-wrapped table cells
 func ExampleFpdf_SplitLines_tables() {
 	const (
 		colCount = 3
@@ -565,7 +565,7 @@ func ExampleFpdf_SplitLines_tables() {
 	// Successfully generated pdf/Fpdf_SplitLines_tables.pdf
 }
 
-// This example demonstrates various table styles.
+// ExampleFpdf_CellFormat_tables demonstrates various table styles.
 func ExampleFpdf_CellFormat_tables() {
 	pdf := gofpdf.New("P", "mm", "A4", "")
 	type countryType struct {
@@ -702,7 +702,7 @@ func ExampleFpdf_CellFormat_tables() {
 	// Successfully generated pdf/Fpdf_CellFormat_tables.pdf
 }
 
-// This example demonstrates internal and external links with and without basic
+// ExampleFpdf_HTMLBasicNew demonstrates internal and external links with and without basic
 // HTML.
 func ExampleFpdf_HTMLBasicNew() {
 	pdf := gofpdf.New("P", "mm", "A4", "")
@@ -737,7 +737,7 @@ func ExampleFpdf_HTMLBasicNew() {
 	// Successfully generated pdf/Fpdf_HTMLBasicNew.pdf
 }
 
-// This example demonstrates the use of a non-standard font.
+// ExampleFpdf_AddFont demonstrates the use of a non-standard font.
 func ExampleFpdf_AddFont() {
 	pdf := gofpdf.New("P", "mm", "A4", example.FontDir())
 	pdf.AddFont("Calligrapher", "", "calligra.json")
@@ -751,7 +751,7 @@ func ExampleFpdf_AddFont() {
 	// Successfully generated pdf/Fpdf_AddFont.pdf
 }
 
-// This example demonstrates how to align text with the Write function.
+// ExampleFpdf_WriteAligned demonstrates how to align text with the Write function.
 func ExampleFpdf_WriteAligned() {
 	pdf := gofpdf.New("P", "mm", "A4", example.FontDir())
 	pdf.AddPage()
@@ -770,7 +770,7 @@ func ExampleFpdf_WriteAligned() {
 	// Successfully generated pdf/Fpdf_WriteAligned.pdf
 }
 
-// This example demonstrates how images are included in documents.
+// ExampleFpdf_Image demonstrates how images are included in documents.
 func ExampleFpdf_Image() {
 	pdf := gofpdf.New("P", "mm", "A4", "")
 	pdf.AddPage()
@@ -792,7 +792,7 @@ func ExampleFpdf_Image() {
 	// Successfully generated pdf/Fpdf_Image.pdf
 }
 
-// This example demonstrates how the AllowNegativePosition field of the
+// ExampleFpdf_ImageOptions demonstrates how the AllowNegativePosition field of the
 // ImageOption struct can be used to affect horizontal image placement.
 func ExampleFpdf_ImageOptions() {
 	var opt gofpdf.ImageOptions
@@ -897,7 +897,7 @@ func ExampleFpdf_SetKeywords() {
 	// Successfully generated pdf/Fpdf_SetKeywords.pdf
 }
 
-// This example demonstrates the construction of various geometric figures,
+// ExampleFpdf_Circle demonstrates the construction of various geometric figures,
 func ExampleFpdf_Circle() {
 	const (
 		thin  = 0.2
@@ -980,7 +980,7 @@ func ExampleFpdf_Circle() {
 	// Successfully generated pdf/Fpdf_Circle_figures.pdf
 }
 
-// This example demonstrates alpha transparency.
+// ExampleFpdf_SetAlpha demonstrates alpha transparency.
 func ExampleFpdf_SetAlpha() {
 	const (
 		gapX  = 10.0
@@ -1032,7 +1032,7 @@ func ExampleFpdf_SetAlpha() {
 	// Successfully generated pdf/Fpdf_SetAlpha_transparency.pdf
 }
 
-// This example deomstrates various gradients.
+// ExampleFpdf_LinearGradient deomstrates various gradients.
 func ExampleFpdf_LinearGradient() {
 	pdf := gofpdf.New("", "", "", "")
 	pdf.SetFont("Helvetica", "", 12)
@@ -1055,7 +1055,7 @@ func ExampleFpdf_LinearGradient() {
 	// Successfully generated pdf/Fpdf_LinearGradient_gradient.pdf
 }
 
-// This example demonstrates clipping.
+// ExampleFpdf_ClipText demonstrates clipping.
 func ExampleFpdf_ClipText() {
 	pdf := gofpdf.New("", "", "", "")
 	y := 10.0
@@ -1125,7 +1125,7 @@ func ExampleFpdf_ClipText() {
 	// Successfully generated pdf/Fpdf_ClipText.pdf
 }
 
-// This example generates a PDF document with various page sizes.
+// ExampleFpdf_PageSize generates a PDF document with various page sizes.
 func ExampleFpdf_PageSize() {
 	pdf := gofpdf.NewCustom(&gofpdf.InitType{
 		UnitStr:    "in",
@@ -1158,7 +1158,7 @@ func ExampleFpdf_PageSize() {
 	// Successfully generated pdf/Fpdf_PageSize.pdf
 }
 
-// This example demonstrates the Bookmark method.
+// ExampleFpdf_Bookmark demonstrates the Bookmark method.
 func ExampleFpdf_Bookmark() {
 	pdf := gofpdf.New("P", "mm", "A4", "")
 	pdf.AddPage()
@@ -1180,7 +1180,7 @@ func ExampleFpdf_Bookmark() {
 	// Successfully generated pdf/Fpdf_Bookmark.pdf
 }
 
-// This example demonstrates various transformations. It is adapted from an
+// ExampleFpdf_TransformBegin demonstrates various transformations. It is adapted from an
 // example script by Moritz Wagner and Andreas Würmser.
 func ExampleFpdf_TransformBegin() {
 	const (
@@ -1302,7 +1302,7 @@ func ExampleFpdf_TransformBegin() {
 	// Successfully generated pdf/Fpdf_TransformBegin.pdf
 }
 
-// This example demonstrates Lawrence Kesteloot's image registration code.
+// ExampleFpdf_RegisterImage demonstrates Lawrence Kesteloot's image registration code.
 func ExampleFpdf_RegisterImage() {
 	const (
 		margin = 10
@@ -1371,7 +1371,7 @@ func ExampleFpdf_RegisterImage() {
 	// Successfully generated pdf/Fpdf_RegisterImage.pdf
 }
 
-// This example demonstrates Bruno Michel's line splitting function.
+// ExampleFpdf_SplitLines demonstrates Bruno Michel's line splitting function.
 func ExampleFpdf_SplitLines() {
 	const (
 		fontPtSize = 18.0
@@ -1400,7 +1400,7 @@ func ExampleFpdf_SplitLines() {
 	// Successfully generated pdf/Fpdf_Splitlines.pdf
 }
 
-// This example demonstrates how to render a simple path-only SVG image of the
+// ExampleFpdf_SVGBasicWrite demonstrates how to render a simple path-only SVG image of the
 // type generated by the jSignature web control.
 func ExampleFpdf_SVGBasicWrite() {
 	const (
@@ -1448,7 +1448,7 @@ func ExampleFpdf_SVGBasicWrite() {
 	// Successfully generated pdf/Fpdf_SVGBasicWrite.pdf
 }
 
-// This example demonstrates Stefan Schroeder's code to control vertical
+// ExampleFpdf_CellFormat_align demonstrates Stefan Schroeder's code to control vertical
 // alignment.
 func ExampleFpdf_CellFormat_align() {
 	type recType struct {
@@ -1503,7 +1503,7 @@ func ExampleFpdf_CellFormat_align() {
 	// Successfully generated pdf/Fpdf_CellFormat_align.pdf
 }
 
-// This example demonstrates the use of characters in the high range of the
+// ExampleFpdf_CellFormat_codepageescape demonstrates the use of characters in the high range of the
 // Windows-1252 code page (gofdpf default). See the example for CellFormat (4)
 // for a way to do this automatically.
 func ExampleFpdf_CellFormat_codepageescape() {
@@ -1535,7 +1535,7 @@ func ExampleFpdf_CellFormat_codepageescape() {
 	// Successfully generated pdf/Fpdf_CellFormat_codepageescape.pdf
 }
 
-// This example demonstrates the automatic conversion of UTF-8 strings to an
+// ExampleFpdf_CellFormat_codepage demonstrates the automatic conversion of UTF-8 strings to an
 // 8-bit font encoding.
 func ExampleFpdf_CellFormat_codepage() {
 	pdf := gofpdf.New("P", "mm", "A4", example.FontDir()) // A4 210.0 x 297.0
@@ -1577,7 +1577,7 @@ func ExampleFpdf_CellFormat_codepage() {
 	// Successfully generated pdf/Fpdf_CellFormat_codepage.pdf
 }
 
-// This example demonstrates password protection for documents.
+// ExampleFpdf_SetProtection demonstrates password protection for documents.
 func ExampleFpdf_SetProtection() {
 	pdf := gofpdf.New("P", "mm", "A4", "")
 	pdf.SetProtection(gofpdf.CnProtectPrint, "123", "abc")
@@ -1591,7 +1591,7 @@ func ExampleFpdf_SetProtection() {
 	// Successfully generated pdf/Fpdf_SetProtection.pdf
 }
 
-// This example displays equilateral polygons in a demonstration of the Polygon
+// ExampleFpdf_Polygon displays equilateral polygons in a demonstration of the Polygon
 // function.
 func ExampleFpdf_Polygon() {
 	const rowCount = 5
@@ -1641,7 +1641,7 @@ func ExampleFpdf_Polygon() {
 	// Successfully generated pdf/Fpdf_Polygon.pdf
 }
 
-// This example demonstrates document layers. The initial visibility of a layer
+// ExampleFpdf_AddLayer demonstrates document layers. The initial visibility of a layer
 // is specified with the second parameter to AddLayer(). The layer list
 // displayed by the document reader allows layer visibility to be controlled
 // interactively.
@@ -1681,7 +1681,7 @@ func ExampleFpdf_AddLayer() {
 	// Successfully generated pdf/Fpdf_AddLayer.pdf
 }
 
-// This example demonstrates the use of an image that is retrieved from a web
+// ExampleFpdf_RegisterImageReader demonstrates the use of an image that is retrieved from a web
 // server.
 func ExampleFpdf_RegisterImageReader() {
 
@@ -1725,7 +1725,7 @@ func ExampleFpdf_RegisterImageReader() {
 
 }
 
-// This example demonstrates the Beziergon function.
+// ExampleFpdf_Beziergon demonstrates the Beziergon function.
 func ExampleFpdf_Beziergon() {
 
 	const (
@@ -1814,7 +1814,7 @@ func ExampleFpdf_Beziergon() {
 
 }
 
-// This example demonstrates loading a non-standard font using a generalized
+// ExampleFpdf_SetFontLoader demonstrates loading a non-standard font using a generalized
 // font loader. fontResourceType implements the FontLoader interface and is
 // defined locally in the test source code.
 func ExampleFpdf_SetFontLoader() {
@@ -1834,7 +1834,7 @@ func ExampleFpdf_SetFontLoader() {
 	// Successfully generated pdf/Fpdf_SetFontLoader.pdf
 }
 
-// This example demonstrates the Path Drawing functions, such as: MoveTo,
+// ExampleFpdf_MoveTo demonstrates the Path Drawing functions, such as: MoveTo,
 // LineTo, CurveTo, ..., ClosePath and DrawPath.
 func ExampleFpdf_MoveTo() {
 	pdf := gofpdf.New("P", "mm", "A4", "")
@@ -1855,7 +1855,7 @@ func ExampleFpdf_MoveTo() {
 	// Successfully generated pdf/Fpdf_MoveTo_path.pdf
 }
 
-// This example demonstrates various line cap and line join styles.
+// ExampleFpdf_SetLineJoinStyle demonstrates various line cap and line join styles.
 func ExampleFpdf_SetLineJoinStyle() {
 	const offset = 75.0
 	pdf := gofpdf.New("L", "mm", "A4", "")
@@ -1896,7 +1896,7 @@ func ExampleFpdf_SetLineJoinStyle() {
 	// Successfully generated pdf/Fpdf_SetLineJoinStyle_caps.pdf
 }
 
-// This example demonstrates various fill modes.
+// ExampleFpdf_DrawPath demonstrates various fill modes.
 func ExampleFpdf_DrawPath() {
 	pdf := gofpdf.New("P", "mm", "A4", "")
 	pdf.SetDrawColor(0xff, 0x00, 0x00)
@@ -1972,7 +1972,7 @@ func ExampleFpdf_DrawPath() {
 	// Successfully generated pdf/Fpdf_DrawPath_fill.pdf
 }
 
-// This example demonstrates creating and using templates
+// ExampleFpdf_CreateTemplate demonstrates creating and using templates
 func ExampleFpdf_CreateTemplate() {
 	pdf := gofpdf.New("P", "mm", "A4", "")
 	pdf.SetCompression(false)
@@ -2029,7 +2029,7 @@ func ExampleFpdf_CreateTemplate() {
 	// Successfully generated pdf/Fpdf_CreateTemplate.pdf
 }
 
-// This example demonstrate how to use embedded fonts from byte array
+// ExampleFpdf_AddFontFromBytes demonstrate how to use embedded fonts from byte array
 func ExampleFpdf_AddFontFromBytes() {
 	pdf := gofpdf.New("P", "mm", "A4", "")
 	pdf.AddPage()
@@ -2137,7 +2137,7 @@ func ExampleFpdf_Rect() {
 	// Successfully generated pdf/Fpdf_WrappedTableCells.pdf
 }
 
-// This example demonstrates including JavaScript in the document.
+// ExampleFpdf_SetJavascript demonstrates including JavaScript in the document.
 func ExampleFpdf_SetJavascript() {
 	pdf := gofpdf.New("P", "mm", "A4", "")
 	pdf.SetJavascript("print(true);")
@@ -2151,7 +2151,7 @@ func ExampleFpdf_SetJavascript() {
 	// Successfully generated pdf/Fpdf_SetJavascript.pdf
 }
 
-// This example demonstrates spot color use
+// ExampleFpdf_AddSpotColor demonstrates spot color use
 func ExampleFpdf_AddSpotColor() {
 	pdf := gofpdf.New("P", "mm", "A4", "")
 	pdf.AddSpotColor("PANTONE 145 CVC", 0, 42, 100, 25)
@@ -2165,7 +2165,7 @@ func ExampleFpdf_AddSpotColor() {
 	// Successfully generated pdf/Fpdf_AddSpotColor.pdf
 }
 
-// This example demonstrates how to use `RegisterAlias` to create a table of
+// ExampleFpdf_RegisterAlias demonstrates how to use `RegisterAlias` to create a table of
 // contents.
 func ExampleFpdf_RegisterAlias() {
 	pdf := gofpdf.New("P", "mm", "A4", "")
@@ -2196,7 +2196,7 @@ func ExampleFpdf_RegisterAlias() {
 	// Successfully generated pdf/Fpdf_RegisterAlias.pdf
 }
 
-// This example demonstrates the generation of graph grids.
+// ExampleNewGrid demonstrates the generation of graph grids.
 func ExampleNewGrid() {
 	pdf := gofpdf.New("P", "mm", "A4", "")
 	pdf.SetFont("Arial", "", 12)
@@ -2250,7 +2250,7 @@ func ExampleNewGrid() {
 	// Successfully generated pdf/Fpdf_Grid.pdf
 }
 
-// This example demonstrates the use of a page box
+// ExampleFpdf_SetPageBox demonstrates the use of a page box
 func ExampleFpdf_SetPageBox() {
 	// pdfinfo (from http://www.xpdfreader.com) reports the following for this example:
 	// ~ pdfinfo -box pdf/Fpdf_PageBox.pdf

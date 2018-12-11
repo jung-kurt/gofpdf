@@ -100,7 +100,7 @@ func DeserializeTemplate(b []byte) (Template, error) {
 	return tpl, err
 }
 
-// returns the next layer of children images, it doesn't dig into
+// childrenImages returns the next layer of children images, it doesn't dig into
 // children of children. Applies template namespace to keys to ensure
 // no collisions. See UseTemplateScaled
 func (t *FpdfTpl) childrenImages() map[string]*ImageInfoType {

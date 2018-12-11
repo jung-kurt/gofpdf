@@ -36,7 +36,7 @@ func init() {
 	gofpdf.SetDefaultCreationDate(time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC))
 }
 
-// Assign the relative path to the gofpdfDir directory based on current working
+// setRoot assigns the relative path to the gofpdfDir directory based on current working
 // directory
 func setRoot() {
 	wdStr, err := os.Getwd()
