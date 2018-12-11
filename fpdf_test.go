@@ -222,7 +222,7 @@ func (f fontResourceType) Open(name string) (rdr io.Reader, err error) {
 	return
 }
 
-// strDelimit; Convert 'ABCDEFG' to, for example, 'A,BCD,EFG'
+// strDelimit converts 'ABCDEFG' to, for example, 'A,BCD,EFG'
 func strDelimit(str string, sepstr string, sepcount int) string {
 	pos := len(str) - sepcount
 	for pos > 0 {
