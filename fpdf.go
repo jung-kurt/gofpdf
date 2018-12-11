@@ -598,7 +598,7 @@ func (f *Fpdf) AliasNbPages(aliasStr string) {
 	f.aliasNbPagesStr = aliasStr
 }
 
-// open; Begin document
+// open begins a document
 func (f *Fpdf) open() {
 	f.state = 1
 }
@@ -1841,7 +1841,7 @@ func (f *Fpdf) SetLink(link int, y float64, page int) {
 	f.links[link] = intLinkType{page, y}
 }
 
-// newLink; Add a new clickable link on current page
+// newLink adds a new clickable link on current page
 func (f *Fpdf) newLink(x, y, w, h float64, link int, linkStr string) {
 	// linkList, ok := f.pageLinks[f.page]
 	// if !ok {
@@ -2292,7 +2292,7 @@ func (f *Fpdf) MultiCell(w, h float64, txtStr, borderStr, alignStr string, fill 
 	f.x = f.lMargin
 }
 
-// write; Output text in flowing mode
+// write outputs text in flowing mode
 func (f *Fpdf) write(h float64, txtStr string, link int, linkStr string) {
 	// dbg("Write")
 	cw := &f.currentFont.Cw
@@ -2966,7 +2966,7 @@ func (f *Fpdf) escape(s string) string {
 	return s
 }
 
-// textstring; Format a text string
+// textstring formats a text string
 func (f *Fpdf) textstring(s string) string {
 	if f.protect.encrypted {
 		b := []byte(s)
@@ -3008,7 +3008,7 @@ func (f *Fpdf) newImageInfo() *ImageInfoType {
 	return &ImageInfoType{scale: f.k, dpi: 72}
 }
 
-// parsejpg; Extract info from io.Reader with JPEG data
+// parsejpg extracts info from io.Reader with JPEG data
 // Thank you, Bruno Michel, for providing this code.
 func (f *Fpdf) parsejpg(r io.Reader) (info *ImageInfoType) {
 	info = f.newImageInfo()
@@ -3046,7 +3046,7 @@ func (f *Fpdf) parsejpg(r io.Reader) (info *ImageInfoType) {
 	return
 }
 
-// parsepng; Extract info from a PNG data
+// parsepng extracts info from a PNG data
 func (f *Fpdf) parsepng(r io.Reader, readdpi bool) (info *ImageInfoType) {
 	buf, err := bufferFromReader(r)
 	if err != nil {
@@ -3072,7 +3072,7 @@ func (f *Fpdf) readByte(r io.Reader) (val byte) {
 	return
 }
 
-// parsegif; Extract info from a GIF data (via PNG conversion)
+// parsegif extracts info from a GIF data (via PNG conversion)
 func (f *Fpdf) parsegif(r io.Reader) (info *ImageInfoType) {
 	data, err := bufferFromReader(r)
 	if err != nil {
@@ -3094,7 +3094,7 @@ func (f *Fpdf) parsegif(r io.Reader) (info *ImageInfoType) {
 	return f.parsepngstream(pngBuf, false)
 }
 
-// newobj; Begin a new object
+// newobj begins a new object
 func (f *Fpdf) newobj() {
 	// dbg("newobj")
 	f.n++
@@ -3126,7 +3126,7 @@ func (f *Fpdf) out(s string) {
 	}
 }
 
-// outbuf; Add a buffered line to the document
+// outbuf adds a buffered line to the document
 func (f *Fpdf) outbuf(r io.Reader) {
 	if f.state == 2 {
 		f.pages[f.page].ReadFrom(r)
@@ -3153,7 +3153,7 @@ func (f *Fpdf) RawWriteBuf(r io.Reader) {
 	f.outbuf(r)
 }
 
-// outf; Add a formatted line to the document
+// outf adds a formatted line to the document
 func (f *Fpdf) outf(fmtStr string, args ...interface{}) {
 	f.out(sprintf(fmtStr, args...))
 }
