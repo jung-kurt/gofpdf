@@ -105,7 +105,7 @@ func sliceUncompress(data []byte) (outData []byte, err error) {
 	return
 }
 
-// utf8toutf16; Convert UTF-8 to UTF-16BE with BOM; from http://www.fpdf.org/
+// utf8toutf16 converts UTF-8 to UTF-16BE with BOM; from http://www.fpdf.org/
 func utf8toutf16(s string) string {
 	res := make([]byte, 0, 8)
 	res = append(res, 0xFE, 0xFF)
@@ -137,7 +137,7 @@ func utf8toutf16(s string) string {
 	return string(res)
 }
 
-// intIf; Return a if cnd is true, otherwise b
+// intIf returns a if cnd is true, otherwise b
 func intIf(cnd bool, a, b int) int {
 	if cnd {
 		return a
@@ -145,7 +145,7 @@ func intIf(cnd bool, a, b int) int {
 	return b
 }
 
-// strIf; Return aStr if cnd is true, otherwise bStr
+// strIf returns aStr if cnd is true, otherwise bStr
 func strIf(cnd bool, aStr, bStr string) string {
 	if cnd {
 		return aStr
