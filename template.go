@@ -124,6 +124,9 @@ type Template interface {
 	Bytes() []byte
 	Images() map[string]*ImageInfoType
 	Templates() []Template
+	NumPages() int
+	FromPage(int) (Template, error)
+	FromPages() []Template
 	Serialize() ([]byte, error)
 	gob.GobDecoder
 	gob.GobEncoder

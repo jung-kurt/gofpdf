@@ -64,6 +64,42 @@ func TestFpdfImplementPdf(t *testing.T) {
 	var _ gofpdf.Pdf = (*gofpdf.Tpl)(nil)
 }
 
+// TestPagedTemplate ensures new paged templates work
+func TestPagedTemplate(t *testing.T) {
+	pdf := gofpdf.New("P", "mm", "A4", "")
+	tpl := pdf.CreateTemplate(func(t *gofpdf.Tpl) {
+		// this will be the second page, as a page is already
+		// created by default
+		t.AddPage()
+		t.AddPage()
+		t.AddPage()
+	})
+
+	if tpl.NumPages() != 4 {
+		t.Fatalf("The template does not have the correct number of pages %d", tpl.NumPages())
+	}
+
+	tplPages := tpl.FromPages()
+	for x := 0; x < len(tplPages); x++ {
+		pdf.AddPage()
+		pdf.UseTemplate(tplPages[x])
+	}
+
+	// get the last template
+	tpl2, err := tpl.FromPage(tpl.NumPages())
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	// the objects should be the exact same, as the
+	// template will represent the last page by default
+	// therefore no new id should be set, and the object
+	// should be the same object
+	if fmt.Sprintf("%p", tpl2) != fmt.Sprintf("%p", tpl) {
+		t.Fatal("Template no longer respecting initial template object")
+	}
+}
+
 // TestIssue0116 addresses issue 116 in which library silently fails after
 // calling CellFormat when no font has been set.
 func TestIssue0116(t *testing.T) {
