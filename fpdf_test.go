@@ -64,7 +64,7 @@ func TestFpdfImplementPdf(t *testing.T) {
 	var _ gofpdf.Pdf = (*gofpdf.Tpl)(nil)
 }
 
-// Testcase to ensure new paged templates work
+// TestPagedTemplate ensures new paged templates work
 func TestPagedTemplate(t *testing.T) {
 	pdf := gofpdf.New("P", "mm", "A4", "")
 	tpl := pdf.CreateTemplate(func(t *gofpdf.Tpl) {
