@@ -83,8 +83,8 @@ func fpdfNew(orientationStr, unitStr, sizeStr, fontDirStr string, size SizeType)
 	f.fonts = make(map[string]fontDefType)
 	f.fontFiles = make(map[string]fontFileType)
 	f.diffs = make([]string, 0, 8)
-	f.templates = make(map[int64]Template)
-	f.templateObjects = make(map[int64]int)
+	f.templates = make(map[string]Template)
+	f.templateObjects = make(map[string]int)
 	f.images = make(map[string]*ImageInfoType)
 	f.pageLinks = make([][]linkType, 0, 8)
 	f.pageLinks = append(f.pageLinks, make([]linkType, 0, 0)) // pageLinks[0] is unused (1-based)
@@ -3559,8 +3559,8 @@ func (f *Fpdf) putxobjectdict() {
 		}
 	}
 	{
-		var keyList []int64
-		var key int64
+		var keyList []string
+		var key string
 		var tpl Template
 		keyList = templateKeyList(f.templates, f.catalogSort)
 		for _, key = range keyList {
@@ -3568,7 +3568,7 @@ func (f *Fpdf) putxobjectdict() {
 			// for _, tpl := range f.templates {
 			id := tpl.ID()
 			if objID, ok := f.templateObjects[id]; ok {
-				f.outf("/TPL%d %d 0 R", id, objID)
+				f.outf("/TPL%s %d 0 R", id, objID)
 			}
 		}
 	}

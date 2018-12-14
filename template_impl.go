@@ -2,6 +2,7 @@ package gofpdf
 
 import (
 	"bytes"
+	"crypto/sha1"
 	"encoding/gob"
 	"errors"
 	"fmt"
@@ -48,14 +49,12 @@ func newTpl(corner PointType, size SizeType, orientationStr, unitStr, fontDirStr
 	}
 	images := tpl.Fpdf.images
 
-	id := GenerateTemplateID()
-	template := FpdfTpl{id, corner, size, bytes, images, templates, tpl.Fpdf.page}
+	template := FpdfTpl{corner, size, bytes, images, templates, tpl.Fpdf.page}
 	return &template
 }
 
 // FpdfTpl is a concrete implementation of the Template interface.
 type FpdfTpl struct {
-	id        int64
 	corner    PointType
 	size      SizeType
 	bytes     [][]byte
@@ -65,8 +64,8 @@ type FpdfTpl struct {
 }
 
 // ID returns the global template identifier
-func (t *FpdfTpl) ID() int64 {
-	return t.id
+func (t *FpdfTpl) ID() string {
+	return fmt.Sprintf("%x", sha1.Sum(t.Bytes()))
 }
 
 // Size gives the bounding dimensions of this template
@@ -96,7 +95,6 @@ func (t *FpdfTpl) FromPage(page int) (Template, error) {
 	}
 
 	t2 := *t
-	t2.id = GenerateTemplateID()
 	t2.page = page
 	return &t2, nil
 }
@@ -158,12 +156,25 @@ func (t *FpdfTpl) childrenImages() map[string]*ImageInfoType {
 	for x := 0; x < len(t.templates); x++ {
 		imgs := t.templates[x].Images()
 		for key, val := range imgs {
-			name := sprintf("t%d-%s", t.templates[x].ID(), key)
+			name := sprintf("t%s-%s", t.templates[x].ID(), key)
 			childrenImgs[name] = val
 		}
 	}
 
 	return childrenImgs
+}
+
+// childrensTemplates returns the next layer of children templates, it doesn't dig into
+// children of children.
+func (t *FpdfTpl) childrensTemplates() []Template {
+	childrenTmpls := make([]Template, 0)
+
+	for x := 0; x < len(t.templates); x++ {
+		tmpls := t.templates[x].Templates()
+		childrenTmpls = append(childrenTmpls, tmpls...)
+	}
+
+	return childrenTmpls
 }
 
 // GobEncode encodes the receiving template into a byte buffer. Use GobDecode
@@ -172,33 +183,32 @@ func (t *FpdfTpl) GobEncode() ([]byte, error) {
 	w := new(bytes.Buffer)
 	encoder := gob.NewEncoder(w)
 
-	err := encoder.Encode(t.templates)
-	childrenImgs := t.childrenImages()
+	childrensTemplates := t.childrensTemplates()
+	firstClassTemplates := make([]Template, 0)
 
-	if err == nil {
-		encoder.Encode(len(t.images))
-	}
-
-	for key, img := range t.images {
-		// if the image has already been saved as a child, then
-		// save nil so we don't duplicate data
-		err = encoder.Encode(key)
-
-		if err != nil {
-			break
-		}
-
-		if _, ok := childrenImgs[key]; ok {
-			err = encoder.Encode("p")
-		} else {
-			err = encoder.Encode("o")
-			if err == nil {
-				err = encoder.Encode(img)
+found_continue:
+	for x := 0; x < len(t.templates); x++ {
+		for y := 0; y < len(childrensTemplates); y++ {
+			if childrensTemplates[y].ID() == t.templates[x].ID() {
+				continue found_continue
 			}
 		}
+
+		firstClassTemplates = append(firstClassTemplates, t.templates[x])
 	}
+	err := encoder.Encode(firstClassTemplates)
+
+	childrenImgs := t.childrenImages()
+	firstClassImgs := make(map[string]*ImageInfoType)
+
+	for key, img := range t.images {
+		if _, ok := childrenImgs[key]; !ok {
+			firstClassImgs[key] = img
+		}
+	}
+
 	if err == nil {
-		err = encoder.Encode(t.id)
+		err = encoder.Encode(firstClassImgs)
 	}
 	if err == nil {
 		err = encoder.Encode(t.corner)
@@ -221,55 +231,27 @@ func (t *FpdfTpl) GobDecode(buf []byte) error {
 	r := bytes.NewBuffer(buf)
 	decoder := gob.NewDecoder(r)
 
-	templates := make([]*FpdfTpl, 0)
-	err := decoder.Decode(&templates)
-	t.templates = make([]Template, len(templates))
+	firstClassTemplates := make([]*FpdfTpl, 0)
+	err := decoder.Decode(&firstClassTemplates)
+	t.templates = make([]Template, len(firstClassTemplates))
 
-	for x := 0; x < len(templates); x++ {
-		t.templates[x] = templates[x]
+	for x := 0; x < len(t.templates); x++ {
+		t.templates[x] = Template(firstClassTemplates[x])
 	}
 
-	var numImgs int
-	if err == nil {
-		err = decoder.Decode(&numImgs)
-	}
+	firstClassImages := t.childrenImages()
+
+	t.templates = append(t.childrensTemplates(), t.templates...)
 
 	t.images = make(map[string]*ImageInfoType)
-	childrenImgs := t.childrenImages()
-
-	for x := 0; x < numImgs; x++ {
-		var key string
-		var tpe string
-
-		if err == nil {
-			err = decoder.Decode(&key)
-		}
-
-		if err == nil {
-			err = decoder.Decode(&tpe)
-		}
-
-		if err == nil {
-			switch tpe {
-			case "p":
-				if _, ok := childrenImgs[key]; !ok {
-					err = fmt.Errorf("Encoded template is corrupt, could not find image %s", key)
-				} else {
-					t.images[key] = childrenImgs[key]
-				}
-			case "o":
-				var img *ImageInfoType
-				err = decoder.Decode(&img)
-
-				if err == nil {
-					t.images[key] = img
-				}
-			}
-		}
-	}
 	if err == nil {
-		err = decoder.Decode(&t.id)
+		err = decoder.Decode(&t.images)
 	}
+
+	for k, v := range firstClassImages {
+		t.images[k] = v
+	}
+
 	if err == nil {
 		err = decoder.Decode(&t.corner)
 	}
