@@ -681,9 +681,9 @@ type fontDefType struct {
 	File         string       // "Redressed.z"
 	Size1, Size2 int          // Type1 values
 	OriginalSize int          // Size of uncompressed font file
-	I            int          // 1-based position in font list, set by font loader, not this program
 	N            int          // Set by font loader
 	DiffN        int          // Position of diff in app array, set by font loader
+	i            string       // 1-based position in font list, set by font loader, not this program
 }
 
 type fontInfoType struct {
