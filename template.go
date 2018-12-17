@@ -85,7 +85,7 @@ func (f *Fpdf) UseTemplateScaled(t Template, corner PointType, size SizeType) {
 		f.templates[tt.ID()] = tt
 	}
 	for name, ti := range t.Images() {
-		name = sprintf("t%d-%s", t.ID(), name)
+		name = sprintf("t%s-%s", t.ID(), name)
 		f.images[name] = ti
 	}
 
@@ -97,29 +97,12 @@ func (f *Fpdf) UseTemplateScaled(t Template, corner PointType, size SizeType) {
 	ty := (f.curPageSize.Ht - corner.Y - size.Ht) * f.k
 
 	f.outf("q %.4f 0 0 %.4f %.4f %.4f cm", scaleX, scaleY, tx, ty) // Translate
-	f.outf("/TPL%d Do Q", t.ID())
-}
-
-var nextTemplateIDChannel = func() chan int64 {
-	ch := make(chan int64)
-	go func() {
-		var nextID int64 = 1
-		for {
-			ch <- nextID
-			nextID++
-		}
-	}()
-	return ch
-}()
-
-// GenerateTemplateID gives the next template ID. These numbers are global so that they can never clash.
-func GenerateTemplateID() int64 {
-	return <-nextTemplateIDChannel
+	f.outf("/TPL%s Do Q", t.ID())
 }
 
 // Template is an object that can be written to, then used and re-used any number of times within a document.
 type Template interface {
-	ID() int64
+	ID() string
 	Size() (PointType, SizeType)
 	Bytes() []byte
 	Images() map[string]*ImageInfoType
@@ -201,7 +184,7 @@ func (f *Fpdf) putTemplates() {
 			for _, tt := range tTemplates {
 				id := tt.ID()
 				if objID, ok := f.templateObjects[id]; ok {
-					f.outf("/TPL%d %d 0 R", id, objID)
+					f.outf("/TPL%s %d 0 R", id, objID)
 				}
 			}
 			f.out(">>")
@@ -221,8 +204,8 @@ func (f *Fpdf) putTemplates() {
 	}
 }
 
-func templateKeyList(mp map[int64]Template, sort bool) (keyList []int64) {
-	var key int64
+func templateKeyList(mp map[string]Template, sort bool) (keyList []string) {
+	var key string
 	for key = range mp {
 		keyList = append(keyList, key)
 	}
@@ -239,12 +222,12 @@ func templateKeyList(mp map[int64]Template, sort bool) (keyList []int64) {
 }
 
 // sortTemplates puts templates in a suitable order based on dependices
-func sortTemplates(templates map[int64]Template, catalogSort bool) []Template {
+func sortTemplates(templates map[string]Template, catalogSort bool) []Template {
 	chain := make([]Template, 0, len(templates)*2)
 
 	// build a full set of dependency chains
-	var keyList []int64
-	var key int64
+	var keyList []string
+	var key string
 	var t Template
 	keyList = templateKeyList(templates, catalogSort)
 	for _, key = range keyList {
