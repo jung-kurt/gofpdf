@@ -23,6 +23,7 @@ package gofpdf
 
 import (
 	"bytes"
+	"crypto/sha1"
 	"encoding/binary"
 	"encoding/json"
 	"fmt"
@@ -1578,7 +1579,7 @@ func (f *Fpdf) AddFontFromBytes(familyStr, styleStr string, jsonFileBytes, zFile
 	}
 
 	// search existing encodings
-	info.I = len(f.fonts)
+	info.i = fmt.Sprintf("%x", sha1.Sum(jsonFileBytes))
 
 	if len(info.Diff) > 0 {
 		n := -1
@@ -1648,7 +1649,6 @@ func (f *Fpdf) AddFontFromReader(familyStr, styleStr string, r io.Reader) {
 	if f.err != nil {
 		return
 	}
-	info.I = len(f.fonts)
 	if len(info.Diff) > 0 {
 		// Search existing encodings
 		n := -1
@@ -1783,7 +1783,7 @@ func (f *Fpdf) SetFont(familyStr, styleStr string, size float64) {
 	f.fontSize = size / f.k
 	f.currentFont = f.fonts[fontkey]
 	if f.page > 0 {
-		f.outf("BT /F%d %.2f Tf ET", f.currentFont.I, f.fontSizePt)
+		f.outf("BT /F%s %.2f Tf ET", f.currentFont.i, f.fontSizePt)
 	}
 	return
 }
@@ -1797,7 +1797,7 @@ func (f *Fpdf) SetFontSize(size float64) {
 	f.fontSizePt = size
 	f.fontSize = size / f.k
 	if f.page > 0 {
-		f.outf("BT /F%d %.2f Tf ET", f.currentFont.I, f.fontSizePt)
+		f.outf("BT /F%s %.2f Tf ET", f.currentFont.i, f.fontSizePt)
 	}
 }
 
@@ -1810,7 +1810,7 @@ func (f *Fpdf) SetFontUnitSize(size float64) {
 	f.fontSizePt = size * f.k
 	f.fontSize = size
 	if f.page > 0 {
-		f.outf("BT /F%d %.2f Tf ET", f.currentFont.I, f.fontSizePt)
+		f.outf("BT /F%s %.2f Tf ET", f.currentFont.i, f.fontSizePt)
 	}
 }
 
@@ -2953,6 +2953,7 @@ func (f *Fpdf) loadfont(r io.Reader) (def fontDefType) {
 	if err != nil {
 		f.err = err
 	}
+	def.i = fmt.Sprintf("%x", sha1.Sum(buf.Bytes()))
 	// dump(def)
 	return
 }
@@ -3585,11 +3586,11 @@ func (f *Fpdf) putresourcedict() {
 			keyList = append(keyList, key)
 		}
 		if f.catalogSort {
-			sort.SliceStable(keyList, func(i, j int) bool { return f.fonts[keyList[i]].I < f.fonts[keyList[j]].I })
+			sort.SliceStable(keyList, func(i, j int) bool { return f.fonts[keyList[i]].i < f.fonts[keyList[j]].i })
 		}
 		for _, key = range keyList {
 			font = f.fonts[key]
-			f.outf("/F%d %d 0 R", font.I, font.N)
+			f.outf("/F%s %d 0 R", font.i, font.N)
 		}
 	}
 	f.out(">>")

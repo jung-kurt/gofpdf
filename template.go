@@ -128,7 +128,7 @@ func (f *Fpdf) templateFontCatalog() {
 	}
 	for _, key = range keyList {
 		font = f.fonts[key]
-		f.outf("/F%d %d 0 R", font.I, font.N)
+		f.outf("/F%s %d 0 R", font.i, font.N)
 	}
 	f.out(">>")
 }
