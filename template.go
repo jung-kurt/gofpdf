@@ -178,7 +178,7 @@ func (f *Fpdf) putTemplates() {
 				for _, key = range keyList {
 					// for _, ti := range tImages {
 					ti = tImages[key]
-					f.outf("/I%d %d 0 R", ti.i, ti.n)
+					f.outf("/I%s %d 0 R", ti.i, ti.n)
 				}
 			}
 			for _, tt := range tTemplates {

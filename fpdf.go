@@ -23,7 +23,6 @@ package gofpdf
 
 import (
 	"bytes"
-	"crypto/sha1"
 	"encoding/binary"
 	"encoding/json"
 	"fmt"
@@ -1578,9 +1577,12 @@ func (f *Fpdf) AddFontFromBytes(familyStr, styleStr string, jsonFileBytes, zFile
 		return
 	}
 
-	// search existing encodings
-	info.i = fmt.Sprintf("%x", sha1.Sum(jsonFileBytes))
+	if info.i, err = generateFontID(info); err != nil {
+		f.err = err
+		return
+	}
 
+	// search existing encodings
 	if len(info.Diff) > 0 {
 		n := -1
 
@@ -2523,7 +2525,7 @@ func (f *Fpdf) imageOut(info *ImageInfoType, x, y, w, h float64, allowNegativeX,
 	}
 	// dbg("h %.2f", h)
 	// q 85.04 0 0 NaN 28.35 NaN cm /I2 Do Q
-	f.outf("q %.5f 0 0 %.5f %.5f %.5f cm /I%d Do Q", w*f.k, h*f.k, x*f.k, (f.h-(y+h))*f.k, info.i)
+	f.outf("q %.5f 0 0 %.5f %.5f %.5f cm /I%s Do Q", w*f.k, h*f.k, x*f.k, (f.h-(y+h))*f.k, info.i)
 	if link > 0 || len(linkStr) > 0 {
 		f.newLink(x, y, w, h, link, linkStr)
 	}
@@ -2660,7 +2662,10 @@ func (f *Fpdf) RegisterImageOptionsReader(imgName string, options ImageOptions, 
 	if f.err != nil {
 		return
 	}
-	info.i = len(f.images) + 1
+
+	if info.i, f.err = generateImageID(info); f.err != nil {
+		return
+	}
 	f.images[imgName] = info
 
 	return
@@ -2952,8 +2957,12 @@ func (f *Fpdf) loadfont(r io.Reader) (def fontDefType) {
 	err = json.Unmarshal(buf.Bytes(), &def)
 	if err != nil {
 		f.err = err
+		return
 	}
-	def.i = fmt.Sprintf("%x", sha1.Sum(buf.Bytes()))
+
+	if def.i, err = generateFontID(def); err != nil {
+		f.err = err
+	}
 	// dump(def)
 	return
 }
@@ -3556,7 +3565,7 @@ func (f *Fpdf) putxobjectdict() {
 		}
 		for _, key = range keyList {
 			image = f.images[key]
-			f.outf("/I%d %d 0 R", image.i, image.n)
+			f.outf("/I%s %d 0 R", image.i, image.n)
 		}
 	}
 	{
