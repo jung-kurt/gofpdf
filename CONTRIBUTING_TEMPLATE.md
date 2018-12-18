@@ -23,7 +23,7 @@ Here are guidelines for making submissions. Your change should:
 [Pull requests](https://help.github.com/articles/using-pull-requests) work nicely as a means of contributing your changes.
 
 # Code Review Comments and Effective Go Guidelines
-Every pull request is automatically checked against the following guidelines from [Effective Go](https://golang.org/doc/effective_go.html) and [Code Review Comments](https://github.com/golang/go/wiki/CodeReviewComments)
+[CodeLingo](https://codelingo.io) automatically checks every pull request against the following guidelines from [Effective Go](https://golang.org/doc/effective_go.html) and [Code Review Comments](https://github.com/golang/go/wiki/CodeReviewComments).
 
 {{range .}}
 ## {{.title}}

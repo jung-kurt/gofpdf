@@ -23,18 +23,7 @@ Here are guidelines for making submissions. Your change should:
 [Pull requests](https://help.github.com/articles/using-pull-requests) work nicely as a means of contributing your changes.
 
 # Code Review Comments and Effective Go Guidelines
-Every pull request is automatically checked against the following guidelines from [Effective Go](https://golang.org/doc/effective_go.html) and [Code Review Comments](https://github.com/golang/go/wiki/CodeReviewComments)
-
-
-## Single Method Interface Name
-By convention, one-method interfaces are named by the method name plus an -er suffix 
-or similar modification to construct an agent noun: Reader, Writer, Formatter, CloseNotifier etc.
-
-There are a number of such names and it's productive to honor them and the function names they capture. 
-Read, Write, Close, Flush, String and so on have canonical signatures and meanings. To avoid confusion, 
-don't give your method one of those names unless it has the same signature and meaning. Conversely, 
-if your type implements a method with the same meaning as a method on a well-known type, give it the 
-same name and signature; call your string-converter method String not ToString.
+[CodeLingo](https://codelingo.io) automatically checks every pull request against the following guidelines from [Effective Go](https://golang.org/doc/effective_go.html) and [Code Review Comments](https://github.com/golang/go/wiki/CodeReviewComments).
 
 
 ## Avoid Annotations in Comments
@@ -58,6 +47,32 @@ The package comment should introduce the package and provide information relevan
 whole. It will appear first on the godoc page and should set up the detailed documentation that follows.
 
 
+## Single Method Interface Name
+By convention, one-method interfaces are named by the method name plus an -er suffix 
+or similar modification to construct an agent noun: Reader, Writer, Formatter, CloseNotifier etc.
+
+There are a number of such names and it's productive to honor them and the function names they capture. 
+Read, Write, Close, Flush, String and so on have canonical signatures and meanings. To avoid confusion, 
+don't give your method one of those names unless it has the same signature and meaning. Conversely, 
+if your type implements a method with the same meaning as a method on a well-known type, give it the 
+same name and signature; call your string-converter method String not ToString.
+
+
+## Do Not Discard Errors
+Do not discard errors using _ variables. If a function returns an error, 
+check it to make sure the function succeeded. Handle the error, return it, or, 
+in truly exceptional situations, panic.
+
+
+## Go Error Format
+Error strings should not be capitalized (unless beginning with proper nouns 
+or acronyms) or end with punctuation, since they are usually printed following
+other context. That is, use fmt.Errorf("something bad") not fmt.Errorf("Something bad"),
+so that log.Printf("Reading %s: %v", filename, err) formats without a spurious 
+capital letter mid-message. This does not apply to logging, which is implicitly
+line-oriented and not combined inside other messages.
+
+
 ## Use Crypto Rand
 Do not use package math/rand to generate keys, even 
 throwaway ones. Unseeded, the generator is completely predictable. 
@@ -79,19 +94,4 @@ pass Contexts explicitly along the entire function call chain from incoming RPCs
 and HTTP requests to outgoing requests.
 
 Most functions that use a Context should accept it as their first parameter.
-
-
-## Do Not Discard Errors
-Do not discard errors using _ variables. If a function returns an error, 
-check it to make sure the function succeeded. Handle the error, return it, or, 
-in truly exceptional situations, panic.
-
-
-## Go Error Format
-Error strings should not be capitalized (unless beginning with proper nouns 
-or acronyms) or end with punctuation, since they are usually printed following
-other context. That is, use fmt.Errorf("something bad") not fmt.Errorf("Something bad"),
-so that log.Printf("Reading %s: %v", filename, err) formats without a spurious 
-capital letter mid-message. This does not apply to logging, which is implicitly
-line-oriented and not combined inside other messages.
 
