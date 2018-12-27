@@ -2325,3 +2325,53 @@ func ExampleFpdf_SetPageBox() {
 	// Output:
 	// Successfully generated pdf/Fpdf_PageBox.pdf
 }
+
+// ExampleFpdf_SubWrite demonstrates subscripted and superscripted text
+// Adapted from http://www.fpdf.org/en/script/script61.php
+func ExampleFpdf_SubWrite() {
+
+	const (
+		fontSize = 12
+		halfX    = 105
+	)
+
+	pdf := gofpdf.New("P", "mm", "A4", "") // 210mm x 297mm
+	pdf.AddPage()
+	pdf.SetFont("Arial", "", fontSize)
+	_, lineHt := pdf.GetFontSize()
+
+	pdf.Write(lineHt, "Hello World!")
+	pdf.SetX(halfX)
+	pdf.Write(lineHt, "This is standard text.\n")
+	pdf.Ln(lineHt * 2)
+
+	pdf.SubWrite(10, "H", 33, 0, 0, "")
+	pdf.Write(10, "ello World!")
+	pdf.SetX(halfX)
+	pdf.Write(10, "This is text with a capital first letter.\n")
+	pdf.Ln(lineHt * 2)
+
+	pdf.SubWrite(lineHt, "Y", 6, 0, 0, "")
+	pdf.Write(lineHt, "ou can also begin the sentence with a small letter. And word wrap also works if the line is too long, like this one is.")
+	pdf.SetX(halfX)
+	pdf.Write(lineHt, "This is text with a small first letter.\n")
+	pdf.Ln(lineHt * 2)
+
+	pdf.Write(lineHt, "The world has a lot of km")
+	pdf.SubWrite(lineHt, "2", 6, 4, 0, "")
+	pdf.SetX(halfX)
+	pdf.Write(lineHt, "This is text with a superscripted letter.\n")
+	pdf.Ln(lineHt * 2)
+
+	pdf.Write(lineHt, "The world has a lot of H")
+	pdf.SubWrite(lineHt, "2", 6, -3, 0, "")
+	pdf.Write(lineHt, "O")
+	pdf.SetX(halfX)
+	pdf.Write(lineHt, "This is text with a subscripted letter.\n")
+
+	fileStr := example.Filename("Fpdf_SubWrite")
+	err := pdf.OutputFileAndClose(fileStr)
+	example.Summary(err, fileStr)
+	// Output:
+	// Successfully generated pdf/Fpdf_SubWrite.pdf
+}
