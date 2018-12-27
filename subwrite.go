@@ -10,6 +10,8 @@ package gofpdf
 // identifier returned by AddLink() or 0 for no internal link. linkStr is a
 // target URL or empty for no external link. A non--zero value for link takes
 // precedence over linkStr.
+//
+// The SubWrite example demonstrates this method.
 func (f *Fpdf) SubWrite(ht float64, str string, subFontSize, subOffset float64, link int, linkStr string) {
 	if f.err != nil {
 		return
