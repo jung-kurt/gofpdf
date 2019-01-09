@@ -59,7 +59,7 @@ go get -u -v github.com/jung-kurt/gofpdf/...
 
 The following Go code generates a simple PDF file.
 
-```
+```go
 pdf := gofpdf.New("P", "mm", "A4", "")
 pdf.AddPage()
 pdf.SetFont("Arial", "B", 16)
