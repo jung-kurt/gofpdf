@@ -799,6 +799,13 @@ func ExampleFpdf_WriteAligned() {
 	pdf.WriteAligned(0, 35, "This text is aligned Center", "C")
 	pdf.Ln(35)
 	pdf.WriteAligned(0, 35, "This text is aligned Right", "R")
+	pdf.Ln(35)
+	line := "This text fill line using word spacing. This can by used to write justified text"
+	leftMargin, _, rightMargin, _ := pdf.GetMargins()
+	pageWidth, _ := pdf.GetPageSize()
+	pageWidth -= leftMargin + rightMargin
+	pdf.SetWordSpacing((pageWidth - pdf.GetStringWidth(line)) / float64(strings.Count(line, " ")))
+	pdf.WriteAligned(pageWidth, 35, line, "L")
 	fileStr := example.Filename("Fpdf_WriteAligned")
 	err := pdf.OutputFileAndClose(fileStr)
 	example.Summary(err, fileStr)
