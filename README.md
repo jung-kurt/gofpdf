@@ -59,7 +59,7 @@ go get -u -v github.com/jung-kurt/gofpdf/...
 
 The following Go code generates a simple PDF file.
 
-```go
+```
 pdf := gofpdf.New("P", "mm", "A4", "")
 pdf.AddPage()
 pdf.SetFont("Arial", "B", 16)
@@ -224,7 +224,8 @@ of contents functionality. Andy Bakun identified and corrected a problem in
 which the internal catalogs were not sorted stably. Paul Montag added encoding
 and decoding functionality for templates, including images that are embedded in
 templates; this allows templates to be stored independently of gofpdf. Paul
-also added support for page boxes used in printing PDF documents.
+also added support for page boxes used in printing PDF documents. Wojciech
+Matusiak added supported for word spacing.
 
 ## Roadmap
 

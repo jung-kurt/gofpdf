@@ -238,7 +238,8 @@ of contents functionality. Andy Bakun identified and corrected a problem in
 which the internal catalogs were not sorted stably. Paul Montag added encoding
 and decoding functionality for templates, including images that are embedded in
 templates; this allows templates to be stored independently of gofpdf. Paul
-also added support for page boxes used in printing PDF documents.
+also added support for page boxes used in printing PDF documents. Wojciech
+Matusiak added supported for word spacing.
 
 Roadmap
 
