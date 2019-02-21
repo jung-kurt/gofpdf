@@ -1899,7 +1899,7 @@ func (f *Fpdf) Text(x, y float64, txtStr string) {
 
 // SetWordSpacing sets spacing between words of following text
 func (f *Fpdf) SetWordSpacing(space float64) {
-	f.out(sprintf("%.3f Tw", space*f.k))
+	f.out(sprintf("%.5f Tw", space*f.k))
 }
 
 // SetAcceptPageBreakFunc allows the application to control where page breaks
