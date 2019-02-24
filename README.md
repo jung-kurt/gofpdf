@@ -38,7 +38,7 @@ extensions may depend on packages besdides those found in the standard library.
 Like FPDF version 1.7, from which gofpdf is derived, this package does not yet
 support UTF-8 fonts. In particular, languages that require more than one code
 page such as Chinese, Japanese, and Arabic are not currently supported. This is
-explained in [[issue 109](https://github.com/jung-kurt/gofpdf/issues/109)](https://github.com/jung-kurt/gofpdf/issues/109).
+explained in [issue 109](https://github.com/jung-kurt/gofpdf/issues/109).
 However, support is provided to automatically translate UTF-8 runes to code
 page encodings for languages that have fewer than 256 glyphs.
 
@@ -89,7 +89,7 @@ func main() {
 ```
 
 See the functions in the
-[[fpdf_test.go](https://github.com/jung-kurt/gofpdf/blob/master/fpdf_test.go)](https://github.com/jung-kurt/gofpdf/blob/master/[fpdf_test.go](https://github.com/jung-kurt/gofpdf/blob/master/fpdf_test.go))
+[fpdf_test.go](https://github.com/jung-kurt/gofpdf/blob/master/fpdf_test.go)
 file (shown as examples in this documentation) for more advanced PDF examples.
 
 ##  Errors
@@ -110,7 +110,7 @@ retrieved with a call to Error().
 
 This package is a relatively straightforward translation from the original
 [FPDF](http://www.fpdf.org/) library written in PHP (despite the caveat in the
-introduction to [[Effective Go](https://golang.org/doc/effective_go.html)](https://golang.org/doc/effective_go.html)).
+introduction to [Effective Go](https://golang.org/doc/effective_go.html).
 The API names have been retained even though the Go idiom would suggest
 otherwise (for example, pdf.GetX() is used rather than simply pdf.X()). The
 similarity of the two libraries makes the original FPDF website a good source
@@ -132,8 +132,9 @@ example PDFs. These can be found in the gofpdf/pdf directory after the tests
 complete.
 
 Please note that these examples run in the context of a test. In order run an
-example as a standalone application, you'll need to examine [[fpdf_test.go](https://github.com/jung-kurt/gofpdf/blob/master/fpdf_test.go)](https://github.com/jung-kurt/gofpdf/blob/master/[fpdf_test.go](https://github.com/jung-kurt/gofpdf/blob/master/fpdf_test.go)) for
-some helper routines, for example exampleFilename() and summary().
+example as a standalone application, you'll need to examine 
+[fpdf_test.go](https://github.com/jung-kurt/gofpdf/blob/master/fpdf_test.go)
+for some helper routines, for example exampleFilename() and summary().
 
 Example PDFs can be compared with reference copies in order to verify that they
 have been generated as expected. This comparison will be performed if a PDF
@@ -170,7 +171,7 @@ the font subdirectory and run the command as in the following example.
 In your PDF generation code, call AddFont() to load the font and, as with the
 standard fonts, SetFont() to begin using it. Most examples, including the
 package example, demonstrate this method. Good sources of free, open-source
-fonts include [Google Fonts]([Google Fonts](http://www.google.com/fonts/)) and [DejaVu Fonts]([DejaVu Fonts](http://dejavu-fonts.org/)).
+fonts include [Google Fonts](http://www.google.com/fonts/) and [DejaVu Fonts](http://dejavu-fonts.org/).
 
 ##  Related Packages
 
@@ -190,11 +191,11 @@ Here are guidelines for making submissions. Your change should
 * be compatible with the MIT License
 * be properly documented
 * be formatted with `go fmt`
-* include an example in [[fpdf_test.go](https://github.com/jung-kurt/gofpdf/blob/master/fpdf_test.go)](https://github.com/jung-kurt/gofpdf/blob/master/[fpdf_test.go](https://github.com/jung-kurt/gofpdf/blob/master/fpdf_test.go)) if appropriate
-* conform to the standards of [[golint](https://github.com/golang/lint) and
-[[go vet](https://godoc.org/golang.org/x/tools/cmd/vet), that is, `golint .` and
+* include an example in [fpdf_test.go](https://github.com/jung-kurt/gofpdf/blob/master/fpdf_test.go) if appropriate
+* conform to the standards of [golint](https://github.com/golang/lint) and
+[go vet](https://godoc.org/golang.org/x/tools/cmd/vet), that is, `golint .` and
 `go vet .` should not generate any warnings
-* not diminish [[test coverage](https://blog.golang.org/cover)
+* not diminish [test coverage](https://blog.golang.org/cover)
 
 ##  License
 
@@ -242,7 +243,7 @@ Matusiak added supported for word spacing.
 ##  Roadmap
 
 * Handle UTF-8 source text natively. Until then, automatic translation of
-UTF-8 runes to code page bytes is provided.
+  UTF-8 runes to code page bytes is provided.
 * Improve test coverage as reported by the coverage tool.
 
 
