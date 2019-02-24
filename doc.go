@@ -26,7 +26,7 @@ Features
 
 • Automatic page breaks, line breaks, and text justification
 
-• Inclusion of JPEG, PNG, GIF, TIFF and basic path-only SVG images
+• Inclusion of JPEG, PNG, GIF and basic path-only SVG images
 
 • Colors, gradients and alpha channel transparency
 
