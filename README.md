@@ -4,7 +4,6 @@
 
 [![MIT licensed](https://img.shields.io/badge/license-MIT-blue.svg)](https://raw.githubusercontent.com/jung-kurt/gofpdf/master/license.txt)
 [![GoDoc](https://godoc.org/github.com/jung-kurt/gofpdf?status.svg)](https://godoc.org/github.com/jung-kurt/gofpdf)
-[![Build Status](https://travis-ci.org/jung-kurt/gofpdf.svg?branch=master)](https://travis-ci.org/jung-kurt/gofpdf)
 
 Package gofpdf implements a PDF document generator with high level support for
 text, drawing and images.
@@ -31,9 +30,9 @@ text, drawing and images.
 gofpdf has no dependencies other than the Go standard library. All tests pass
 on Linux, Mac and Windows platforms.
 
-Contributed extensions to gofpdf, such as barcode support, are located in the
-[gofpdfcontrib](https://github.com/jung-kurt/gofpdfcontrib) repository. These
-extensions may depend on packages besdides those found in the standard library.
+Contributed extensions to gofpdf that depend on packages other than those found
+in the standard library, such as barcode support, are located in the
+[gofpdfcontrib](https://github.com/jung-kurt/gofpdfcontrib) repository.
 
 Like FPDF version 1.7, from which gofpdf is derived, this package does not yet
 support UTF-8 fonts. In particular, languages that require more than one code
