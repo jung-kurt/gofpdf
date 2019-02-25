@@ -44,13 +44,19 @@ page encodings for languages that have fewer than 256 glyphs.
 
 ##  Installation
 
-If you use Go modules, you can install gofpdf as follows:
+If you use Go modules, simply import `github.com/jung-kurt/gofpdf/v2` and
+gofpdf will be available automatically when you build your application. If you
+want to view or modify the source tree, execute the following in a directory
+that is outside of your $GOPATH.
 
 ```
 git clone https://github.com/jung-kurt/gofpdf.git
+cd gofpdf
+git checkout -t origin/v2
 ```
 
-If you currently use the $GOPATH scheme, install the package as follows:
+If you currently use the $GOPATH scheme, install the package with the following
+command.
 
 ```
 go get github.com/jung-kurt/gofpdf/...
@@ -73,7 +79,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/jung-kurt/gofpdf"
+	"github.com/jung-kurt/gofpdf/v2"
 )
 
 func main() {
