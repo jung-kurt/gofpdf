@@ -21,7 +21,7 @@ import (
 	"fmt"
 
 	"github.com/jung-kurt/gofpdf"
-	"github.com/jung-kurt/gofpdf/internal/example"
+	"../gofpdf/internal/example"
 )
 
 func ExampleTtfParse() {

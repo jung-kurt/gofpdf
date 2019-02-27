@@ -32,8 +32,8 @@ import (
 	"time"
 
 	"github.com/jung-kurt/gofpdf"
-	"github.com/jung-kurt/gofpdf/internal/example"
-	"github.com/jung-kurt/gofpdf/internal/files"
+	"../gofpdf/internal/example"
+	"../gofpdf/internal/files"
 )
 
 func init() {
