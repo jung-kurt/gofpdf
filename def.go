@@ -442,6 +442,7 @@ type Pdf interface {
 	SetMargins(left, top, right float64)
 	SetPageBoxRec(t string, pb PageBox)
 	SetPageBox(t string, x, y, wd, ht float64)
+	SetPage(pageNum int)
 	SetProtection(actionFlag byte, userPassStr, ownerPassStr string)
 	SetRightMargin(margin float64)
 	SetSubject(subjectStr string, isUTF8 bool)

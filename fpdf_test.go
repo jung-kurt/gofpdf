@@ -23,6 +23,7 @@ import (
 	"io"
 	"io/ioutil"
 	"math"
+	"math/rand"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -2381,4 +2382,62 @@ func ExampleFpdf_SubWrite() {
 	example.Summary(err, fileStr)
 	// Output:
 	// Successfully generated pdf/Fpdf_SubWrite.pdf
+}
+
+// ExampleFpdf_SetPage demomstrates the SetPage() method, allowing content
+// generation to be deferred until all pages have been added.
+func ExampleFpdf_SetPage() {
+	rnd := rand.New(rand.NewSource(0)) // Make reproducable documents
+	pdf := gofpdf.New("L", "cm", "A4", "")
+	pdf.SetFont("Times", "", 12)
+
+	var time []float64
+	temperaturesFromSensors := make([][]float64, 5)
+	maxs := []float64{25, 41, 89, 62, 11}
+	for i := range temperaturesFromSensors {
+		temperaturesFromSensors[i] = make([]float64, 0)
+	}
+
+	for i := 0.0; i < 100; i += 0.5 {
+		time = append(time, i)
+		for j, sensor := range temperaturesFromSensors {
+			dataValue := rnd.Float64() * maxs[j]
+			sensor = append(sensor, dataValue)
+			temperaturesFromSensors[j] = sensor
+		}
+	}
+	var graphs []gofpdf.GridType
+	var pageNums []int
+	xMax := time[len(time)-1]
+	for i := range temperaturesFromSensors {
+		//Create a new page and graph for each sensor we want to graph.
+		pdf.AddPage()
+		pdf.Ln(1)
+		//Custom label per sensor
+		pdf.WriteAligned(0, 0, "Temperature Sensor "+strconv.Itoa(i+1)+" (C) vs Time (min)", "C")
+		pdf.Ln(0.5)
+		graph := gofpdf.NewGrid(pdf.GetX(), pdf.GetY(), 20, 10)
+		graph.TickmarksContainX(0, xMax)
+		//Custom Y axis
+		graph.TickmarksContainY(0, maxs[i])
+		graph.Grid(pdf)
+		//Save references and locations.
+		graphs = append(graphs, graph)
+		pageNums = append(pageNums, pdf.PageNo())
+	}
+	// For each X, graph the Y in each sensor.
+	for i, currTime := range time {
+		for j, sensor := range temperaturesFromSensors {
+			pdf.SetPage(pageNums[j])
+			graph := graphs[j]
+			temperature := sensor[i]
+			pdf.Circle(graph.X(currTime), graph.Y(temperature), 0.04, "D")
+		}
+	}
+
+	fileStr := example.Filename("Fpdf_SetPage")
+	err := pdf.OutputFileAndClose(fileStr)
+	example.Summary(err, fileStr)
+	// Output:
+	// Successfully generated pdf/Fpdf_SetPage.pdf
 }
