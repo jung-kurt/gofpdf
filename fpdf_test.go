@@ -2387,6 +2387,7 @@ func ExampleFpdf_SubWrite() {
 // ExampleFpdf_SetPage demomstrates the SetPage() method, allowing content
 // generation to be deferred until all pages have been added.
 func ExampleFpdf_SetPage() {
+	rnd := rand.New(rand.NewSource(0)) // Make reproducable documents
 	pdf := gofpdf.New("L", "cm", "A4", "")
 	pdf.SetFont("Times", "", 12)
 
@@ -2400,7 +2401,7 @@ func ExampleFpdf_SetPage() {
 	for i := 0.0; i < 100; i += 0.5 {
 		time = append(time, i)
 		for j, sensor := range temperaturesFromSensors {
-			dataValue := rand.Float64() * maxs[j]
+			dataValue := rnd.Float64() * maxs[j]
 			sensor = append(sensor, dataValue)
 			temperaturesFromSensors[j] = sensor
 		}
