@@ -2384,8 +2384,10 @@ func ExampleFpdf_SubWrite() {
 	// Successfully generated pdf/Fpdf_SubWrite.pdf
 }
 
-func ExampleChangePage() {
-	pdf := gofpdf.New("P", "cm", "A4", "")
+// ExampleFpdf_SetPage demomstrates the SetPage() method, allowing content
+// generation to be deferred until all pages have been added.
+func ExampleFpdf_SetPage() {
+	pdf := gofpdf.New("L", "cm", "A4", "")
 	pdf.SetFont("Times", "", 12)
 
 	var time []float64
@@ -2435,4 +2437,6 @@ func ExampleChangePage() {
 	fileStr := example.Filename("Fpdf_SetPage")
 	err := pdf.OutputFileAndClose(fileStr)
 	example.Summary(err, fileStr)
+	// Output:
+	// Successfully generated pdf/Fpdf_SetPage.pdf
 }

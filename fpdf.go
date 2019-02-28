@@ -383,7 +383,9 @@ func (f *Fpdf) SetPageBoxRec(t string, pb PageBox) {
 func (f *Fpdf) SetPageBox(t string, x, y, wd, ht float64) {
 	f.SetPageBoxRec(t, PageBox{SizeType{Wd: wd, Ht: ht}, PointType{X: x, Y: y}})
 }
+
 // SetPage sets the current page to that of a valid page in the PDF document.
+// The SetPage() example demonstrates this method.
 func (f *Fpdf) SetPage(pageNum int) {
 	if (pageNum > 0) && (pageNum < len(f.pages)) {
 		f.page = pageNum
@@ -677,7 +679,7 @@ func (f *Fpdf) AddPageFormat(orientationStr string, size SizeType) {
 		return
 	}
 	if f.page != len(f.pages)-1 {
-		f.page = len(f.pages)-1
+		f.page = len(f.pages) - 1
 	}
 	if f.state == 0 {
 		f.open()
@@ -693,7 +695,7 @@ func (f *Fpdf) AddPageFormat(orientationStr string, size SizeType) {
 	fc := f.color.fill
 	tc := f.color.text
 	cf := f.colorFlag
-	
+
 	if f.page > 0 {
 		f.inFooter = true
 		// Page footer avoid double call on footer.
