@@ -2441,3 +2441,36 @@ func ExampleFpdf_SetPage() {
 	// Output:
 	// Successfully generated pdf/Fpdf_SetPage.pdf
 }
+
+// ExampleFpdf_SetFillColor demonstrates how graphic attributes are properly
+// assigned within multiple transformations. See issue #234.
+func ExampleFpdf_SetFillColor() {
+	pdf := gofpdf.New("P", "mm", "A4", "")
+
+	pdf.AddPage()
+	pdf.TransformBegin()
+	pdf.TransformTranslateX(5)
+	pdf.TransformTranslateY(5)
+	pdf.SetLineJoinStyle("round")
+	pdf.SetLineWidth(2)
+	pdf.SetDrawColor(128, 64, 0)
+	pdf.SetFillColor(255, 127, 0)
+	pdf.Rect(0, 0, 20, 20, "FD")
+	pdf.TransformEnd()
+
+	pdf.TransformBegin()
+	pdf.TransformTranslateX(35)
+	pdf.TransformTranslateY(35)
+	pdf.SetLineJoinStyle("round")
+	pdf.SetLineWidth(2)
+	pdf.SetDrawColor(128, 64, 0)
+	pdf.SetFillColor(255, 127, 0)
+	pdf.Rect(0, 0, 20, 20, "FD")
+	pdf.TransformEnd()
+
+	fileStr := example.Filename("Fpdf_SetFillColor")
+	err := pdf.OutputFileAndClose(fileStr)
+	example.Summary(err, fileStr)
+	// Output:
+	// Successfully generated pdf/Fpdf_SetFillColor.pdf
+}
