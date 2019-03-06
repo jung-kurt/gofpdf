@@ -838,9 +838,7 @@ func rgbColorValue(r, g, b int, grayStr, fullStr string) (clr colorType) {
 // The method can be called before the first page is created. The value is
 // retained from page to page.
 func (f *Fpdf) SetDrawColor(r, g, b int) {
-	if r != f.color.draw.ir || g != f.color.draw.ig || b != f.color.draw.ib {
-		f.setDrawColor(r, g, b)
-	}
+	f.setDrawColor(r, g, b)
 }
 
 func (f *Fpdf) setDrawColor(r, g, b int) {
@@ -862,9 +860,7 @@ func (f *Fpdf) GetDrawColor() (int, int, int) {
 // -255). The method can be called before the first page is created and the
 // value is retained from page to page.
 func (f *Fpdf) SetFillColor(r, g, b int) {
-	if r != f.color.fill.ir || g != f.color.fill.ig || b != f.color.fill.ib {
-		f.setFillColor(r, g, b)
-	}
+	f.setFillColor(r, g, b)
 }
 
 func (f *Fpdf) setFillColor(r, g, b int) {
@@ -886,9 +882,7 @@ func (f *Fpdf) GetFillColor() (int, int, int) {
 // components (0 - 255). The method can be called before the first page is
 // created. The value is retained from page to page.
 func (f *Fpdf) SetTextColor(r, g, b int) {
-	if r != f.color.text.ir || g != f.color.text.ig || b != f.color.text.ib {
-		f.setTextColor(r, g, b)
-	}
+	f.setTextColor(r, g, b)
 }
 
 func (f *Fpdf) setTextColor(r, g, b int) {
@@ -923,9 +917,7 @@ func (f *Fpdf) GetStringWidth(s string) float64 {
 // The method can be called before the first page is created. The value is
 // retained from page to page.
 func (f *Fpdf) SetLineWidth(width float64) {
-	if f.lineWidth != width {
-		f.setLineWidth(width)
-	}
+	f.setLineWidth(width)
 }
 
 func (f *Fpdf) setLineWidth(width float64) {
@@ -954,11 +946,9 @@ func (f *Fpdf) SetLineCapStyle(styleStr string) {
 	default:
 		capStyle = 0
 	}
-	if capStyle != f.capStyle {
-		f.capStyle = capStyle
-		if f.page > 0 {
-			f.outf("%d J", f.capStyle)
-		}
+	f.capStyle = capStyle
+	if f.page > 0 {
+		f.outf("%d J", f.capStyle)
 	}
 }
 
@@ -975,11 +965,9 @@ func (f *Fpdf) SetLineJoinStyle(styleStr string) {
 	default:
 		joinStyle = 0
 	}
-	if joinStyle != f.joinStyle {
-		f.joinStyle = joinStyle
-		if f.page > 0 {
-			f.outf("%d j", f.joinStyle)
-		}
+	f.joinStyle = joinStyle
+	if f.page > 0 {
+		f.outf("%d j", f.joinStyle)
 	}
 }
 
