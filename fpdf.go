@@ -985,13 +985,13 @@ func (f *Fpdf) SetDashPattern(dashArray []float64, dashPhase float64) {
 		scaled[i] = value * f.k
 	}
 	dashPhase *= f.k
-	if !slicesEqual(scaled, f.dashArray) || dashPhase != f.dashPhase {
-		f.dashArray = scaled
-		f.dashPhase = dashPhase
-		if f.page > 0 {
-			f.outputDashPattern()
-		}
+
+	f.dashArray = scaled
+	f.dashPhase = dashPhase
+	if f.page > 0 {
+		f.outputDashPattern()
 	}
+
 }
 
 func (f *Fpdf) outputDashPattern() {
@@ -1234,7 +1234,7 @@ func (f *Fpdf) GetAlpha() (alpha float64, blendModeStr string) {
 // To reset normal rendering after applying a blending mode, call this method
 // with alpha set to 1.0 and blendModeStr set to "Normal".
 func (f *Fpdf) SetAlpha(alpha float64, blendModeStr string) {
-	if f.err != nil || (alpha == f.alpha && blendModeStr == f.blendMode) {
+	if f.err != nil {
 		return
 	}
 	var bl blendModeType
@@ -1742,10 +1742,7 @@ func (f *Fpdf) SetFont(familyStr, styleStr string, size float64) {
 	if size == 0.0 {
 		size = f.fontSizePt
 	}
-	// Test if font is already selected
-	if f.fontFamily == familyStr && f.fontStyle == styleStr && f.fontSizePt == size {
-		return
-	}
+
 	// Test if font is already loaded
 	fontkey := familyStr + styleStr
 	_, ok = f.fonts[fontkey]
@@ -1793,9 +1790,6 @@ func (f *Fpdf) SetFont(familyStr, styleStr string, size float64) {
 // SetFontSize defines the size of the current font. Size is specified in
 // points (1/ 72 inch). See also SetFontUnitSize().
 func (f *Fpdf) SetFontSize(size float64) {
-	if f.fontSizePt == size {
-		return
-	}
 	f.fontSizePt = size
 	f.fontSize = size / f.k
 	if f.page > 0 {
@@ -1806,9 +1800,6 @@ func (f *Fpdf) SetFontSize(size float64) {
 // SetFontUnitSize defines the size of the current font. Size is specified in
 // the unit of measure specified in New(). See also SetFontSize().
 func (f *Fpdf) SetFontUnitSize(size float64) {
-	if f.fontSize == size {
-		return
-	}
 	f.fontSizePt = size * f.k
 	f.fontSize = size
 	if f.page > 0 {
