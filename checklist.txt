@@ -3,6 +3,7 @@ Prior to module release
 ./cov
 ./check
 git diff v2...master
+git merge 6b7...563
 git commit -am "Commit message here"
 git tag
 git tag v2.x.y
