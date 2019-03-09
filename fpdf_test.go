@@ -2448,6 +2448,8 @@ func ExampleFpdf_SetFillColor() {
 	pdf := gofpdf.New("P", "mm", "A4", "")
 
 	pdf.AddPage()
+	pdf.SetFont("Arial", "", 12)
+
 	pdf.TransformBegin()
 	pdf.TransformTranslateX(5)
 	pdf.TransformTranslateY(5)
@@ -2455,7 +2457,11 @@ func ExampleFpdf_SetFillColor() {
 	pdf.SetLineWidth(2)
 	pdf.SetDrawColor(128, 64, 0)
 	pdf.SetFillColor(255, 127, 0)
+	pdf.SetAlpha(0.5, "Normal")
+	pdf.SetDashPattern([]float64{5, 10}, 0)
 	pdf.Rect(0, 0, 20, 20, "FD")
+	pdf.SetFontSize(8)
+	pdf.Write(10, "Test")
 	pdf.TransformEnd()
 
 	pdf.TransformBegin()
@@ -2465,7 +2471,11 @@ func ExampleFpdf_SetFillColor() {
 	pdf.SetLineWidth(2)
 	pdf.SetDrawColor(128, 64, 0)
 	pdf.SetFillColor(255, 127, 0)
+	pdf.SetAlpha(0.5, "Normal")
+	pdf.SetDashPattern([]float64{5, 10}, 0)
 	pdf.Rect(0, 0, 20, 20, "FD")
+	pdf.SetFontSize(8)
+	pdf.Write(10, "Test")
 	pdf.TransformEnd()
 
 	fileStr := example.Filename("Fpdf_SetFillColor")
