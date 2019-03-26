@@ -105,10 +105,16 @@ func sliceUncompress(data []byte) (outData []byte, err error) {
 	return
 }
 
-// utf8toutf16 converts UTF-8 to UTF-16BE with BOM; from http://www.fpdf.org/
-func utf8toutf16(s string) string {
+// utf8toutf16 converts UTF-8 to UTF-16BE; from http://www.fpdf.org/
+func utf8toutf16(s string, withBOM ...bool) string {
+	bom := true
+	if len(withBOM) > 0 {
+		bom = withBOM[0]
+	}
 	res := make([]byte, 0, 8)
-	res = append(res, 0xFE, 0xFF)
+	if bom {
+		res = append(res, 0xFE, 0xFF)
+	}
 	nb := len(s)
 	i := 0
 	for i < nb {
@@ -313,4 +319,133 @@ func (s *SizeType) ScaleToWidth(width float64) SizeType {
 func (s *SizeType) ScaleToHeight(height float64) SizeType {
 	width := s.Wd * height / s.Ht
 	return SizeType{width, height}
+}
+
+//Imitation of untyped Map Array
+type untypedKeyMap struct {
+	keySet   []interface{}
+	valueSet []int
+}
+
+//Get position of key=>value in PHP Array
+func (pa *untypedKeyMap) getIndex(key interface{}) int {
+	if key != nil {
+		for i, mKey := range pa.keySet {
+			if mKey == key {
+				return i
+			}
+		}
+		return -1
+	}
+	return -1
+}
+
+//Put key=>value in PHP Array
+func (pa *untypedKeyMap) put(key interface{}, value int) {
+	if key == nil {
+		i := 0
+		for n := 0; ; n++ {
+			i = pa.getIndex(n)
+			if i < 0 {
+				key = n
+				break
+			}
+		}
+		pa.keySet = append(pa.keySet, key)
+		pa.valueSet = append(pa.valueSet, value)
+	} else {
+		i := pa.getIndex(key)
+		if i < 0 {
+			pa.keySet = append(pa.keySet, key)
+			pa.valueSet = append(pa.valueSet, value)
+		} else {
+			pa.valueSet[i] = value
+		}
+	}
+}
+
+//Delete value in PHP Array
+func (pa *untypedKeyMap) delete(key interface{}) {
+	if pa == nil || pa.keySet == nil || pa.valueSet == nil {
+		return
+	}
+	i := pa.getIndex(key)
+	if i >= 0 {
+		if i == 0 {
+			pa.keySet = pa.keySet[1:]
+			pa.valueSet = pa.valueSet[1:]
+		} else if i == len(pa.keySet)-1 {
+			pa.keySet = pa.keySet[:len(pa.keySet)-1]
+			pa.valueSet = pa.valueSet[:len(pa.valueSet)-1]
+		} else {
+			pa.keySet = append(pa.keySet[:i], pa.keySet[i+1:]...)
+			pa.valueSet = append(pa.valueSet[:i], pa.valueSet[i+1:]...)
+		}
+	}
+}
+
+//Get value from PHP Array
+func (pa *untypedKeyMap) get(key interface{}) int {
+	i := pa.getIndex(key)
+	if i >= 0 {
+		return pa.valueSet[i]
+	}
+	return 0
+}
+
+//Imitation of PHP function pop()
+func (pa *untypedKeyMap) pop() {
+	pa.keySet = pa.keySet[:len(pa.keySet)-1]
+	pa.valueSet = pa.valueSet[:len(pa.valueSet)-1]
+}
+
+//Imitation of PHP function array_merge()
+func arrayMerge(arr1, arr2 *untypedKeyMap) *untypedKeyMap {
+	answer := untypedKeyMap{}
+	if arr1 == nil && arr2 == nil {
+		answer = untypedKeyMap{
+			make([]interface{}, 0),
+			make([]int, 0),
+		}
+	} else if arr2 == nil {
+		answer.keySet = arr1.keySet[:]
+		answer.valueSet = arr1.valueSet[:]
+	} else if arr1 == nil {
+		answer.keySet = arr2.keySet[:]
+		answer.valueSet = arr2.valueSet[:]
+	} else {
+		answer.keySet = arr1.keySet[:]
+		answer.valueSet = arr1.valueSet[:]
+		for i := 0; i < len(arr2.keySet); i++ {
+			if arr2.keySet[i] == "interval" {
+				u := 0
+				u = u + 1
+				if arr1.getIndex("interval") < 0 {
+					answer.put("interval", arr2.valueSet[i])
+				} else {
+
+					u := 0
+					u = u + 1
+				}
+			} else {
+				answer.put(nil, arr2.valueSet[i])
+			}
+		}
+	}
+	return &answer
+}
+
+func remove(arr []int, key int) []int {
+	n := 0
+	for i, mKey := range arr {
+		if mKey == key {
+			n = i
+		}
+	}
+	if n == 0 {
+		return arr[1:]
+	} else if n == len(arr)-1 {
+		return arr[:len(arr)-1]
+	}
+	return append(arr[:n], arr[n+1:]...)
 }

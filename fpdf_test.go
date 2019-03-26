@@ -2476,3 +2476,36 @@ func ExampleFpdf_SetFillColor() {
 	// Output:
 	// Successfully generated pdf/Fpdf_SetFillColor.pdf
 }
+
+// ExampleFpdf_AddUTF8Font demonstrates how use the font
+// with utf-8 mode
+func ExampleFpdf_AddUTF8Font() {
+	pdf := gofpdf.New("P", "mm", "A4", "")
+
+	pdf.AddPage()
+
+	pdf.AddUTF8Font("dejavu", "", example.FontFile("DejaVuSansCondensed.ttf"))
+	pdf.AddUTF8Font("dejavu", "B", example.FontFile("DejaVuSansCondensed-Bold.ttf"))
+	pdf.AddUTF8Font("dejavu", "I", example.FontFile("DejaVuSansCondensed-Oblique.ttf"))
+	pdf.AddUTF8Font("dejavu", "BI", example.FontFile("DejaVuSansCondensed-BoldOblique.ttf"))
+
+	txtStr, _ := ioutil.ReadFile(example.TextFile("utf-8test.txt"))
+
+	pdf.SetFont("dejavu", "B", 17)
+	pdf.MultiCell(100, 8, "Text in different languages :", "", "C", false)
+	pdf.SetFont("dejavu", "", 14)
+	pdf.MultiCell(100, 5, string(txtStr), "", "C", false)
+	pdf.Ln(15)
+
+	txtStr, _ = ioutil.ReadFile(example.TextFile("utf-8test2.txt"))
+	pdf.SetFont("dejavu", "BI", 17)
+	pdf.MultiCell(100, 8, "Greek text with alignStr = \"J\":", "", "C", false)
+	pdf.SetFont("dejavu", "I", 14)
+	pdf.MultiCell(100, 5, string(txtStr), "", "J", false)
+
+	fileStr := example.Filename("Fpdf_AddUTF8Font")
+	err := pdf.OutputFileAndClose(fileStr)
+	example.Summary(err, fileStr)
+	// Output:
+	// Successfully generated pdf/Fpdf_AddUTF8Font.pdf
+}

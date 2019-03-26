@@ -903,14 +903,40 @@ func (f *Fpdf) GetStringWidth(s string) float64 {
 	if f.err != nil {
 		return 0
 	}
-	w := 0
-	for _, ch := range []byte(s) {
-		if ch == 0 {
-			break
-		}
-		w += f.currentFont.Cw[ch]
-	}
+	w := f.GetStringGlyfWidth(s)
 	return float64(w) * f.fontSize / 1000
+}
+
+// GetStringGlyfWidth returns the length of a string in glyf units. A font must be
+// currently selected.
+func (f *Fpdf) GetStringGlyfWidth(s string) int {
+	if f.err != nil {
+		return 0
+	}
+	w := 0
+	if f.unifontSubset {
+		unicode := []rune(s)
+		for _, char := range unicode {
+			intChar := int(char)
+			if len(f.currentFont.Cw) >= intChar && f.currentFont.Cw[intChar] > 0 {
+				if f.currentFont.Cw[intChar] != 65535 {
+					w += f.currentFont.Cw[intChar]
+				}
+			} else if f.currentFont.Desc.MissingWidth != 0 {
+				w += f.currentFont.Desc.MissingWidth
+			} else {
+				w += 500
+			}
+		}
+	} else {
+		for _, ch := range []byte(s) {
+			if ch == 0 {
+				break
+			}
+			w += f.currentFont.Cw[ch]
+		}
+	}
+	return w
 }
 
 // SetLineWidth defines the line width. By default, the value equals 0.2 mm.
@@ -1510,30 +1536,132 @@ func (f *Fpdf) ClipEnd() {
 // definition file to be added. The file will be loaded from the font directory
 // specified in the call to New() or SetFontLocation().
 func (f *Fpdf) AddFont(familyStr, styleStr, fileStr string) {
-	if fileStr == "" {
-		fileStr = strings.Replace(familyStr, " ", "", -1) + strings.ToLower(styleStr) + ".json"
-	}
+	f.addFont(familyStr, styleStr, fileStr, false)
+}
 
-	if f.fontLoader != nil {
-		reader, err := f.fontLoader.Open(fileStr)
-		if err == nil {
-			f.AddFontFromReader(familyStr, styleStr, reader)
-			if closer, ok := reader.(io.Closer); ok {
-				closer.Close()
-			}
-			return
+// AddUTF8Font imports a TrueType font with utf-8 symbols and makes it available.
+// It is necessary to generate a font definition file first with the makefont
+// utility. It is not necessary to call this function for the core PDF fonts
+// (courier, helvetica, times, zapfdingbats).
+//
+// The JSON definition file (and the font file itself when embedding) must be
+// present in the font directory. If it is not found, the error "Could not
+// include font definition file" is set.
+//
+// family specifies the font family. The name can be chosen arbitrarily. If it
+// is a standard family name, it will override the corresponding font. This
+// string is used to subsequently set the font with the SetFont method.
+//
+// style specifies the font style. Acceptable values are (case insensitive) the
+// empty string for regular style, "B" for bold, "I" for italic, or "BI" or
+// "IB" for bold and italic combined.
+//
+// fileStr specifies the base name with ".json" extension of the font
+// definition file to be added. The file will be loaded from the font directory
+// specified in the call to New() or SetFontLocation().
+func (f *Fpdf) AddUTF8Font(familyStr, styleStr, fileStr string) {
+	f.addFont(familyStr, styleStr, fileStr, true)
+}
+
+func (f *Fpdf) addFont(familyStr, styleStr, fileStr string, uni bool) {
+	if fileStr == "" {
+		if uni {
+			fileStr = strings.Replace(familyStr, " ", "", -1) + strings.ToLower(styleStr) + ".ttf"
+		} else {
+			fileStr = strings.Replace(familyStr, " ", "", -1) + strings.ToLower(styleStr) + ".json"
 		}
 	}
+	if uni {
+		fontKey := getFontKey(familyStr, styleStr)
+		_, ok := f.fonts[fontKey]
+		if ok {
+			return
+		}
+		ttfFileName := fileStr
+		ttfStat, _ := os.Stat(ttfFileName)
+		originalSize := ttfStat.Size()
+		Type := "TTF"
+		ttf := NewTTFontFile()
+		err := ttf.GetFileMetrics(ttfFileName)
+		if err != nil {
+			fmt.Printf("get metrics Error: %e\n", err)
+			return
+		}
+		name := ttf.FullName
+		desc := FontDescType{
+			Ascent:    int(ttf.Ascent),
+			Descent:   int(ttf.Descent),
+			CapHeight: ttf.CapHeight,
+			Flags:     ttf.Flags,
+			FontBBox: fontBoxType{
+				int(ttf.Bbox[0]),
+				int(ttf.Bbox[1]),
+				int(ttf.Bbox[2]),
+				int(ttf.Bbox[3]),
+			},
+			ItalicAngle:  ttf.ItalicAngle,
+			StemV:        ttf.StemV,
+			MissingWidth: round(ttf.DefaultWidth),
+		}
 
-	fileStr = path.Join(f.fontpath, fileStr)
-	file, err := os.Open(fileStr)
-	if err != nil {
-		f.err = err
-		return
+		up := round(ttf.UnderlinePosition)
+		ut := round(ttf.UnderlineThickness)
+
+		var sbarr map[int]int
+		if f.aliasNbPagesStr == "" {
+			sbarr = makeSubsetRange(57)
+		} else {
+			sbarr = makeSubsetRange(32)
+		}
+		def := fontDefType{
+			Tp:     Type,
+			Name:   name,
+			Desc:   desc,
+			Up:     int(up),
+			Ut:     ut,
+			Cw:     ttf.CharWidths,
+			subset: sbarr,
+			File:   ttfFileName,
+		}
+		def.i, _ = generateFontID(def)
+		f.fonts[fontKey] = def
+		f.fontFiles[fontKey] = fontFileType{
+			length1:  originalSize,
+			fontType: "TTF",
+		}
+		f.fontFiles[fileStr] = fontFileType{
+			fontType: "TTF",
+		}
+	} else {
+		if f.fontLoader != nil {
+			reader, err := f.fontLoader.Open(fileStr)
+			if err == nil {
+				f.AddFontFromReader(familyStr, styleStr, reader)
+				if closer, ok := reader.(io.Closer); ok {
+					closer.Close()
+				}
+				return
+			}
+		}
+
+		fileStr = path.Join(f.fontpath, fileStr)
+		file, err := os.Open(fileStr)
+		if err != nil {
+			f.err = err
+			return
+		}
+		defer file.Close()
+
+		f.AddFontFromReader(familyStr, styleStr, file)
 	}
-	defer file.Close()
+}
 
-	f.AddFontFromReader(familyStr, styleStr, file)
+func makeSubsetRange(end int) map[int]int {
+	answer := make(map[int]int)
+	for i := 0; i < end; i++ {
+		answer[i] = 0
+	}
+	return answer
 }
 
 // AddFontFromBytes imports a TrueType, OpenType or Type1 font from static
@@ -1552,6 +1680,29 @@ func (f *Fpdf) AddFont(familyStr, styleStr, fileStr string) {
 //
 // zFileBytes contain all bytes of Z file.
 func (f *Fpdf) AddFontFromBytes(familyStr, styleStr string, jsonFileBytes, zFileBytes []byte) {
+	f.addFontFromBytes(familyStr, styleStr, jsonFileBytes, zFileBytes, nil)
+}
+
+// AddUTF8FontFromBytes  imports a TrueType font with utf-8 symbols from static
+// bytes within the executable and makes it available for use in the generated
+// document.
+//
+// family specifies the font family. The name can be chosen arbitrarily. If it
+// is a standard family name, it will override the corresponding font. This
+// string is used to subsequently set the font with the SetFont method.
+//
+// style specifies the font style. Acceptable values are (case insensitive) the
+// empty string for regular style, "B" for bold, "I" for italic, or "BI" or
+// "IB" for bold and italic combined.
+//
+// jsonFileBytes contain all bytes of JSON file.
+//
+// zFileBytes contain all bytes of Z file.
+func (f *Fpdf) AddUTF8FontFromBytes(familyStr, styleStr string, utf8Bytes []byte) {
+	f.addFontFromBytes(familyStr, styleStr, nil, nil, utf8Bytes)
+}
+
+func (f *Fpdf) addFontFromBytes(familyStr, styleStr string, jsonFileBytes, zFileBytes, utf8Bytes []byte) {
 	if f.err != nil {
 		return
 	}
@@ -1565,61 +1716,115 @@ func (f *Fpdf) AddFontFromBytes(familyStr, styleStr string, jsonFileBytes, zFile
 		return
 	}
 
-	// load font definitions
-	var info fontDefType
-	err := json.Unmarshal(jsonFileBytes, &info)
+	if utf8Bytes != nil {
 
-	if err != nil {
-		f.err = err
-	}
-
-	if f.err != nil {
-		return
-	}
-
-	if info.i, err = generateFontID(info); err != nil {
-		f.err = err
-		return
-	}
-
-	// search existing encodings
-	if len(info.Diff) > 0 {
-		n := -1
-
-		for j, str := range f.diffs {
-			if str == info.Diff {
-				n = j + 1
-				break
-			}
+		if styleStr == "IB" {
+			styleStr = "BI"
 		}
 
-		if n < 0 {
-			f.diffs = append(f.diffs, info.Diff)
-			n = len(f.diffs)
+		Type := "TTF"
+		ttf := NewTTFontFile()
+
+		err := ttf.GetBytesMetrics(utf8Bytes)
+		if err != nil {
+			fmt.Printf("get metrics Error: %e\n", err)
+			return
+		}
+		name := ttf.FullName
+		desc := FontDescType{
+			Ascent:    int(ttf.Ascent),
+			Descent:   int(ttf.Descent),
+			CapHeight: ttf.CapHeight,
+			Flags:     ttf.Flags,
+			FontBBox: fontBoxType{
+				int(ttf.Bbox[0]),
+				int(ttf.Bbox[1]),
+				int(ttf.Bbox[2]),
+				int(ttf.Bbox[3]),
+			},
+			ItalicAngle:  ttf.ItalicAngle,
+			StemV:        ttf.StemV,
+			MissingWidth: round(ttf.DefaultWidth),
 		}
 
-		info.DiffN = n
-	}
+		up := round(ttf.UnderlinePosition)
+		ut := round(ttf.UnderlineThickness)
 
-	// embed font
-	if len(info.File) > 0 {
-		if info.Tp == "TrueType" {
-			f.fontFiles[info.File] = fontFileType{
-				length1:  int64(info.OriginalSize),
-				embedded: true,
-				content:  zFileBytes,
-			}
+		var sbarr map[int]int
+		if f.aliasNbPagesStr == "" {
+			sbarr = makeSubsetRange(57)
 		} else {
-			f.fontFiles[info.File] = fontFileType{
-				length1:  int64(info.Size1),
-				length2:  int64(info.Size2),
-				embedded: true,
-				content:  zFileBytes,
+			sbarr = makeSubsetRange(32)
+		}
+		def := fontDefType{
+			Tp:      Type,
+			Name:    name,
+			Desc:    desc,
+			Up:      int(up),
+			Ut:      ut,
+			Cw:      ttf.CharWidths,
+			ttfFile: utf8Bytes,
+			subset:  sbarr,
+		}
+		def.i, _ = generateFontID(def)
+		f.fonts[fontkey] = def
+	} else {
+		// load font definitions
+		var info fontDefType
+		err := json.Unmarshal(jsonFileBytes, &info)
+
+		if err != nil {
+			f.err = err
+		}
+
+		if f.err != nil {
+			return
+		}
+
+		if info.i, err = generateFontID(info); err != nil {
+			f.err = err
+			return
+		}
+
+		// search existing encodings
+		if len(info.Diff) > 0 {
+			n := -1
+
+			for j, str := range f.diffs {
+				if str == info.Diff {
+					n = j + 1
+					break
+				}
+			}
+
+			if n < 0 {
+				f.diffs = append(f.diffs, info.Diff)
+				n = len(f.diffs)
+			}
+
+			info.DiffN = n
+		}
+
+		// embed font
+		if len(info.File) > 0 {
+			if info.Tp == "TrueType" {
+				f.fontFiles[info.File] = fontFileType{
+					length1:  int64(info.OriginalSize),
+					embedded: true,
+					content:  zFileBytes,
+				}
+			} else {
+				f.fontFiles[info.File] = fontFileType{
+					length1:  int64(info.Size1),
+					length2:  int64(info.Size2),
+					embedded: true,
+					content:  zFileBytes,
+				}
 			}
 		}
-	}
 
-	f.fonts[fontkey] = info
+		f.fonts[fontkey] = info
+	}
 }
 
 // getFontKey is used by AddFontFromReader and GetFontDesc
@@ -1744,8 +1949,8 @@ func (f *Fpdf) SetFont(familyStr, styleStr string, size float64) {
 	}
 
 	// Test if font is already loaded
-	fontkey := familyStr + styleStr
-	_, ok = f.fonts[fontkey]
+	fontKey := familyStr + styleStr
+	_, ok = f.fonts[fontKey]
 	if !ok {
 		// Test if one of the core fonts
 		if familyStr == "arial" {
@@ -1759,8 +1964,8 @@ func (f *Fpdf) SetFont(familyStr, styleStr string, size float64) {
 			if familyStr == "zapfdingbats" {
 				styleStr = ""
 			}
-			fontkey = familyStr + styleStr
-			_, ok = f.fonts[fontkey]
+			fontKey = familyStr + styleStr
+			_, ok = f.fonts[fontKey]
 			if !ok {
 				rdr := f.coreFontReader(familyStr, styleStr)
 				if f.err == nil {
@@ -1780,7 +1985,12 @@ func (f *Fpdf) SetFont(familyStr, styleStr string, size float64) {
 	f.fontStyle = styleStr
 	f.fontSizePt = size
 	f.fontSize = size / f.k
-	f.currentFont = f.fonts[fontkey]
+	f.currentFont = f.fonts[fontKey]
+	if f.currentFont.Tp == "TTF" {
+		f.unifontSubset = true
+	} else {
+		f.unifontSubset = false
+	}
 	if f.page > 0 {
 		f.outf("BT /F%s %.2f Tf ET", f.currentFont.i, f.fontSizePt)
 	}
@@ -1878,7 +2088,16 @@ func (f *Fpdf) Bookmark(txtStr string, level int, y float64) {
 // precisely on the page, but it is usually easier to use Cell(), MultiCell()
 // or Write() which are the standard methods to print text.
 func (f *Fpdf) Text(x, y float64, txtStr string) {
-	s := sprintf("BT %.2f %.2f Td (%s) Tj ET", x*f.k, (f.h-y)*f.k, f.escape(txtStr))
+	var txt2 string
+	if f.unifontSubset {
+		txt2 = f.escape(utf8toutf16(txtStr, false))
+		for _, uni := range []rune(txtStr) {
+			f.currentFont.subset[int(uni)] = int(uni)
+		}
+	} else {
+		txt2 = f.escape(txtStr)
+	}
+	s := sprintf("BT %.2f %.2f Td (%s) Tj ET", x*f.k, (f.h-y)*f.k, txt2)
 	if f.underline && txtStr != "" {
 		s += " " + f.dounderline(x, y, txtStr)
 	}
@@ -2057,14 +2276,46 @@ func (f *Fpdf) CellFormat(w, h float64, txtStr, borderStr string, ln int,
 		if f.colorFlag {
 			s.printf("q %s ", f.color.text.str)
 		}
-		txt2 := strings.Replace(txtStr, "\\", "\\\\", -1)
-		txt2 = strings.Replace(txt2, "(", "\\(", -1)
-		txt2 = strings.Replace(txt2, ")", "\\)", -1)
-		// if strings.Contains(txt2, "end of excerpt") {
-		// dbg("f.h %.2f, f.y %.2f, h %.2f, f.fontSize %.2f, k %.2f", f.h, f.y, h, f.fontSize, k)
-		// }
-		s.printf("BT %.2f %.2f Td (%s) Tj ET", (f.x+dx)*k, (f.h-(f.y+dy+.5*h+.3*f.fontSize))*k, txt2)
-		//BT %.2F %.2F Td (%s) Tj ET',($this->x+$dx)*$k,($this->h-($this->y+.5*$h+.3*$this->FontSize))*$k,$txt2);
+		//If multibyte, Tw has no effect - do word spacing using an adjustment before each space
+		if (f.ws != 0 || alignStr == "J") && f.unifontSubset { // && f.ws != 0
+			wmax := int(math.Ceil((w - 2*f.cMargin) * 1000 / f.fontSize))
+			for _, uni := range []rune(txtStr) {
+				f.currentFont.subset[int(uni)] = int(uni)
+			}
+			space := f.escape(utf8toutf16(" ", false))
+			strSize := f.GetStringGlyfWidth(txtStr)
+			s.printf("BT 0 Tw %.2f %.2f Td [", (f.x+dx)*k, (f.h-(f.y+.5*h+.3*f.fontSize))*k)
+			t := strings.Split(txtStr, " ")
+			shift := float64((wmax - strSize)) / float64(len(t)-1)
+			numt := len(t)
+			for i := 0; i < numt; i++ {
+				tx := t[i]
+				tx = "(" + f.escape(utf8toutf16(tx, false)) + ")"
+				s.printf("%s ", tx)
+				if (i + 1) < numt {
+					s.printf("%.3f(%s) ", -shift, space)
+				}
+			}
+			s.printf("] TJ ET")
+		} else {
+			var txt2 string
+			if f.unifontSubset {
+				txt2 = f.escape(utf8toutf16(txtStr, false))
+				for _, uni := range []rune(txtStr) {
+					f.currentFont.subset[int(uni)] = int(uni)
+				}
+			} else {
+
+				txt2 = strings.Replace(txtStr, "\\", "\\\\", -1)
+				txt2 = strings.Replace(txt2, "(", "\\(", -1)
+				txt2 = strings.Replace(txt2, ")", "\\)", -1)
+			}
+			bt := (f.x + dx) * k
+			td := (f.h - (f.y + dy + .5*h + .3*f.fontSize)) * k
+			s.printf("BT %.2f %.2f Td (%s)Tj ET", bt, td, txt2)
+			//BT %.2F %.2F Td (%s) Tj ET',(f.x+dx)*k,(f.h-(f.y+.5*h+.3*f.FontSize))*k,txt2);
+		}
+
 		if f.underline {
 			s.printf(" %s", f.dounderline(f.x+dx, f.y+dy+.5*h+.3*f.fontSize, txtStr))
 		}
@@ -2115,7 +2366,7 @@ func (f *Fpdf) Cellf(w, h float64, fmtStr string, args ...interface{}) {
 func (f *Fpdf) SplitLines(txt []byte, w float64) [][]byte {
 	// Function contributed by Bruno Michel
 	lines := [][]byte{}
-	cw := &f.currentFont.Cw
+	cw := f.currentFont.Cw
 	wmax := int(math.Ceil((w - 2*f.cMargin) * 1000 / f.fontSize))
 	s := bytes.Replace(txt, []byte("\r"), []byte{}, -1)
 	nb := len(s)
@@ -2175,17 +2426,26 @@ func (f *Fpdf) MultiCell(w, h float64, txtStr, borderStr, alignStr string, fill 
 	if alignStr == "" {
 		alignStr = "J"
 	}
-	cw := &f.currentFont.Cw
+	cw := f.currentFont.Cw
 	if w == 0 {
 		w = f.w - f.rMargin - f.x
 	}
 	wmax := int(math.Ceil((w - 2*f.cMargin) * 1000 / f.fontSize))
 	s := strings.Replace(txtStr, "\r", "", -1)
-	nb := len(s)
-	// if nb > 0 && s[nb-1:nb] == "\n" {
-	if nb > 0 && []byte(s)[nb-1] == '\n' {
-		nb--
-		s = s[0:nb]
+
+	var nb int
+	if f.unifontSubset {
+		nb = len([]rune(s))
+		for nb > 0 && []rune(s)[nb-1] == '\n' {
+			nb--
+			s = string([]rune(s)[0:nb])
+		}
+	} else {
+		nb = len(s)
+		if nb > 0 && []byte(s)[nb-1] == '\n' {
+			nb--
+			s = s[0:nb]
+		}
 	}
 	// dbg("[%s]\n", s)
 	var b, b2 string
@@ -2219,14 +2479,23 @@ func (f *Fpdf) MultiCell(w, h float64, txtStr, borderStr, alignStr string, fill 
 	nl := 1
 	for i < nb {
 		// Get next character
-		c := []byte(s)[i]
+		var c rune
+		if f.unifontSubset {
+			c = []rune(s)[i]
+		} else {
+			c = rune([]byte(s)[i])
+		}
 		if c == '\n' {
 			// Explicit line break
 			if f.ws > 0 {
 				f.ws = 0
 				f.out("0 Tw")
 			}
-			f.CellFormat(w, h, s[j:i], b, 2, alignStr, fill, 0, "")
+			if f.unifontSubset {
+				f.CellFormat(w, h, string([]rune(s)[j:i]), b, 2, alignStr, fill, 0, "")
+			} else {
+				f.CellFormat(w, h, s[j:i], b, 2, alignStr, fill, 0, "")
+			}
 			i++
 			sep = -1
 			j = i
@@ -2243,7 +2512,11 @@ func (f *Fpdf) MultiCell(w, h float64, txtStr, borderStr, alignStr string, fill 
 			ls = l
 			ns++
 		}
-		l += cw[c]
+		if cw[int(c)] == 0 { //Marker length 0 used for missing symbols
+			l += f.currentFont.Desc.MissingWidth
+		} else if cw[int(c)] != 65535 { //Marker length 65535 used for zero length symbols
+			l += cw[int(c)]
+		}
 		if l > wmax {
 			// Automatic line break
 			if sep == -1 {
@@ -2254,7 +2527,11 @@ func (f *Fpdf) MultiCell(w, h float64, txtStr, borderStr, alignStr string, fill 
 					f.ws = 0
 					f.out("0 Tw")
 				}
-				f.CellFormat(w, h, s[j:i], b, 2, alignStr, fill, 0, "")
+				if f.unifontSubset {
+					f.CellFormat(w, h, string([]rune(s)[j:i]), b, 2, alignStr, fill, 0, "")
+				} else {
+					f.CellFormat(w, h, s[j:i], b, 2, alignStr, fill, 0, "")
+				}
 			} else {
 				if alignStr == "J" {
 					if ns > 1 {
@@ -2264,7 +2541,11 @@ func (f *Fpdf) MultiCell(w, h float64, txtStr, borderStr, alignStr string, fill 
 					}
 					f.outf("%.3f Tw", f.ws*f.k)
 				}
-				f.CellFormat(w, h, s[j:sep], b, 2, alignStr, fill, 0, "")
+				if f.unifontSubset {
+					f.CellFormat(w, h, string([]rune(s)[j:sep]), b, 2, alignStr, fill, 0, "")
+				} else {
+					f.CellFormat(w, h, s[j:sep], b, 2, alignStr, fill, 0, "")
+				}
 				i = sep + 1
 			}
 			sep = -1
@@ -2287,18 +2568,34 @@ func (f *Fpdf) MultiCell(w, h float64, txtStr, borderStr, alignStr string, fill 
 	if len(borderStr) > 0 && strings.Contains(borderStr, "B") {
 		b += "B"
 	}
-	f.CellFormat(w, h, s[j:i], b, 2, alignStr, fill, 0, "")
+	if f.unifontSubset {
+		if alignStr == "J" {
+			alignStr = ""
+		}
+		f.CellFormat(w, h, string([]rune(s)[j:i]), b, 2, alignStr, fill, 0, "")
+	} else {
+		f.CellFormat(w, h, s[j:i], b, 2, alignStr, fill, 0, "")
+	}
 	f.x = f.lMargin
 }
 
 // write outputs text in flowing mode
 func (f *Fpdf) write(h float64, txtStr string, link int, linkStr string) {
 	// dbg("Write")
-	cw := &f.currentFont.Cw
+	cw := f.currentFont.Cw
 	w := f.w - f.rMargin - f.x
 	wmax := (w - 2*f.cMargin) * 1000 / f.fontSize
 	s := strings.Replace(txtStr, "\r", "", -1)
-	nb := len(s)
+	var nb int
+	if f.unifontSubset {
+		nb = len([]rune(s))
+		if nb == 1 && s == " " {
+			f.x += f.GetStringWidth(s)
+			return
+		}
+	} else {
+		nb = len(s)
+	}
 	sep := -1
 	i := 0
 	j := 0
@@ -2306,10 +2603,19 @@ func (f *Fpdf) write(h float64, txtStr string, link int, linkStr string) {
 	nl := 1
 	for i < nb {
 		// Get next character
-		c := []byte(s)[i]
+		var c rune
+		if f.unifontSubset {
+			c = []rune(s)[i]
+		} else {
+			c = rune([]byte(s)[i])
+		}
 		if c == '\n' {
 			// Explicit line break
-			f.CellFormat(w, h, s[j:i], "", 2, "", false, link, linkStr)
+			if f.unifontSubset {
+				f.CellFormat(w, h, string([]rune(s)[j:i]), "", 2, "", false, link, linkStr)
+			} else {
+				f.CellFormat(w, h, s[j:i], "", 2, "", false, link, linkStr)
+			}
 			i++
 			sep = -1
 			j = i
@@ -2325,7 +2631,7 @@ func (f *Fpdf) write(h float64, txtStr string, link int, linkStr string) {
 		if c == ' ' {
 			sep = i
 		}
-		l += float64(cw[c])
+		l += float64(cw[int(c)])
 		if l > wmax {
 			// Automatic line break
 			if sep == -1 {
@@ -2342,9 +2648,17 @@ func (f *Fpdf) write(h float64, txtStr string, link int, linkStr string) {
 				if i == j {
 					i++
 				}
-				f.CellFormat(w, h, s[j:i], "", 2, "", false, link, linkStr)
+				if f.unifontSubset {
+					f.CellFormat(w, h, string([]rune(s)[j:i]), "", 2, "", false, link, linkStr)
+				} else {
+					f.CellFormat(w, h, s[j:i], "", 2, "", false, link, linkStr)
+				}
 			} else {
-				f.CellFormat(w, h, s[j:sep], "", 2, "", false, link, linkStr)
+				if f.unifontSubset {
+					f.CellFormat(w, h, string([]rune(s)[j:sep]), "", 2, "", false, link, linkStr)
+				} else {
+					f.CellFormat(w, h, s[j:sep], "", 2, "", false, link, linkStr)
+				}
 				i = sep + 1
 			}
 			sep = -1
@@ -2362,7 +2676,11 @@ func (f *Fpdf) write(h float64, txtStr string, link int, linkStr string) {
 	}
 	// Last chunk
 	if i != j {
-		f.CellFormat(l/1000*f.fontSize, h, s[j:], "", 0, "", false, link, linkStr)
+		if f.unifontSubset {
+			f.CellFormat(l/1000*f.fontSize, h, string([]rune(s)[j:]), "", 0, "", false, link, linkStr)
+		} else {
+			f.CellFormat(l/1000*f.fontSize, h, s[j:], "", 0, "", false, link, linkStr)
+		}
 	}
 }
 
@@ -3227,6 +3545,9 @@ func (f *Fpdf) putpages() {
 	nb := f.page
 	if len(f.aliasNbPagesStr) > 0 {
 		// Replace number of pages
+		alias := utf8toutf16(f.aliasNbPagesStr, false)
+		r := utf8toutf16(sprintf("%d", nb), false)
+		f.RegisterAlias(alias, r)
 		f.RegisterAlias(f.aliasNbPagesStr, sprintf("%d", nb))
 	}
 	f.replaceAliases()
@@ -3333,42 +3654,43 @@ func (f *Fpdf) putfonts() {
 		}
 		for _, file = range fileList {
 			info = f.fontFiles[file]
-			// Font file embedding
-			f.newobj()
-			info.n = f.n
-			f.fontFiles[file] = info
+			if info.fontType != "TTF" {
+				f.newobj()
+				info.n = f.n
+				f.fontFiles[file] = info
 
-			var font []byte
+				var font []byte
 
-			if info.embedded {
-				font = info.content
-			} else {
-				var err error
-				font, err = f.loadFontFile(file)
-				if err != nil {
-					f.err = err
-					return
+				if info.embedded {
+					font = info.content
+				} else {
+					var err error
+					font, err = f.loadFontFile(file)
+					if err != nil {
+						f.err = err
+						return
+					}
 				}
-			}
 
-			// dbg("font file [%s], ext [%s]", file, file[len(file)-2:])
-			compressed := file[len(file)-2:] == ".z"
-			if !compressed && info.length2 > 0 {
-				buf := font[6:info.length1]
-				buf = append(buf, font[6+info.length1+6:info.length2]...)
-				font = buf
+				// dbg("font file [%s], ext [%s]", file, file[len(file)-2:])
+				compressed := file[len(file)-2:] == ".z"
+				if !compressed && info.length2 > 0 {
+					buf := font[6:info.length1]
+					buf = append(buf, font[6+info.length1+6:info.length2]...)
+					font = buf
+				}
+				f.outf("<</Length %d", len(font))
+				if compressed {
+					f.out("/Filter /FlateDecode")
+				}
+				f.outf("/Length1 %d", info.length1)
+				if info.length2 > 0 {
+					f.outf("/Length2 %d /Length3 0", info.length2)
+				}
+				f.out(">>")
+				f.putstream(font)
+				f.out("endobj")
 			}
-			f.outf("<</Length %d", len(font))
-			if compressed {
-				f.out("/Filter /FlateDecode")
-			}
-			f.outf("/Length1 %d", info.length1)
-			if info.length2 > 0 {
-				f.outf("/Length2 %d /Length3 0", info.length2)
-			}
-			f.out(">>")
-			f.putstream(font)
-			f.out("endobj")
 		}
 	}
 	{
@@ -3448,6 +3770,130 @@ func (f *Fpdf) putfonts() {
 				s.printf("/FontFile%s %d 0 R>>", suffix, f.fontFiles[font.File].n)
 				f.out(s.String())
 				f.out("endobj")
+			case "TTF":
+				// Additional UTF-8 font
+				fontName := "MPDFAA" + "+" + font.Name
+				subset := font.subset
+				delete(subset, 0)
+				ttf := NewTTFontFile()
+				var ttFontStream []byte
+				if font.ttfFile != nil {
+					ttFontStream = ttf.MakeArraySubset(font.ttfFile, subset)
+				} else {
+					ttFontStream = ttf.MakeSubset(font.File, subset)
+				}
+				ttFontSize := len(ttFontStream)
+				compressedFontStream := sliceCompress(ttFontStream)
+				codeToGlyph := ttf.CodeToGlyph
+				delete(codeToGlyph, 0)
+
+				// Type0 Font
+				// A composite font - a font composed of other fonts, organized hierarchically
+				f.newobj()
+				f.out("<</Type /Font\n/Subtype /Type0")
+				f.out("/BaseFont /" + fontName + "\n/Encoding /Identity-H")
+				f.out("/DescendantFonts [" + strconv.Itoa(f.n+1) + " 0 R]")
+				f.out("/ToUnicode " + strconv.Itoa(f.n+2) + " 0 R")
+				f.out(">>")
+				f.out("endobj")
+
+				// CIDFontType2
+				// A CIDFont whose glyph descriptions are based on TrueType font technology
+				f.newobj()
+				f.out("<</Type /Font")
+				f.out("/Subtype /CIDFontType2")
+				f.out("/BaseFont /" + fontName + "")
+				f.out("/CIDSystemInfo " + strconv.Itoa(f.n+2) + " 0 R")
+				f.out("/FontDescriptor " + strconv.Itoa(f.n+3) + " 0 R")
+				if font.Desc.MissingWidth != 0 {
+					f.out("/DW " + strconv.Itoa(font.Desc.MissingWidth) + "")
+				}
+
+				f.putCidFontWidths(&font, ttf.MaxUni)
+				f.out("/CIDToGIDMap " + strconv.Itoa(f.n+4) + " 0 R")
+				f.out(">>")
+				f.out("endobj")
+
+				// ToUnicode
+				f.newobj()
+				toUni := "/CIDInit /ProcSet findresource begin\n" +
+					"12 dict begin\n" +
+					"begincmap\n" +
+					"/CIDSystemInfo\n" +
+					"<</Registry (Adobe)\n" +
+					"/Ordering (UCS)\n" +
+					"/Supplement 0\n" +
+					">> def\n" +
+					"/CMapName /Adobe-Identity-UCS def\n" +
+					"/CMapType 2 def\n" +
+					"1 begincodespacerange\n" +
+					"<0000> <FFFF>\n" +
+					"endcodespacerange\n" +
+					"1 beginbfrange\n" +
+					"<0000> <FFFF> <0000>\n" +
+					"endbfrange\n" +
+					"endcmap\n" +
+					"CMapName currentdict /CMap defineresource pop\n" +
+					"end\n" +
+					"end"
+				f.out("<</Length " + strconv.Itoa(len(toUni)) + ">>")
+				f.putstream([]byte(toUni))
+				f.out("endobj")
+
+				// CIDSystemInfo dictionary
+				f.newobj()
+				f.out("<</Registry (Adobe)")
+				f.out("/Ordering (UCS)")
+				f.out("/Supplement 0")
+				f.out(">>")
+				f.out("endobj")
+
+				// Font descriptor
+				f.newobj()
+				f.out("<</Type /FontDescriptor")
+				f.out("/FontName /" + fontName)
+
+				f.out(" /Ascent " + strconv.Itoa(font.Desc.Ascent))
+				f.out(" /Descent " + strconv.Itoa(font.Desc.Descent))
+				f.out(" /CapHeight " + strconv.Itoa(font.Desc.CapHeight))
+				v := font.Desc.Flags
+				v = v | 4
+				v = v &^ 32
+				f.out(" /Flags " + strconv.Itoa(v))
+				f.out(" /FontBBox [" + strconv.Itoa(font.Desc.FontBBox.Xmin) + " " + strconv.Itoa(font.Desc.FontBBox.Ymin) + " " + strconv.Itoa(font.Desc.FontBBox.Xmax) + " " + strconv.Itoa(font.Desc.FontBBox.Ymax) + "]")
+				f.out(" /ItalicAngle " + strconv.Itoa(font.Desc.ItalicAngle))
+				f.out(" /StemV " + strconv.Itoa(font.Desc.StemV))
+				f.out(" /MissingWidth " + strconv.Itoa(font.Desc.MissingWidth))
+
+				f.out("/FontFile2 " + strconv.Itoa(f.n+2) + " 0 R")
+				f.out(">>")
+				f.out("endobj")
+
+				// Embed CIDToGIDMap
+				// A specification of the mapping from CIDs to glyph indices
+				cidToGidMap := make([]byte, 256*256*2)
+
+				for cc, glyph := range codeToGlyph {
+					cidToGidMap[cc*2] = byte(glyph >> 8)
+					cidToGidMap[cc*2+1] = byte(glyph & 0xFF)
+				}
+
+				cidToGidMap = sliceCompress(cidToGidMap)
+				f.newobj()
+				f.out("<</Length " + strconv.Itoa(len(cidToGidMap)) + "")
+				f.out("/Filter /FlateDecode")
+				f.out(">>")
+				f.putstream(cidToGidMap)
+				f.out("endobj")
+
+				//Font file
+				f.newobj()
+				f.out("<</Length " + strconv.Itoa(len(compressedFontStream)))
+				f.out("/Filter /FlateDecode")
+				f.out("/Length1 " + strconv.Itoa(ttFontSize))
+				f.out(">>")
+				f.putstream(compressedFontStream)
+				f.out("endobj")
 			default:
 				f.err = fmt.Errorf("unsupported font type: %s", tp)
 				return
@@ -3455,6 +3901,149 @@ func (f *Fpdf) putfonts() {
 		}
 	}
 	return
+}
+
+//Generate SIDFont map
+func (f *Fpdf) putCidFontWidths(font *fontDefType, maxUni int) {
+	rangeID := 0
+	arrayRange := make(map[int]*untypedKeyMap)
+	arrayRangeKeys := make([]int, 0)
+	prevCid := -2
+	prevWidth := -1
+	interval := false
+	startCid := 1
+	cwLen := maxUni + 1
+
+	// for each character
+	for cid := startCid; cid < cwLen; cid++ {
+		if font.Cw[cid] == 0x00 {
+			continue
+		}
+		width := font.Cw[cid]
+		if width == 65535 {
+			width = 0
+		}
+		if numb, OK := font.subset[cid]; cid > 255 && (!OK || numb == 0) {
+			continue
+		}
+
+		if cid == prevCid+1 {
+			if width == prevWidth {
+
+				if width == arrayRange[rangeID].get(0) {
+					arrayRange[rangeID].put(nil, width)
+				} else {
+
+					arrayRange[rangeID].pop()
+
+					// new range
+					rangeID = prevCid
+					r := untypedKeyMap{
+						valueSet: make([]int, 0),
+						keySet:   make([]interface{}, 0),
+					}
+					arrayRange[rangeID] = &r
+					arrayRangeKeys = append(arrayRangeKeys, rangeID)
+					arrayRange[rangeID].put(nil, prevWidth)
+					arrayRange[rangeID].put(nil, width)
+				}
+				interval = true
+				arrayRange[rangeID].put("interval", 1)
+				ui := 0
+				ui = ui + 1
+			} else {
+				if interval {
+					// new range
+					rangeID = cid
+					r := untypedKeyMap{
+						valueSet: make([]int, 0),
+						keySet:   make([]interface{}, 0),
+					}
+					arrayRange[rangeID] = &r
+					arrayRangeKeys = append(arrayRangeKeys, rangeID)
+					arrayRange[rangeID].put(nil, width)
+				} else {
+					arrayRange[rangeID].put(nil, width)
+				}
+				interval = false
+			}
+		} else {
+			rangeID = cid
+			r := untypedKeyMap{
+				valueSet: make([]int, 0),
+				keySet:   make([]interface{}, 0),
+			}
+			arrayRange[rangeID] = &r
+			arrayRangeKeys = append(arrayRangeKeys, rangeID)
+			arrayRange[rangeID].put(nil, width)
+			interval = false
+		}
+		prevCid = cid
+		prevWidth = width
+
+	}
+	prevK := -1
+	nextK := -1
+	prevInt := false
+	for g := 0; g < len(arrayRangeKeys); {
+		k := arrayRangeKeys[g]
+		ws := *arrayRange[k]
+		cws := len(ws.keySet)
+		if (k == nextK) && (!prevInt) && (ws.getIndex("interval") < 0 || cws < 4) {
+			if arrayRange[k].getIndex("interval") >= 0 {
+				arrayRange[k].delete("interval")
+			}
+			arrayRange[prevK] = arrayMerge(arrayRange[prevK], arrayRange[k])
+			arrayRangeKeys = remove(arrayRangeKeys, k)
+		} else {
+			g++
+			prevK = k
+		}
+		nextK = k + cws
+		ui := ws.getIndex("interval")
+		ui = ui + 1
+		if ws.getIndex("interval") >= 0 {
+			if cws > 3 {
+				prevInt = true
+			} else {
+				prevInt = false
+			}
+			arrayRange[k].delete("interval")
+			nextK--
+		} else {
+			prevInt = false
+		}
+	}
+	var w fmtBuffer
+	for _, k := range arrayRangeKeys {
+		ws := arrayRange[k]
+		if len(arrayCountValues(ws.valueSet)) == 1 {
+			w.printf(" %d %d %d", k, k+len(ws.valueSet)-1, ws.get(0))
+		} else {
+			w.printf(" %d [ %s ]\n", k, implode(" ", ws.valueSet))
+		}
+	}
+	f.out("/W [" + w.String() + " ]")
+}
+
+func implode(sep string, arr []int) string {
+	var s fmtBuffer
+	for i := 0; i < len(arr)-1; i++ {
+		s.printf("%v", arr[i])
+		s.printf(sep)
+	}
+	if len(arr) > 0 {
+		s.printf("%v", arr[len(arr)-1])
+	}
+	return s.String()
+}
+
+func arrayCountValues(mp []int) map[int]int {
+	answer := make(map[int]int)
+	for _, v := range mp {
+		answer[v] = answer[v] + 1
+	}
+	return answer
 }
 
 func (f *Fpdf) loadFontFile(name string) ([]byte, error) {

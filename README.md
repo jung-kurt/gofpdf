@@ -28,14 +28,14 @@ text, drawing and images.
 * Templates
 * Barcodes
 * Charting facility
+* UTF-8 support
 
 gofpdf has no dependencies other than the Go standard library. All tests pass
 on Linux, Mac and Windows platforms.
 
-Like FPDF version 1.7, from which gofpdf is derived, this package does not yet
-support UTF-8 fonts. In particular, languages that require more than one code
-page such as Chinese, Japanese, and Arabic are not currently supported. This is
-explained in [issue 109](https://github.com/jung-kurt/gofpdf/issues/109). However, support is provided to automatically translate
+Similar to tFPDF 1.25, gofpdf supports UTF-8 fonts.
+
+Also, support is provided to automatically translate
 UTF-8 runes to code page encodings for languages that have fewer than 256
 glyphs.
 
@@ -135,7 +135,9 @@ for all examples.
 Nothing special is required to use the standard PDF fonts (courier, helvetica,
 times, zapfdingbats) in your documents other than calling SetFont().
 
-In order to use a different TrueType or Type1 font, you will need to generate a
+You should use AddUTF8Font to add UTF-8 TTF font.
+
+In order to use a different non-UTF-8 TrueType or Type1 font, you will need to generate a
 font definition file and, if the font will be embedded into PDFs, a compressed
 version of the font file. This is done by calling the MakeFont function or
 using the included makefont command line utility. To create the utility, cd
@@ -225,12 +227,10 @@ which the internal catalogs were not sorted stably. Paul Montag added encoding
 and decoding functionality for templates, including images that are embedded in
 templates; this allows templates to be stored independently of gofpdf. Paul
 also added support for page boxes used in printing PDF documents. Wojciech
-Matusiak added supported for word spacing.
+Matusiak added supported for word spacing. Artem Korotkiy added support of UTF-8 fonts.
 
 ## Roadmap
 
-* Handle UTF-8 source text natively. Until then, automatic translation of
-UTF-8 runes to code page bytes is provided.
 * Improve test coverage as reported by the coverage tool.
 
 
