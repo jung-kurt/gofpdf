@@ -2499,7 +2499,7 @@ func (f *Fpdf) MultiCell(w, h float64, txtStr, borderStr, alignStr string, fill 
 				}
 				f.CellFormat(w, h, string([]rune(s)[j:i]), b, 2, newAlignStr, fill, 0, "")
 			} else {
-				f.CellFormat(w, h, s[j:i], b, 2, alignStr, fill, 0, "L")
+				f.CellFormat(w, h, s[j:i], b, 2, alignStr, fill, 0, "")
 			}
 			i++
 			sep = -1
