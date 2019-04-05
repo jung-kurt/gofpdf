@@ -2491,10 +2491,14 @@ func (f *Fpdf) MultiCell(w, h float64, txtStr, borderStr, alignStr string, fill 
 				f.ws = 0
 				f.out("0 Tw")
 			}
+			newAlignStr := alignStr
+			if newAlignStr == "J" {
+				newAlignStr = "L"
+			}
 			if f.unifontSubset {
-				f.CellFormat(w, h, string([]rune(s)[j:i]), b, 2, alignStr, fill, 0, "")
+				f.CellFormat(w, h, string([]rune(s)[j:i]), b, 2, newAlignStr, fill, 0, "")
 			} else {
-				f.CellFormat(w, h, s[j:i], b, 2, alignStr, fill, 0, "")
+				f.CellFormat(w, h, s[j:i], b, 2, newAlignStr, fill, 0, "L")
 			}
 			i++
 			sep = -1
