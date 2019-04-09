@@ -321,14 +321,14 @@ type Pdf interface {
 	AddPageFormat(orientationStr string, size SizeType)
 	AddSpotColor(nameStr string, c, m, y, k byte)
 	AliasNbPages(aliasStr string)
-	Arc(x, y, rx, ry, degRotate, degStart, degEnd float64, styleStr string)
 	ArcTo(x, y, rx, ry, degRotate, degStart, degEnd float64)
+	Arc(x, y, rx, ry, degRotate, degStart, degEnd float64, styleStr string)
 	BeginLayer(id int)
 	Beziergon(points []PointType, styleStr string)
 	Bookmark(txtStr string, level int, y float64)
-	Cell(w, h float64, txtStr string)
 	CellFormat(w, h float64, txtStr, borderStr string, ln int, alignStr string, fill bool, link int, linkStr string)
 	Cellf(w, h float64, fmtStr string, args ...interface{})
+	Cell(w, h float64, txtStr string)
 	Circle(x, y, r float64, styleStr string)
 	ClearError()
 	ClipCircle(x, y, r float64, outline bool)
@@ -340,13 +340,13 @@ type Pdf interface {
 	ClipText(x, y float64, txtStr string, outline bool)
 	Close()
 	ClosePath()
-	CreateTemplate(fn func(*Tpl)) Template
 	CreateTemplateCustom(corner PointType, size SizeType, fn func(*Tpl)) Template
-	Curve(x0, y0, cx, cy, x1, y1 float64, styleStr string)
-	CurveBezierCubic(x0, y0, cx0, cy0, cx1, cy1, x1, y1 float64, styleStr string)
+	CreateTemplate(fn func(*Tpl)) Template
 	CurveBezierCubicTo(cx0, cy0, cx1, cy1, x, y float64)
+	CurveBezierCubic(x0, y0, cx0, cy0, cx1, cy1, x1, y1 float64, styleStr string)
 	CurveCubic(x0, y0, cx0, cy0, x1, y1, cx1, cy1 float64, styleStr string)
 	CurveTo(cx, cy, x, y float64)
+	Curve(x0, y0, cx, cy, x1, y1 float64, styleStr string)
 	DrawPath(styleStr string)
 	Ellipse(x, y, rx, ry, degRotate float64, styleStr string)
 	EndLayer()
@@ -365,8 +365,8 @@ type Pdf interface {
 	GetImageInfo(imageStr string) (info *ImageInfoType)
 	GetLineWidth() float64
 	GetMargins() (left, top, right, bottom float64)
-	GetPageSize() (width, height float64)
 	GetPageSizeStr(sizeStr string) (size SizeType)
+	GetPageSize() (width, height float64)
 	GetStringWidth(s string) float64
 	GetTextColor() (int, int, int)
 	GetTextSpotColor() (name string, c, m, y, k byte)
@@ -377,19 +377,20 @@ type Pdf interface {
 	Image(imageNameStr string, x, y, w, h float64, flow bool, tp string, link int, linkStr string)
 	ImageOptions(imageNameStr string, x, y, w, h float64, flow bool, options ImageOptions, link int, linkStr string)
 	ImageTypeFromMime(mimeStr string) (tp string)
-	Line(x1, y1, x2, y2 float64)
-	LineTo(x, y float64)
 	LinearGradient(x, y, w, h float64, r1, g1, b1, r2, g2, b2 int, x1, y1, x2, y2 float64)
-	Link(x, y, w, h float64, link int)
+	LineTo(x, y float64)
+	Line(x1, y1, x2, y2 float64)
 	LinkString(x, y, w, h float64, linkStr string)
+	Link(x, y, w, h float64, link int)
 	Ln(h float64)
 	MoveTo(x, y float64)
 	MultiCell(w, h float64, txtStr, borderStr, alignStr string, fill bool)
 	Ok() bool
 	OpenLayerPane()
-	Output(w io.Writer) error
 	OutputAndClose(w io.WriteCloser) error
 	OutputFileAndClose(fileStr string) error
+	Output(w io.Writer) error
+	PageCount() int
 	PageNo() int
 	PageSize(pageNum int) (wd, ht float64, unitStr string)
 	PointConvert(pt float64) (u float64)
@@ -404,7 +405,6 @@ type Pdf interface {
 	RegisterImageOptions(fileStr string, options ImageOptions) (info *ImageInfoType)
 	RegisterImageOptionsReader(imgName string, options ImageOptions, r io.Reader) (info *ImageInfoType)
 	RegisterImageReader(imgName, tp string, r io.Reader) (info *ImageInfoType)
-	SVGBasicWrite(sb *SVGBasicType, scale float64)
 	SetAcceptPageBreakFunc(fnc func() bool)
 	SetAlpha(alpha float64, blendModeStr string)
 	SetAuthor(authorStr string, isUTF8 bool)
@@ -450,14 +450,14 @@ type Pdf interface {
 	SetTextSpotColor(nameStr string, tint byte)
 	SetTitle(titleStr string, isUTF8 bool)
 	SetTopMargin(margin float64)
+	SetXmpMetadata(xmpStream []byte)
 	SetX(x float64)
 	SetXY(x, y float64)
-	SetXmpMetadata(xmpStream []byte)
 	SetY(y float64)
 	SplitLines(txt []byte, w float64) [][]byte
 	String() string
+	SVGBasicWrite(sb *SVGBasicType, scale float64)
 	Text(x, y float64, txtStr string)
-	Transform(tm TransformMatrix)
 	TransformBegin()
 	TransformEnd()
 	TransformMirrorHorizontal(x float64)
@@ -472,18 +472,19 @@ type Pdf interface {
 	TransformSkew(angleX, angleY, x, y float64)
 	TransformSkewX(angleX, x, y float64)
 	TransformSkewY(angleY, x, y float64)
+	Transform(tm TransformMatrix)
 	TransformTranslate(tx, ty float64)
 	TransformTranslateX(tx float64)
 	TransformTranslateY(ty float64)
 	UnicodeTranslatorFromDescriptor(cpStr string) (rep func(string) string)
 	UnitToPointConvert(u float64) (pt float64)
-	UseTemplate(t Template)
 	UseTemplateScaled(t Template, corner PointType, size SizeType)
-	Write(h float64, txtStr string)
+	UseTemplate(t Template)
 	WriteAligned(width, lineHeight float64, textStr, alignStr string)
+	Writef(h float64, fmtStr string, args ...interface{})
+	Write(h float64, txtStr string)
 	WriteLinkID(h float64, displayStr string, linkID int)
 	WriteLinkString(h float64, displayStr, targetStr string)
-	Writef(h float64, fmtStr string, args ...interface{})
 }
 
 // PageBox defines the coordinates and extent of the various page box types
