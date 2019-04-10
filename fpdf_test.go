@@ -2476,3 +2476,44 @@ func ExampleFpdf_SetFillColor() {
 	// Output:
 	// Successfully generated pdf/Fpdf_SetFillColor.pdf
 }
+
+// ExampleFpdf_TransformRotate demonstrates how to rotate text within a header
+// to make a watermark that appears on each page.
+func ExampleFpdf_TransformRotate() {
+
+	loremStr := lorem() + "\n\n"
+	pdf := gofpdf.New("P", "mm", "A4", "")
+	margin := 25.0
+	pdf.SetMargins(margin, margin, margin)
+
+	fontHt := 13.0
+	lineHt := pdf.PointToUnitConvert(fontHt)
+	markFontHt := 50.0
+	markLineHt := pdf.PointToUnitConvert(markFontHt)
+	markY := (297.0 - markLineHt) / 2.0
+	ctrX := 210.0 / 2.0
+	ctrY := 297.0 / 2.0
+
+	pdf.SetHeaderFunc(func() {
+		pdf.SetFont("Arial", "B", markFontHt)
+		pdf.SetTextColor(206, 216, 232)
+		pdf.SetXY(margin, markY)
+		pdf.TransformBegin()
+		pdf.TransformRotate(45, ctrX, ctrY)
+		pdf.CellFormat(0, markLineHt, "W A T E R M A R K   D E M O", "", 0, "C", false, 0, "")
+		pdf.TransformEnd()
+		pdf.SetXY(margin, margin)
+	})
+
+	pdf.AddPage()
+	pdf.SetFont("Arial", "", 8)
+	for j := 0; j < 25; j++ {
+		pdf.MultiCell(0, lineHt, loremStr, "", "L", false)
+	}
+
+	fileStr := example.Filename("Fpdf_RotateText")
+	err := pdf.OutputFileAndClose(fileStr)
+	example.Summary(err, fileStr)
+	// Output:
+	// Successfully generated pdf/Fpdf_RotateText.pdf
+}
