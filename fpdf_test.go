@@ -791,6 +791,8 @@ func ExampleFpdf_AddFont() {
 // ExampleFpdf_WriteAligned demonstrates how to align text with the Write function.
 func ExampleFpdf_WriteAligned() {
 	pdf := gofpdf.New("P", "mm", "A4", example.FontDir())
+	pdf.SetLeftMargin(50.0)
+	pdf.SetRightMargin(50.0)
 	pdf.AddPage()
 	pdf.SetFont("Helvetica", "", 12)
 	pdf.WriteAligned(0, 35, "This text is the default alignment, Left", "")
@@ -801,7 +803,7 @@ func ExampleFpdf_WriteAligned() {
 	pdf.Ln(35)
 	pdf.WriteAligned(0, 35, "This text is aligned Right", "R")
 	pdf.Ln(35)
-	line := "This text fill line using word spacing. This can by used to write justified text"
+	line := "This can by used to write justified text"
 	leftMargin, _, rightMargin, _ := pdf.GetMargins()
 	pageWidth, _ := pdf.GetPageSize()
 	pageWidth -= leftMargin + rightMargin
