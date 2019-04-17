@@ -2441,7 +2441,7 @@ func (f *Fpdf) WriteAligned(width, lineHeight float64, textStr, alignStr string)
 			f.Write(lineHeight, lineStr)
 			f.SetLeftMargin(lMargin)
 		case "R":
-			f.SetLeftMargin(lMargin + (width - lineWidth) - rMargin)
+			f.SetLeftMargin(lMargin + (width - lineWidth) - 2.01*f.cMargin)
 			f.Write(lineHeight, lineStr)
 			f.SetLeftMargin(lMargin)
 		default:
