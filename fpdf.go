@@ -430,6 +430,11 @@ func (f *Fpdf) SetHeaderFuncMode(fnc func(), homeMode bool) {
 // headers. fnc will typically be a closure that has access to the Fpdf
 // instance and other document generation variables.
 //
+// A header is a convenient place to put background content that repeats on
+// each page such as a watermark. When this is done, remember to reset the X
+// and Y values so the normal content begins where expected. Including a
+// watermark on each page is demonstrated in the example for TransformRotate.
+//
 // This method is demonstrated in the example for AddPage().
 func (f *Fpdf) SetHeaderFunc(fnc func()) {
 	f.headerFnc = fnc
@@ -2436,7 +2441,7 @@ func (f *Fpdf) WriteAligned(width, lineHeight float64, textStr, alignStr string)
 			f.Write(lineHeight, lineStr)
 			f.SetLeftMargin(lMargin)
 		case "R":
-			f.SetLeftMargin(lMargin + (width - lineWidth) - rMargin)
+			f.SetLeftMargin(lMargin + (width - lineWidth))
 			f.Write(lineHeight, lineStr)
 			f.SetLeftMargin(lMargin)
 		default:
