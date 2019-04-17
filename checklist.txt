@@ -8,3 +8,8 @@ git commit -am "Commit message here"
 git tag
 git tag v2.x.y
 git push --tags -u origin v2
+
+Delete tag
+----------
+git push --delete origin tagName
+git tag -d tagName
