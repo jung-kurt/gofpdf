@@ -16,8 +16,8 @@ const symbolAllScale = 1 << 6
 const symbol2x2 = 1 << 7
 const toUnicode = "/CIDInit /ProcSet findresource begin\n12 dict begin\nbegincmap\n/CIDSystemInfo\n<</Registry (Adobe)\n/Ordering (UCS)\n/Supplement 0\n>> def\n/CMapName /Adobe-Identity-UCS def\n/CMapType 2 def\n1 begincodespacerange\n<0000> <FFFF>\nendcodespacerange\n1 beginbfrange\n<0000> <FFFF> <0000>\nendbfrange\nendcmap\nCMapName currentdict /CMap defineresource pop\nend\nend"
 
-type UTF8FontFile struct {
-	fileReader           *FileReader
+type utf8FontFile struct {
+	fileReader           *fileReader
 	LastRune             int
 	tableDescriptions    map[string]*tableDescription
 	outTablesData        map[string][]byte
@@ -46,18 +46,18 @@ type tableDescription struct {
 	size     int
 }
 
-type FileReader struct {
+type fileReader struct {
 	readerPosition int64
 	array          []byte
 }
 
-func (fr *FileReader) Read(s int) []byte {
+func (fr *fileReader) Read(s int) []byte {
 	b := fr.array[fr.readerPosition : fr.readerPosition+int64(s)]
 	fr.readerPosition += int64(s)
 	return b
 }
 
-func (fr *FileReader) Seek(shift int64, flag int) (int64, error) {
+func (fr *fileReader) seek(shift int64, flag int) (int64, error) {
 	if flag == 0 {
 		fr.readerPosition = shift
 	} else if flag == 1 {
@@ -68,14 +68,14 @@ func (fr *FileReader) Seek(shift int64, flag int) (int64, error) {
 	return int64(fr.readerPosition), nil
 }
 
-func NewUTF8Font(reader *FileReader) *UTF8FontFile {
-	utf := UTF8FontFile{
+func newUTF8Font(reader *fileReader) *utf8FontFile {
+	utf := utf8FontFile{
 		fileReader: reader,
 	}
 	return &utf
 }
 
-func (utf *UTF8FontFile) ParseFile() error {
+func (utf *utf8FontFile) parseFile() error {
 	utf.fileReader.readerPosition = 0
 	utf.symbolPosition = make([]int, 0)
 	utf.charSymbolDictionary = make(map[int]int)
@@ -98,7 +98,7 @@ func (utf *UTF8FontFile) ParseFile() error {
 	return nil
 }
 
-func (utf *UTF8FontFile) generateTableDescriptions() {
+func (utf *utf8FontFile) generateTableDescriptions() {
 
 	tablesCount := utf.readUint16()
 	_ = utf.readUint16()
@@ -117,21 +117,21 @@ func (utf *UTF8FontFile) generateTableDescriptions() {
 	}
 }
 
-func (utf *UTF8FontFile) readTableName() string {
+func (utf *utf8FontFile) readTableName() string {
 	return string(utf.fileReader.Read(4))
 }
 
-func (utf *UTF8FontFile) readUint16() int {
+func (utf *utf8FontFile) readUint16() int {
 	s := utf.fileReader.Read(2)
 	return (int(s[0]) << 8) + int(s[1])
 }
 
-func (utf *UTF8FontFile) readUint32() int {
+func (utf *utf8FontFile) readUint32() int {
 	s := utf.fileReader.Read(4)
 	return (int(s[0]) * 16777216) + (int(s[1]) << 16) + (int(s[2]) << 8) + int(s[3]) // 	16777216  = 1<<24
 }
 
-func (utf *UTF8FontFile) calcInt32(x, y []int) []int {
+func (utf *utf8FontFile) calcInt32(x, y []int) []int {
 	answer := make([]int, 2)
 	if y[1] > x[1] {
 		x[1] += 1 << 16
@@ -146,7 +146,7 @@ func (utf *UTF8FontFile) calcInt32(x, y []int) []int {
 	return answer
 }
 
-func (utf *UTF8FontFile) generateChecksum(data []byte) []int {
+func (utf *utf8FontFile) generateChecksum(data []byte) []int {
 	if (len(data) % 4) != 0 {
 		for i := 0; (len(data) % 4) != 0; i++ {
 			data = append(data, 0)
@@ -163,25 +163,25 @@ func (utf *UTF8FontFile) generateChecksum(data []byte) []int {
 	return answer
 }
 
-func (utf *UTF8FontFile) seek(shift int) {
-	_, _ = utf.fileReader.Seek(int64(shift), 0)
+func (utf *utf8FontFile) seek(shift int) {
+	_, _ = utf.fileReader.seek(int64(shift), 0)
 }
 
-func (utf *UTF8FontFile) skip(delta int) {
-	_, _ = utf.fileReader.Seek(int64(delta), 1)
+func (utf *utf8FontFile) skip(delta int) {
+	_, _ = utf.fileReader.seek(int64(delta), 1)
 }
 
 //SeekTable position
-func (utf *UTF8FontFile) SeekTable(name string) int {
+func (utf *utf8FontFile) SeekTable(name string) int {
 	return utf.seekTable(name, 0)
 }
 
-func (utf *UTF8FontFile) seekTable(name string, offsetInTable int) int {
-	_, _ = utf.fileReader.Seek(int64(utf.tableDescriptions[name].position+offsetInTable), 0)
+func (utf *utf8FontFile) seekTable(name string, offsetInTable int) int {
+	_, _ = utf.fileReader.seek(int64(utf.tableDescriptions[name].position+offsetInTable), 0)
 	return int(utf.fileReader.readerPosition)
 }
 
-func (utf *UTF8FontFile) readInt16() int16 {
+func (utf *utf8FontFile) readInt16() int16 {
 	s := utf.fileReader.Read(2)
 	a := (int16(s[0]) << 8) + int16(s[1])
 	if (int(a) & (1 << 15)) == 0 {
@@ -190,24 +190,24 @@ func (utf *UTF8FontFile) readInt16() int16 {
 	return a
 }
 
-func (utf *UTF8FontFile) getUint16(pos int) int {
-	_, _ = utf.fileReader.Seek(int64(pos), 0)
+func (utf *utf8FontFile) getUint16(pos int) int {
+	_, _ = utf.fileReader.seek(int64(pos), 0)
 	s := utf.fileReader.Read(2)
 	return (int(s[0]) << 8) + int(s[1])
 }
 
-func (utf *UTF8FontFile) splice(stream []byte, offset int, value []byte) []byte {
+func (utf *utf8FontFile) splice(stream []byte, offset int, value []byte) []byte {
 	return append(append(stream[:offset], value...), stream[offset+len(value):]...)
 }
 
-func (utf *UTF8FontFile) insertUint16(stream []byte, offset int, value int) []byte {
+func (utf *utf8FontFile) insertUint16(stream []byte, offset int, value int) []byte {
 	up := make([]byte, 2)
 	binary.BigEndian.PutUint16(up, uint16(value))
 	return utf.splice(stream, offset, up)
 }
 
-func (utf *UTF8FontFile) getRange(pos, length int) []byte {
-	utf.fileReader.Seek(int64(pos), 0)
+func (utf *utf8FontFile) getRange(pos, length int) []byte {
+	utf.fileReader.seek(int64(pos), 0)
 	if length < 1 {
 		return make([]byte, 0)
 	}
@@ -215,7 +215,7 @@ func (utf *UTF8FontFile) getRange(pos, length int) []byte {
 	return s
 }
 
-func (utf *UTF8FontFile) getTableData(name string) []byte {
+func (utf *utf8FontFile) getTableData(name string) []byte {
 	desckrip := utf.tableDescriptions[name]
 	if desckrip == nil {
 		return nil
@@ -223,12 +223,12 @@ func (utf *UTF8FontFile) getTableData(name string) []byte {
 	if desckrip.size == 0 {
 		return nil
 	}
-	utf.fileReader.Seek(int64(desckrip.position), 0)
+	utf.fileReader.seek(int64(desckrip.position), 0)
 	s := utf.fileReader.Read(desckrip.size)
 	return s
 }
 
-func (utf *UTF8FontFile) setOutTable(name string, data []byte) {
+func (utf *utf8FontFile) setOutTable(name string, data []byte) {
 	if data == nil {
 		return
 	}
@@ -257,7 +257,7 @@ func inArray(s int, arr []int) bool {
 	return false
 }
 
-func (utf *UTF8FontFile) parseNAMETable() int {
+func (utf *utf8FontFile) parseNAMETable() int {
 	namePosition := utf.SeekTable("name")
 	format := utf.readUint16()
 	if format != 0 {
@@ -313,7 +313,7 @@ func (utf *UTF8FontFile) parseNAMETable() int {
 	return format
 }
 
-func (utf *UTF8FontFile) parseHEADTable() {
+func (utf *utf8FontFile) parseHEADTable() {
 	utf.SeekTable("head")
 	utf.skip(18)
 	utf.fontElementSize = utf.readUint16()
@@ -333,7 +333,7 @@ func (utf *UTF8FontFile) parseHEADTable() {
 	}
 }
 
-func (utf *UTF8FontFile) parseHHEATable() int {
+func (utf *utf8FontFile) parseHHEATable() int {
 	metricsCount := 0
 	if _, OK := utf.tableDescriptions["hhea"]; OK {
 		scale := 1000.0 / float64(utf.fontElementSize)
@@ -358,7 +358,7 @@ func (utf *UTF8FontFile) parseHHEATable() int {
 	return metricsCount
 }
 
-func (utf *UTF8FontFile) parseOS2Table() int {
+func (utf *utf8FontFile) parseOS2Table() int {
 	weightType := 0
 	scale := 1000.0 / float64(utf.fontElementSize)
 	if _, OK := utf.tableDescriptions["OS/2"]; OK {
@@ -405,7 +405,7 @@ func (utf *UTF8FontFile) parseOS2Table() int {
 	return weightType
 }
 
-func (utf *UTF8FontFile) parsePOSTTable(weight int) {
+func (utf *utf8FontFile) parsePOSTTable(weight int) {
 	utf.SeekTable("post")
 	utf.skip(4)
 	utf.ItalicAngle = int(utf.readInt16()) + utf.readUint16()/65536.0
@@ -427,7 +427,7 @@ func (utf *UTF8FontFile) parsePOSTTable(weight int) {
 	}
 }
 
-func (utf *UTF8FontFile) parseCMAPTable(format int) int {
+func (utf *utf8FontFile) parseCMAPTable(format int) int {
 	cmapPosition := utf.SeekTable("cmap")
 	utf.skip(2)
 	cmapTableCount := utf.readUint16()
@@ -455,7 +455,7 @@ func (utf *UTF8FontFile) parseCMAPTable(format int) int {
 	return cidCMAPPosition
 }
 
-func (utf *UTF8FontFile) parseTables() {
+func (utf *utf8FontFile) parseTables() {
 	f := utf.parseNAMETable()
 	utf.parseHEADTable()
 	n := utf.parseHHEATable()
@@ -475,7 +475,7 @@ func (utf *UTF8FontFile) parseTables() {
 	utf.parseHMTXTable(n, numSymbols, symbolCharDictionary, scale)
 }
 
-func (utf *UTF8FontFile) generateCMAP() map[int][]int {
+func (utf *utf8FontFile) generateCMAP() map[int][]int {
 	cmapPosition := utf.SeekTable("cmap")
 	utf.skip(2)
 	cmapTableCount := utf.readUint16()
@@ -509,7 +509,7 @@ func (utf *UTF8FontFile) generateCMAP() map[int][]int {
 	return symbolCharDictionary
 }
 
-func (utf *UTF8FontFile) parseSymbols(usedRunes map[int]int) (map[int]int, map[int]int, map[int]int, []int) {
+func (utf *utf8FontFile) parseSymbols(usedRunes map[int]int) (map[int]int, map[int]int, map[int]int, []int) {
 	symbolCollection := map[int]int{0: 0}
 	charSymbolPairCollection := make(map[int]int)
 	for _, char := range usedRunes {
@@ -548,7 +548,7 @@ func (utf *UTF8FontFile) parseSymbols(usedRunes map[int]int) (map[int]int, map[i
 	return runeSymbolPairCollection, symbolArray, symbolCollection, symbolCollectionKeys
 }
 
-func (utf *UTF8FontFile) generateCMAPTable(cidSymbolPairCollection map[int]int, numSymbols int) []byte {
+func (utf *utf8FontFile) generateCMAPTable(cidSymbolPairCollection map[int]int, numSymbols int) []byte {
 	cidSymbolPairCollectionKeys := keySortInt(cidSymbolPairCollection)
 	cidID := 0
 	cidArray := make(map[int][]int)
@@ -616,8 +616,8 @@ func (utf *UTF8FontFile) generateCMAPTable(cidSymbolPairCollection map[int]int, 
 	return cmapstr
 }
 
-//GenerateСutFont fill UTF8FontFile from .utf file, only with runes from usedRunes
-func (utf *UTF8FontFile) GenerateСutFont(usedRunes map[int]int) []byte {
+//GenerateСutFont fill utf8FontFile from .utf file, only with runes from usedRunes
+func (utf *utf8FontFile) GenerateСutFont(usedRunes map[int]int) []byte {
 	utf.fileReader.readerPosition = 0
 	utf.symbolPosition = make([]int, 0)
 	utf.charSymbolDictionary = make(map[int]int)
@@ -771,7 +771,7 @@ func (utf *UTF8FontFile) GenerateСutFont(usedRunes map[int]int) []byte {
 	return utf.assembleTables()
 }
 
-func (utf *UTF8FontFile) getSymbols(originalSymbolIdx int, start *int, symbolSet map[int]int, SymbolsCollection map[int]int, SymbolsCollectionKeys []int) (*int, map[int]int, map[int]int, []int) {
+func (utf *utf8FontFile) getSymbols(originalSymbolIdx int, start *int, symbolSet map[int]int, SymbolsCollection map[int]int, SymbolsCollectionKeys []int) (*int, map[int]int, map[int]int, []int) {
 	symbolPos := utf.symbolPosition[originalSymbolIdx]
 	symbolSize := utf.symbolPosition[originalSymbolIdx+1] - symbolPos
 	if symbolSize == 0 {
@@ -792,7 +792,7 @@ func (utf *UTF8FontFile) getSymbols(originalSymbolIdx int, start *int, symbolSet
 				SymbolsCollection[symbolIndex] = 1
 				SymbolsCollectionKeys = append(SymbolsCollectionKeys, symbolIndex)
 			}
-			oldPosition, _ := utf.fileReader.Seek(0, 1)
+			oldPosition, _ := utf.fileReader.seek(0, 1)
 			_, _, _, SymbolsCollectionKeys = utf.getSymbols(symbolIndex, start, symbolSet, SymbolsCollection, SymbolsCollectionKeys)
 			utf.seek(int(oldPosition))
 			if flags&symbolWords != 0 {
@@ -812,7 +812,7 @@ func (utf *UTF8FontFile) getSymbols(originalSymbolIdx int, start *int, symbolSet
 	return start, symbolSet, SymbolsCollection, SymbolsCollectionKeys
 }
 
-func (utf *UTF8FontFile) parseHMTXTable(numberOfHMetrics, numSymbols int, symbolToChar map[int][]int, scale float64) {
+func (utf *utf8FontFile) parseHMTXTable(numberOfHMetrics, numSymbols int, symbolToChar map[int][]int, scale float64) {
 	start := utf.SeekTable("hmtx")
 	arrayWidths := 0
 	widths := 0
@@ -868,7 +868,7 @@ func (utf *UTF8FontFile) parseHMTXTable(numberOfHMetrics, numSymbols int, symbol
 	utf.CharWidths[0] = charCount
 }
 
-func (utf *UTF8FontFile) getMetrics(metricCount, gid int) []byte {
+func (utf *utf8FontFile) getMetrics(metricCount, gid int) []byte {
 	start := utf.SeekTable("hmtx")
 	var metrics []byte
 	if gid < metricCount {
@@ -883,7 +883,7 @@ func (utf *UTF8FontFile) getMetrics(metricCount, gid int) []byte {
 	return metrics
 }
 
-func (utf *UTF8FontFile) parseLOCATable(format, numSymbols int) {
+func (utf *utf8FontFile) parseLOCATable(format, numSymbols int) {
 	start := utf.SeekTable("loca")
 	utf.symbolPosition = make([]int, 0)
 	if format == 0 {
@@ -904,7 +904,7 @@ func (utf *UTF8FontFile) parseLOCATable(format, numSymbols int) {
 	}
 }
 
-func (utf *UTF8FontFile) generateSCCSDictionaries(runeCmapPosition int, symbolCharDictionary map[int][]int, charSymbolDictionary map[int]int) {
+func (utf *utf8FontFile) generateSCCSDictionaries(runeCmapPosition int, symbolCharDictionary map[int][]int, charSymbolDictionary map[int]int) {
 	maxRune := 0
 	utf.seek(runeCmapPosition + 2)
 	size := utf.readUint16()
@@ -965,7 +965,7 @@ func max(i, n int) int {
 	return i
 }
 
-func (utf *UTF8FontFile) assembleTables() []byte {
+func (utf *utf8FontFile) assembleTables() []byte {
 	answer := make([]byte, 0)
 	tablesCount := len(utf.outTablesData)
 	findSize := 1

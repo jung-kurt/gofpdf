@@ -697,7 +697,7 @@ type fontDefType struct {
 	N            int           // Set by font loader
 	DiffN        int           // Position of diff in app array, set by font loader
 	i            string        // 1-based position in font list, set by font loader, not this program
-	utf8File     *UTF8FontFile // UTF-8 font
+	utf8File     *utf8FontFile // UTF-8 font
 	usedRunes    map[int]int   // Array of used runes
 }
 

@@ -1582,10 +1582,10 @@ func (f *Fpdf) addFont(familyStr, styleStr, fileStr string, isUTF8 bool) {
 		Type := "UTF8"
 
 		utf8Bytes, _ := ioutil.ReadFile(fileStr)
-		reader := FileReader{readerPosition: 0, array: utf8Bytes}
-		utf8File := NewUTF8Font(&reader)
+		reader := fileReader{readerPosition: 0, array: utf8Bytes}
+		utf8File := newUTF8Font(&reader)
 
-		err := utf8File.ParseFile()
+		err := utf8File.parseFile()
 		if err != nil {
 			fmt.Printf("get metrics Error: %e\n", err)
 			return
@@ -1719,11 +1719,11 @@ func (f *Fpdf) addFontFromBytes(familyStr, styleStr string, jsonFileBytes, zFile
 		}
 
 		Type := "UTF8"
-		reader := FileReader{readerPosition: 0, array: utf8Bytes}
+		reader := fileReader{readerPosition: 0, array: utf8Bytes}
 
-		utf8File := NewUTF8Font(&reader)
+		utf8File := newUTF8Font(&reader)
 
-		err := utf8File.ParseFile()
+		err := utf8File.parseFile()
 		if err != nil {
 			fmt.Printf("get metrics Error: %e\n", err)
 			return
