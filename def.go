@@ -426,6 +426,7 @@ type Pdf interface {
 	SetFontLoader(loader FontLoader)
 	SetFontLocation(fontDirStr string)
 	SetFontSize(size float64)
+	SetFontStyle(styleStr string)
 	SetFontUnitSize(size float64)
 	SetFooterFunc(fnc func())
 	SetFooterFuncLpi(fnc func(lastPage bool))
