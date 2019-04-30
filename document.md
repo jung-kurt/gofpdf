@@ -1,14 +1,15 @@
 ~rm~
 # GoFPDF document generator
 
-~x~
+~m~
 [![Git Hub repository][badge-github]][github]
 [![Kurt Jung][badge-author]][jung]
-~x~
+~m~
 [![MIT licensed][badge-mit]][license]
 [![Report][badge-report]][report]
 [![GoDoc][badge-doc]][godoc]
 
+~rm~
 ![gofpdf](image/logo_gofpdf.jpg?raw=true "gofpdf")
 
 ~rgm~

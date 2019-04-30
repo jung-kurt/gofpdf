@@ -15,8 +15,6 @@ check :
 	tidy -quiet -output /dev/null $<
 	touch $@
 
-README.md doc.go doc/index.html : document.md
-
 doc/body.md README.md doc.go : document.md
 	lua doc/doc.lua
 	gofmt -s -w doc.go
