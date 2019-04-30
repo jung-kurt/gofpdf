@@ -1,5 +1,9 @@
 # GoFPDF document generator
 
+[![MIT licensed][badge-mit]][license]
+[![Report][badge-report]][report]
+[![GoDoc][badge-doc]][godoc]
+
 ![gofpdf](image/logo_gofpdf.jpg?raw=true "gofpdf")
 
 Package gofpdf implements a PDF document generator with high level support for
@@ -222,9 +226,6 @@ Matusiak added supported for word spacing.
 * Handle UTF-8 source text natively. Until then, automatic translation of
 UTF-8 runes to code page bytes is provided.
 * Improve test coverage as reported by the coverage tool.
-
-
-
 
 
 [badge-author]: https://img.shields.io/badge/author-Kurt_Jung-blue.svg

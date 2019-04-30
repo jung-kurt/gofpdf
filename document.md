@@ -4,7 +4,7 @@
 ~m~
 [![Git Hub repository][badge-github]][github]
 [![Kurt Jung][badge-author]][jung]
-~m~
+~rm~
 [![MIT licensed][badge-mit]][license]
 [![Report][badge-report]][report]
 [![GoDoc][badge-doc]][godoc]
@@ -234,11 +234,8 @@ Matusiak added supported for word spacing.
 UTF-8 runes to code page bytes is provided.
 * Improve test coverage as reported by the coverage tool.
 
+
 ~mr~
-
-
-
-
 [badge-author]: https://img.shields.io/badge/author-Kurt_Jung-blue.svg
 [badge-doc]: https://img.shields.io/badge/godoc-GoFPDF-blue.svg 
 [badge-github]: https://img.shields.io/badge/project-Git_Hub-blue.svg
