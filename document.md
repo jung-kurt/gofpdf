@@ -4,7 +4,7 @@
 ~x~
 [![Git Hub repository][badge-github]][github]
 [![Kurt Jung][badge-author]][jung]
-~rm~
+~x~
 [![MIT licensed][badge-mit]][license]
 [![Report][badge-report]][report]
 [![GoDoc][badge-doc]][godoc]
