@@ -71,7 +71,7 @@ If an error occurs in an Fpdf method, an internal error field is set. After
 this occurs, Fpdf method calls typically return without performing any
 operations and the error state is retained. This error management scheme
 facilitates PDF generation since individual method calls do not need to be
-examined for failure; it is generally sufficient to wait until after Output()
+examined for failure; it is generally sufficient to wait until after `Output()`
 is called. For the same reason, if an error occurs in the calling application
 during PDF generation, it may be desirable for the application to transfer the
 error to the Fpdf instance by calling the `SetError()` method or the
@@ -223,12 +223,16 @@ Matusiak added supported for word spacing.
 UTF-8 runes to code page bytes is provided.
 * Improve test coverage as reported by the coverage tool.
 
+
+
+
+
 [badge-author]: https://img.shields.io/badge/author-Kurt_Jung-blue.svg
 [badge-doc]: https://img.shields.io/badge/godoc-GoFPDF-blue.svg 
 [badge-github]: https://img.shields.io/badge/project-Git_Hub-blue.svg
 [badge-mit]: https://img.shields.io/badge/license-MIT-blue.svg
 [badge-report]: https://goreportcard.com/badge/github.com/jung-kurt/gofpdf
-[badge-status]: https://travis-ci.org/jung-kurt/gofpdf.svg?branch=master)
+[badge-status]: https://travis-ci.org/jung-kurt/gofpdf.svg?branch=master
 [coverage]: https://blog.golang.org/cover
 [dfont]: http://dejavu-fonts.org/
 [draw2d-site]: https://github.com/llgcode/draw2d
@@ -246,4 +250,4 @@ UTF-8 runes to code page bytes is provided.
 [report]: https://goreportcard.com/report/github.com/jung-kurt/gofpdf
 [status]: https://travis-ci.org/jung-kurt/gofpdf
 [test]: https://github.com/jung-kurt/gofpdf/blob/master/fpdf_test.go
-[vet]: https://godoc.org/golang.org/x/tools/cmd/vet
+[vet]: https://golang.org/cmd/vet/

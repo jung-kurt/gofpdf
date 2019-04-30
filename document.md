@@ -235,6 +235,10 @@ UTF-8 runes to code page bytes is provided.
 * Improve test coverage as reported by the coverage tool.
 
 ~mr~
+
+
+
+
 [badge-author]: https://img.shields.io/badge/author-Kurt_Jung-blue.svg
 [badge-doc]: https://img.shields.io/badge/godoc-GoFPDF-blue.svg 
 [badge-github]: https://img.shields.io/badge/project-Git_Hub-blue.svg
