@@ -236,10 +236,13 @@ UTF-8 runes to code page bytes is provided.
 [coverage]: https://blog.golang.org/cover
 [dfont]: http://dejavu-fonts.org/
 [draw2d]: https://github.com/llgcode/draw2d
+[effective-go]: https://golang.org/doc/effective_go.html 
 [fpdf]: http://www.fpdf.org/
-[gfont]: http://www.google.com/fonts/
+[fpdf-test]: https://github.com/jung-kurt/gofpdf/blob/master/fpdf_test.go
+[gfont]: https://fonts.google.com/
 [github]: https://github.com/jung-kurt/gofpdf
 [godoc]: https://godoc.org/github.com/jung-kurt/gofpdf
+[issue109]: https://github.com/jung-kurt/gofpdf/issues/109
 [jung]: https://github.com/jung-kurt/
 [license]: https://raw.githubusercontent.com/jung-kurt/gofpdf/master/LICENSE
 [lint]: https://github.com/golang/lint
@@ -248,6 +251,3 @@ UTF-8 runes to code page bytes is provided.
 [status]: https://travis-ci.org/jung-kurt/gofpdf
 [test]: https://github.com/jung-kurt/gofpdf/blob/master/fpdf_test.go
 [vet]: https://godoc.org/golang.org/x/tools/cmd/vet
-[issue109]: https://github.com/jung-kurt/gofpdf/issues/109
-[fpdf-test]: https://github.com/jung-kurt/gofpdf/blob/master/fpdf_test.go
-[effective-go]: https://golang.org/doc/effective_go.html 
