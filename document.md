@@ -1,11 +1,17 @@
+~rm~
 # GoFPDF document generator
 
+~m~
+[![Git Hub repository][badge-github]][github]
+[![Kurt Jung][badge-author]][jung]
+~rm~
 [![MIT licensed][badge-mit]][license]
 [![Report][badge-report]][report]
 [![GoDoc][badge-doc]][godoc]
 
 ![gofpdf](image/logo_gofpdf.jpg?raw=true "gofpdf")
 
+~rgm~
 Package gofpdf implements a PDF document generator with high level support for
 text, drawing and images.
 
@@ -227,6 +233,7 @@ Matusiak added supported for word spacing.
 UTF-8 runes to code page bytes is provided.
 * Improve test coverage as reported by the coverage tool.
 
+~mr~
 [badge-author]: https://img.shields.io/badge/author-Kurt_Jung-blue.svg
 [badge-doc]: https://img.shields.io/badge/godoc-GoFPDF-blue.svg 
 [badge-github]: https://img.shields.io/badge/project-Git_Hub-blue.svg
