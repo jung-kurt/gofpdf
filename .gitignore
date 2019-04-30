@@ -15,3 +15,7 @@ private
 *.swp
 **/*.test
 .idea/
+doc/body.html
+doc/body.md
+doc/index.html
+doc/index.html.ok
