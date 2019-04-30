@@ -82,7 +82,7 @@ itself can be retrieved with a call to `Error()`.
 ## Conversion Notes
 
 This package is a relatively straightforward translation from the original
-[FPDF][fpdf] library written in PHP (despite the caveat in the
+[FPDF][fpdf-site] library written in PHP (despite the caveat in the
 introduction to [Effective Go][effective-go]). The
 API names have been retained even though the Go idiom would suggest otherwise
 (for example, `pdf.GetX()` is used rather than simply `pdf.X()`). The
@@ -148,7 +148,7 @@ fonts include [Google Fonts][gfont] and [DejaVu Fonts][dfont].
 
 ## Related Packages
 
-The [draw2d][draw2d] package is a two dimensional vector graphics library that
+The [draw2d][draw2d-site] package is a two dimensional vector graphics library that
 can generate output in different forms. It uses gofpdf for its document
 production mode.
 
@@ -180,7 +180,7 @@ the contributors acknowledged below.
 
 ## Acknowledgments
 
-This package's code and documentation are closely derived from the [FPDF][fpdf]
+This package's code and documentation are closely derived from the [FPDF][fpdf-site]
 library created by Olivier Plathey, and a number of font and image resources
 are copied directly from it. Bruno Michel has provided valuable assistance with
 the code. Drawing support is adapted from the FPDF geometric figures script by
@@ -231,9 +231,9 @@ UTF-8 runes to code page bytes is provided.
 [badge-status]: https://travis-ci.org/jung-kurt/gofpdf.svg?branch=master)
 [coverage]: https://blog.golang.org/cover
 [dfont]: http://dejavu-fonts.org/
-[draw2d]: https://github.com/llgcode/draw2d
+[draw2d-site]: https://github.com/llgcode/draw2d
 [effective-go]: https://golang.org/doc/effective_go.html 
-[fpdf]: http://www.fpdf.org/
+[fpdf-site]: http://www.fpdf.org/
 [fpdf-test]: https://github.com/jung-kurt/gofpdf/blob/master/fpdf_test.go
 [gfont]: https://fonts.google.com/
 [github]: https://github.com/jung-kurt/gofpdf
