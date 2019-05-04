@@ -1,10 +1,11 @@
 <!doctype html>
 
-<html>
+<html lang="en">
 
 <head>
+  <meta charset="utf-8">
   <meta name="viewport" content="width=device-width initial-scale=1 maximum-scale=1 minimum-scale=1 user-scalable=0" />
-  <title>CGI for Caddy</title>
+  <title>GoFPDF Document Generator</title>
   <style>
     body {
       max-width: 800px;
@@ -36,11 +37,12 @@
       background-color: #ffd;
       border: 1px solid #665;
       margin: 1em 0;
-      padding: 0.25em 1.5em;
+      padding: 0 1em;
     }
 
     .key {
-      color: #474;
+      color: #131;
+      font-weight: bold;
     }
 
     .subkey {
@@ -53,7 +55,14 @@
       padding: 1em;
       overflow-x: scroll;
     }
+$if(highlighting-css)$
+$highlighting-css$
+$endif$
   </style>
 </head>
 
 <body>
+$body$
+</body>
+
+</html>
