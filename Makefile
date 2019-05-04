@@ -1,9 +1,8 @@
-doc : README.md doc.go doc/index.html.ok
+all : documentation
 
-test :
-	go test -v
+documentation : doc/index.html doc.go README.md 
 
-cov :
+cov : all
 	go test -v -coverprofile=coverage && go tool cover -html=coverage -o=coverage.html
 
 check :
@@ -11,19 +10,19 @@ check :
 	go vet -all .
 	gofmt -s -l .
 
-%.html.ok : %.html
-	tidy -quiet -output /dev/null $<
-	touch $@
+README.md : doc/document.md
+	pandoc --read=markdown --write=gfm < $< > $@
 
-doc/body.md README.md doc.go : document.md
-	lua doc/doc.lua
-	gofmt -s -w doc.go
+doc/index.html : doc/document.md doc/html.txt
+	pandoc --read=markdown --write=html --template=doc/html.txt \
+		--metadata pagetitle="GoFPDF Document Generator" < $< > $@
 
-doc/index.html : doc/hdr.html doc/body.html doc/ftr.html
-	cat doc/hdr.html doc/body.html doc/ftr.html > $@
+doc.go : doc/document.md doc/go.awk
+	pandoc --read=markdown --write=plain $< | awk -f doc/go.awk > $@
+	gofmt -s -w $@
 
-doc/body.html : doc/body.md
-	markdown -f +links,+image,+smarty,+ext,+divquote -o $@ $<
+build :
+	go build -v
 
 clean :
-	rm -f coverage.html coverage doc/*.ok doc/body.md README.md doc.go doc/index.html doc/body.html
+	rm -f coverage.html coverage doc/index.html doc.go README.md

@@ -1,18 +1,11 @@
-~rm~
 # GoFPDF document generator
 
-~m~
-[![Git Hub repository][badge-github]][github]
-[![Kurt Jung][badge-author]][jung]
-~rm~
 [![MIT licensed][badge-mit]][license]
 [![Report][badge-report]][report]
 [![GoDoc][badge-doc]][godoc]
 
-~rm~
-![gofpdf](image/logo_gofpdf.jpg?raw=true "gofpdf")
+![][logo]
 
-~rgm~
 Package gofpdf implements a PDF document generator with high level support for
 text, drawing and images.
 
@@ -72,9 +65,8 @@ pdf.Cell(40, 10, "Hello, world")
 err := pdf.OutputFileAndClose("hello.pdf")
 ```
 
-See the functions in the
-[fpdf_test.go][fpdf-test]
-file (shown as examples in this documentation) for more advanced PDF examples.
+See the functions in the [fpdf_test.go][fpdf-test] file (shown as examples in
+this documentation) for more advanced PDF examples.
 
 ## Errors
 
@@ -235,7 +227,6 @@ UTF-8 runes to code page bytes is provided.
 * Improve test coverage as reported by the coverage tool.
 
 
-~mr~
 [badge-author]: https://img.shields.io/badge/author-Kurt_Jung-blue.svg
 [badge-doc]: https://img.shields.io/badge/godoc-GoFPDF-blue.svg 
 [badge-github]: https://img.shields.io/badge/project-Git_Hub-blue.svg
@@ -255,6 +246,7 @@ UTF-8 runes to code page bytes is provided.
 [jung]: https://github.com/jung-kurt/
 [license]: https://raw.githubusercontent.com/jung-kurt/gofpdf/master/LICENSE
 [lint]: https://github.com/golang/lint
+[logo]: https://github.com/jung-kurt/gofpdf/raw/master/image/logo_gofpdf.jpg?raw=true
 [pr]: https://help.github.com/articles/using-pull-requests/
 [report]: https://goreportcard.com/report/github.com/jung-kurt/gofpdf
 [status]: https://travis-ci.org/jung-kurt/gofpdf
