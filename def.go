@@ -266,6 +266,7 @@ type fontFileType struct {
 	n                int
 	embedded         bool
 	content          []byte
+	fontType         string
 }
 
 type linkType struct {
@@ -496,6 +497,8 @@ type PageBox struct {
 
 // Fpdf is the principal structure for creating a single PDF document
 type Fpdf struct {
+	isCurrentUTF8    bool                       // is current font used in utf-8 mode
+	isRTL            bool                       // is is right to left mode enabled
 	page             int                        // current page number
 	n                int                        // current object number
 	offsets          []int                      // array of object offsets
@@ -683,20 +686,22 @@ type FontDescType struct {
 }
 
 type fontDefType struct {
-	Tp           string       // "Core", "TrueType", ...
-	Name         string       // "Courier-Bold", ...
-	Desc         FontDescType // Font descriptor
-	Up           int          // Underline position
-	Ut           int          // Underline thickness
-	Cw           [256]int     // Character width by ordinal
-	Enc          string       // "cp1252", ...
-	Diff         string       // Differences from reference encoding
-	File         string       // "Redressed.z"
-	Size1, Size2 int          // Type1 values
-	OriginalSize int          // Size of uncompressed font file
-	N            int          // Set by font loader
-	DiffN        int          // Position of diff in app array, set by font loader
-	i            string       // 1-based position in font list, set by font loader, not this program
+	Tp           string        // "Core", "TrueType", ...
+	Name         string        // "Courier-Bold", ...
+	Desc         FontDescType  // Font descriptor
+	Up           int           // Underline position
+	Ut           int           // Underline thickness
+	Cw           []int         // Character width by ordinal
+	Enc          string        // "cp1252", ...
+	Diff         string        // Differences from reference encoding
+	File         string        // "Redressed.z"
+	Size1, Size2 int           // Type1 values
+	OriginalSize int           // Size of uncompressed font file
+	N            int           // Set by font loader
+	DiffN        int           // Position of diff in app array, set by font loader
+	i            string        // 1-based position in font list, set by font loader, not this program
+	utf8File     *utf8FontFile // UTF-8 font
+	usedRunes    map[int]int   // Array of used runes
 }
 
 // generateFontID generates a font Id from the font definition
@@ -716,7 +721,7 @@ type fontInfoType struct {
 	IsFixedPitch       bool
 	UnderlineThickness int
 	UnderlinePosition  int
-	Widths             [256]int
+	Widths             []int
 	Size1, Size2       uint32
 	Desc               FontDescType
 }

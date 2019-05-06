@@ -12,34 +12,33 @@ support for text, drawing and images.
 
 ## Features
 
-  - Choice of measurement unit, page format and margins
-  - Page header and footer management
-  - Automatic page breaks, line breaks, and text justification
-  - Inclusion of JPEG, PNG, GIF, TIFF and basic path-only SVG images
-  - Colors, gradients and alpha channel transparency
-  - Outline bookmarks
-  - Internal and external links
-  - TrueType, Type1 and encoding support
-  - Page compression
-  - Lines, Bézier curves, arcs, and ellipses
-  - Rotation, scaling, skewing, translation, and mirroring
-  - Clipping
-  - Document protection
-  - Layers
-  - Templates
-  - Barcodes
-  - Charting facility
+* Choice of measurement unit, page format and margins
+* Page header and footer management
+* Automatic page breaks, line breaks, and text justification
+* Inclusion of JPEG, PNG, GIF, TIFF and basic path-only SVG images
+* Colors, gradients and alpha channel transparency
+* Outline bookmarks
+* Internal and external links
+* TrueType, Type1 and encoding support
+* Page compression
+* Lines, Bézier curves, arcs, and ellipses
+* Rotation, scaling, skewing, translation, and mirroring
+* Clipping
+* Document protection
+* Layers
+* Templates
+* Barcodes
+* Charting facility
+* UTF-8 support
 
-gofpdf has no dependencies other than the Go standard library. All tests
-pass on Linux, Mac and Windows platforms.
+gofpdf has no dependencies other than the Go standard library. All tests pass
+on Linux, Mac and Windows platforms.
 
-Like FPDF version 1.7, from which gofpdf is derived, this package does
-not yet support UTF-8 fonts. In particular, languages that require more
-than one code page such as Chinese, Japanese, and Arabic are not
-currently supported. This is explained in
-[issue 109](https://github.com/jung-kurt/gofpdf/issues/109). However,
-support is provided to automatically translate UTF-8 runes to code page
-encodings for languages that have fewer than 256 glyphs.
+gofpdf supports UTF-8 fonts and "right to left" languages.
+
+Also, support is provided to automatically translate
+UTF-8 runes to code page encodings for languages that have fewer than 256
+glyphs.
 
 ## Installation
 
@@ -151,7 +150,18 @@ run `go build`. This will produce a standalone executable named
 makefont. Select the appropriate encoding file from the font
 subdirectory and run the command as in the following example.
 
-``` shell
+You should use AddUTF8Font or AddUTF8FontFromBytes to add UTF-8 TTF font.
+RTL() and LTR() methods switch between "right to left" and "left to right" mode.
+
+In order to use a different non-UTF-8 TrueType or Type1 font, you will need to generate a
+font definition file and, if the font will be embedded into PDFs, a compressed
+version of the font file. This is done by calling the MakeFont function or
+using the included makefont command line utility. To create the utility, cd
+into the makefont subdirectory and run "go build". This will produce a
+standalone executable named makefont. Select the appropriate encoding file from
+the font subdirectory and run the command as in the following example.
+
+```
 ./makefont --embed --enc=../font/cp1252.map --dst=../font ../font/calligra.ttf
 ```
 
@@ -211,38 +221,33 @@ FPDF scripts by Andreas Würmser. Support for outline bookmarks is
 adapted from Olivier Plathey by Manuel Cornes. Layer support is adapted
 from Olivier Plathey. Support for transformations is adapted from the
 FPDF transformation script by Moritz Wagner and Andreas Würmser. PDF
-protection is adapted from the work of Klemen Vodopivec for the FPDF
-product. Lawrence Kesteloot provided code to allow an image’s extent to
-be determined prior to placement. Support for vertical alignment within
-a cell was provided by Stefan Schroeder. Ivan Daniluk generalized the
-font and image loading code to use the Reader interface while
-maintaining backward compatibility. Anthony Starks provided code for the
-Polygon function. Robert Lillack provided the Beziergon function and
-corrected some naming issues with the internal curve function. Claudio
-Felber provided implementations for dashed line drawing and generalized
-font loading. Stani Michiels provided support for multi-segment path
-drawing with smooth line joins, line join styles, enhanced fill modes,
-and has helped greatly with package presentation and tests. Templating
-is adapted by Marcus Downing from the FPDF\_Tpl library created by Jan
-Slabon and Setasign. Jelmer Snoeck contributed packages that generate a
-variety of barcodes and help with registering images on the web. Jelmer
-Snoek and Guillermo Pascual augmented the basic HTML functionality with
-aligned text. Kent Quirk implemented backwards-compatible support for
-reading DPI from images that support it, and for setting DPI manually
-and then having it properly taken into account when calculating image
-size. Paulo Coutinho provided support for static embedded fonts. Dan
-Meyers added support for embedded JavaScript. David Fish added a generic
-alias-replacement function to enable, among other things, table of
-contents functionality. Andy Bakun identified and corrected a problem in
-which the internal catalogs were not sorted stably. Paul Montag added
-encoding and decoding functionality for templates, including images that
-are embedded in templates; this allows templates to be stored
-independently of gofpdf. Paul also added support for page boxes used in
-printing PDF documents. Wojciech Matusiak added supported for word
-spacing.
+protection is adapted from the work of Klemen Vodopivec for the FPDF product.
+Lawrence Kesteloot provided code to allow an image's extent to be determined
+prior to placement. Support for vertical alignment within a cell was provided
+by Stefan Schroeder. Ivan Daniluk generalized the font and image loading code
+to use the Reader interface while maintaining backward compatibility. Anthony
+Starks provided code for the Polygon function. Robert Lillack provided the
+Beziergon function and corrected some naming issues with the internal curve
+function. Claudio Felber provided implementations for dashed line drawing and
+generalized font loading. Stani Michiels provided support for multi-segment
+path drawing with smooth line joins, line join styles, enhanced fill modes, and
+has helped greatly with package presentation and tests. Templating is adapted
+by Marcus Downing from the FPDF\_Tpl library created by Jan Slabon and Setasign.
+Jelmer Snoeck contributed packages that generate a variety of barcodes and help
+with registering images on the web. Jelmer Snoek and Guillermo Pascual
+augmented the basic HTML functionality with aligned text. Kent Quirk
+implemented backwards-compatible support for reading DPI from images that
+support it, and for setting DPI manually and then having it properly taken into
+account when calculating image size. Paulo Coutinho provided support for static
+embedded fonts. Dan Meyers added support for embedded JavaScript. David Fish
+added a generic alias-replacement function to enable, among other things, table
+of contents functionality. Andy Bakun identified and corrected a problem in
+which the internal catalogs were not sorted stably. Paul Montag added encoding
+and decoding functionality for templates, including images that are embedded in
+templates; this allows templates to be stored independently of gofpdf. Paul
+also added support for page boxes used in printing PDF documents. Wojciech
+Matusiak added supported for word spacing. Artem Korotkiy added support of UTF-8 fonts.
 
 ## Roadmap
 
-  - Handle UTF-8 source text natively. Until then, automatic translation
-    of UTF-8 runes to code page bytes is provided.
-  - Improve test coverage as reported by the coverage tool.
+* Improve test coverage as reported by the coverage tool.
