@@ -1736,9 +1736,9 @@ func (f *Fpdf) addFontFromBytes(familyStr, styleStr string, jsonFileBytes, zFile
 
 	if utf8Bytes != nil {
 
-		if styleStr == "IB" {
-			styleStr = "BI"
-		}
+		// if styleStr == "IB" {
+		// 	styleStr = "BI"
+		// }
 
 		Type := "UTF8"
 		reader := fileReader{readerPosition: 0, array: utf8Bytes}
@@ -3995,8 +3995,8 @@ func (f *Fpdf) generateCIDFontMap(font *fontDefType, LastRune int) {
 			previousKey = key
 		}
 		nextKey = key + cws
-		ui := ws.getIndex("interval")
-		ui = ui + 1
+		// ui := ws.getIndex("interval")
+		// ui = ui + 1
 		if ws.getIndex("interval") >= 0 {
 			if cws > 3 {
 				isInterval = true

@@ -863,8 +863,8 @@ func (utf *utf8FontFile) parseHMTXTable(numberOfHMetrics, numSymbols int, symbol
 			}
 		}
 	}
-	data := utf.getRange(start+numberOfHMetrics*4, numSymbols*2)
-	arr = unpackUint16Array(data)
+	// data := utf.getRange(start+numberOfHMetrics*4, numSymbols*2)
+	// arr = unpackUint16Array(data)
 	diff := numSymbols - numberOfHMetrics
 	for pos := 0; pos < diff; pos++ {
 		symbol := pos + numberOfHMetrics
