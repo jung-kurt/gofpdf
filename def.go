@@ -497,6 +497,7 @@ type PageBox struct {
 // Fpdf is the principal structure for creating a single PDF document
 type Fpdf struct {
 	isCurrentUTF8    bool                       // is current font used in utf-8 mode
+	isRTL            bool                       // is is right to left mode enabled
 	page             int                        // current page number
 	n                int                        // current object number
 	offsets          []int                      // array of object offsets

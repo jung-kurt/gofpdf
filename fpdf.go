@@ -618,6 +618,16 @@ func (f *Fpdf) AliasNbPages(aliasStr string) {
 	f.aliasNbPagesStr = aliasStr
 }
 
+// enable right to left mode
+func (f *Fpdf) RTL() {
+	f.isRTL = true
+}
+
+// disable right to left mode
+func (f *Fpdf) LTR() {
+	f.isRTL = false
+}
+
 // open begins a document
 func (f *Fpdf) open() {
 	f.state = 1
@@ -2091,6 +2101,10 @@ func (f *Fpdf) Bookmark(txtStr string, level int, y float64) {
 func (f *Fpdf) Text(x, y float64, txtStr string) {
 	var txt2 string
 	if f.isCurrentUTF8 {
+		if f.isRTL {
+			txtStr = revertText(txtStr)
+			x -= f.GetStringWidth(txtStr)
+		}
 		txt2 = f.escape(utf8toutf16(txtStr, false))
 		for _, uni := range []rune(txtStr) {
 			f.currentFont.usedRunes[int(uni)] = int(uni)
@@ -2279,6 +2293,9 @@ func (f *Fpdf) CellFormat(w, h float64, txtStr, borderStr string, ln int,
 		}
 		//If multibyte, Tw has no effect - do word spacing using an adjustment before each space
 		if (f.ws != 0 || alignStr == "J") && f.isCurrentUTF8 { // && f.ws != 0
+			if f.isRTL {
+				txtStr = revertText(txtStr)
+			}
 			wmax := int(math.Ceil((w - 2*f.cMargin) * 1000 / f.fontSize))
 			for _, uni := range []rune(txtStr) {
 				f.currentFont.usedRunes[int(uni)] = int(uni)
@@ -2301,6 +2318,9 @@ func (f *Fpdf) CellFormat(w, h float64, txtStr, borderStr string, ln int,
 		} else {
 			var txt2 string
 			if f.isCurrentUTF8 {
+				if f.isRTL {
+					txtStr = revertText(txtStr)
+				}
 				txt2 = f.escape(utf8toutf16(txtStr, false))
 				for _, uni := range []rune(txtStr) {
 					f.currentFont.usedRunes[int(uni)] = int(uni)
@@ -2342,6 +2362,17 @@ func (f *Fpdf) CellFormat(w, h float64, txtStr, borderStr string, ln int,
 		f.x += w
 	}
 	return
+}
+
+// Revert string to use in RTL languages
+func revertText(text string) string {
+	oldText := []rune(text)
+	newText := make([]rune, len(oldText))
+	lenght := len(oldText) - 1
+	for i, r := range oldText {
+		newText[lenght-i] = r
+	}
+	return string(newText)
 }
 
 // Cell is a simpler version of CellFormat with no fill, border, links or
@@ -2496,7 +2527,11 @@ func (f *Fpdf) MultiCell(w, h float64, txtStr, borderStr, alignStr string, fill 
 			if f.isCurrentUTF8 {
 				newAlignStr := alignStr
 				if newAlignStr == "J" {
-					newAlignStr = "L"
+					if f.isRTL {
+						newAlignStr = "R"
+					} else {
+						newAlignStr = "L"
+					}
 				}
 				f.CellFormat(w, h, string([]rune(s)[j:i]), b, 2, newAlignStr, fill, 0, "")
 			} else {
@@ -2576,7 +2611,11 @@ func (f *Fpdf) MultiCell(w, h float64, txtStr, borderStr, alignStr string, fill 
 	}
 	if f.isCurrentUTF8 {
 		if alignStr == "J" {
-			alignStr = ""
+			if f.isRTL {
+				alignStr = "R"
+			} else {
+				alignStr = ""
+			}
 		}
 		f.CellFormat(w, h, string([]rune(s)[j:i]), b, 2, alignStr, fill, 0, "")
 	} else {

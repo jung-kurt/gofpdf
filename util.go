@@ -321,6 +321,7 @@ func (s *SizeType) ScaleToHeight(height float64) SizeType {
 	return SizeType{width, height}
 }
 
+//The untypedKeyMap structure and its methods are copyrighted 2019 by Arteom Korotkiy (Gmail: arteomkorotkiy).
 //Imitation of untyped Map Array
 type untypedKeyMap struct {
 	keySet   []interface{}
