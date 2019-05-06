@@ -11,6 +11,7 @@ text, drawing and images.
 
 ## Features
 
+* UTF-8 support
 * Choice of measurement unit, page format and margins
 * Page header and footer management
 * Automatic page breaks, line breaks, and text justification
@@ -28,7 +29,6 @@ text, drawing and images.
 * Templates
 * Barcodes
 * Charting facility
-* UTF-8 support
 
 gofpdf has no dependencies other than the Go standard library. All tests pass
 on Linux, Mac and Windows platforms.
@@ -131,9 +131,9 @@ for all examples.
 Nothing special is required to use the standard PDF fonts (courier, helvetica,
 times, zapfdingbats) in your documents other than calling `SetFont()`.
 
-You should use AddUTF8Font or AddUTF8FontFromBytes to add UTF-8 TTF font.
-`RTL()` and `LTR()` methods switch between "right-to-left" and "left-to-right"
-mode.
+You should use `AddUTF8Font()` or `AddUTF8FontFromBytes()` to add a TrueType
+UTF-8 encoded font. Use `RTL()` and `LTR()` methods switch between
+"right-to-left" and "left-to-right" mode.
 
 In order to use a different non-UTF-8 TrueType or Type1 font, you will need to
 generate a font definition file and, if the font will be embedded into PDFs, a
