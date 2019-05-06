@@ -28,16 +28,15 @@ text, drawing and images.
 * Templates
 * Barcodes
 * Charting facility
+* UTF-8 support
 
 gofpdf has no dependencies other than the Go standard library. All tests pass
 on Linux, Mac and Windows platforms.
 
-Like FPDF version 1.7, from which gofpdf is derived, this package does not yet
-support UTF-8 fonts. In particular, languages that require more than one code
-page such as Chinese, Japanese, and Arabic are not currently supported. This is
-explained in [issue 109][issue109]. However, support is provided to
-automatically translate UTF-8 runes to code page encodings for languages that
-have fewer than 256 glyphs.
+gofpdf supports UTF-8 fonts and "right-to-left" languages.
+
+Also, support is provided to automatically translate UTF-8 runes to code page
+encodings for languages that have fewer than 256 glyphs.
 
 ## Installation
 
@@ -132,19 +131,24 @@ for all examples.
 Nothing special is required to use the standard PDF fonts (courier, helvetica,
 times, zapfdingbats) in your documents other than calling `SetFont()`.
 
-In order to use a different TrueType or Type1 font, you will need to generate a
-font definition file and, if the font will be embedded into PDFs, a compressed
-version of the font file. This is done by calling the `MakeFont()` function or
-using the included makefont command line utility. To create the utility, cd
-into the makefont subdirectory and run `go build`. This will produce a
-standalone executable named makefont. Select the appropriate encoding file from
-the font subdirectory and run the command as in the following example.
+You should use AddUTF8Font or AddUTF8FontFromBytes to add UTF-8 TTF font.
+`RTL()` and `LTR()` methods switch between "right-to-left" and "left-to-right"
+mode.
+
+In order to use a different non-UTF-8 TrueType or Type1 font, you will need to
+generate a font definition file and, if the font will be embedded into PDFs, a
+compressed version of the font file. This is done by calling the MakeFont
+function or using the included makefont command line utility. To create the
+utility, cd into the makefont subdirectory and run "go build". This will
+produce a standalone executable named makefont. Select the appropriate encoding
+file from the font subdirectory and run the command as in the following
+example.
 
 ```shell
 ./makefont --embed --enc=../font/cp1252.map --dst=../font ../font/calligra.ttf
 ```
 
-In your PDF generation code, call AddFont() to load the font and, as with the
+In your PDF generation code, call `AddFont()` to load the font and, as with the
 standard fonts, SetFont() to begin using it. Most examples, including the
 package example, demonstrate this method. Good sources of free, open-source
 fonts include [Google Fonts][gfont] and [DejaVu Fonts][dfont].
@@ -218,12 +222,11 @@ the internal catalogs were not sorted stably. Paul Montag added encoding and
 decoding functionality for templates, including images that are embedded in
 templates; this allows templates to be stored independently of gofpdf. Paul
 also added support for page boxes used in printing PDF documents. Wojciech
-Matusiak added supported for word spacing.
+Matusiak added supported for word spacing. Artem Korotkiy added support of
+UTF-8 fonts.
 
 ## Roadmap
 
-* Handle UTF-8 source text natively. Until then, automatic translation of
-UTF-8 runes to code page bytes is provided.
 * Improve test coverage as reported by the coverage tool.
 
 
