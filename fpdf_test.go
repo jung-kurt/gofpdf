@@ -2389,7 +2389,7 @@ func ExampleFpdf_SubWrite() {
 // ExampleFpdf_SetPage demomstrates the SetPage() method, allowing content
 // generation to be deferred until all pages have been added.
 func ExampleFpdf_SetPage() {
-	rnd := rand.New(rand.NewSource(0)) // Make reproducable documents
+	rnd := rand.New(rand.NewSource(0)) // Make reproducible documents
 	pdf := gofpdf.New("L", "cm", "A4", "")
 	pdf.SetFont("Times", "", 12)
 

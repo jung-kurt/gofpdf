@@ -2107,7 +2107,7 @@ func (f *Fpdf) Text(x, y float64, txtStr string) {
 	var txt2 string
 	if f.isCurrentUTF8 {
 		if f.isRTL {
-			txtStr = revertText(txtStr)
+			txtStr = reverseText(txtStr)
 			x -= f.GetStringWidth(txtStr)
 		}
 		txt2 = f.escape(utf8toutf16(txtStr, false))
@@ -2299,7 +2299,7 @@ func (f *Fpdf) CellFormat(w, h float64, txtStr, borderStr string, ln int,
 		//If multibyte, Tw has no effect - do word spacing using an adjustment before each space
 		if (f.ws != 0 || alignStr == "J") && f.isCurrentUTF8 { // && f.ws != 0
 			if f.isRTL {
-				txtStr = revertText(txtStr)
+				txtStr = reverseText(txtStr)
 			}
 			wmax := int(math.Ceil((w - 2*f.cMargin) * 1000 / f.fontSize))
 			for _, uni := range []rune(txtStr) {
@@ -2324,7 +2324,7 @@ func (f *Fpdf) CellFormat(w, h float64, txtStr, borderStr string, ln int,
 			var txt2 string
 			if f.isCurrentUTF8 {
 				if f.isRTL {
-					txtStr = revertText(txtStr)
+					txtStr = reverseText(txtStr)
 				}
 				txt2 = f.escape(utf8toutf16(txtStr, false))
 				for _, uni := range []rune(txtStr) {
@@ -2370,12 +2370,12 @@ func (f *Fpdf) CellFormat(w, h float64, txtStr, borderStr string, ln int,
 }
 
 // Revert string to use in RTL languages
-func revertText(text string) string {
+func reverseText(text string) string {
 	oldText := []rune(text)
 	newText := make([]rune, len(oldText))
-	lenght := len(oldText) - 1
+	length := len(oldText) - 1
 	for i, r := range oldText {
-		newText[lenght-i] = r
+		newText[length-i] = r
 	}
 	return string(newText)
 }
