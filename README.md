@@ -33,7 +33,7 @@ text, drawing and images.
 gofpdf has no dependencies other than the Go standard library. All tests pass
 on Linux, Mac and Windows platforms.
 
-gofpdf supports UTF-8 fonts.
+gofpdf supports UTF-8 fonts and "right to left" languages.
 
 Also, support is provided to automatically translate
 UTF-8 runes to code page encodings for languages that have fewer than 256
@@ -136,6 +136,7 @@ Nothing special is required to use the standard PDF fonts (courier, helvetica,
 times, zapfdingbats) in your documents other than calling SetFont().
 
 You should use AddUTF8Font or AddUTF8FontFromBytes to add UTF-8 TTF font.
+RTL() and LTR() methods switch between "right to left" and "left to right" mode.
 
 In order to use a different non-UTF-8 TrueType or Type1 font, you will need to generate a
 font definition file and, if the font will be embedded into PDFs, a compressed
