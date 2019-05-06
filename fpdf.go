@@ -618,12 +618,12 @@ func (f *Fpdf) AliasNbPages(aliasStr string) {
 	f.aliasNbPagesStr = aliasStr
 }
 
-// enable right to left mode
+// RTL enables right-to-left mode
 func (f *Fpdf) RTL() {
 	f.isRTL = true
 }
 
-// disable right to left mode
+// LTR disables right-to-left mode
 func (f *Fpdf) LTR() {
 	f.isRTL = false
 }
