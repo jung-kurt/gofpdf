@@ -9,6 +9,7 @@ check :
 	golint .
 	go vet -all .
 	gofmt -s -l .
+	goreportcard-cli -v
 
 README.md : doc/document.md
 	pandoc --read=markdown --write=gfm < $< > $@

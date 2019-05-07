@@ -377,7 +377,7 @@ func (utf *utf8FontFile) parseHHEATable() int {
 }
 
 func (utf *utf8FontFile) parseOS2Table() int {
-	weightType := 0
+	var weightType int
 	scale := 1000.0 / float64(utf.fontElementSize)
 	if _, OK := utf.tableDescriptions["OS/2"]; OK {
 		utf.SeekTable("OS/2")
@@ -831,9 +831,9 @@ func (utf *utf8FontFile) getSymbols(originalSymbolIdx int, start *int, symbolSet
 }
 
 func (utf *utf8FontFile) parseHMTXTable(numberOfHMetrics, numSymbols int, symbolToChar map[int][]int, scale float64) {
+	var widths int
 	start := utf.SeekTable("hmtx")
 	arrayWidths := 0
-	widths := 0
 	var arr []int
 	utf.CharWidths = make([]int, 256*256)
 	charCount := 0
@@ -863,8 +863,6 @@ func (utf *utf8FontFile) parseHMTXTable(numberOfHMetrics, numSymbols int, symbol
 			}
 		}
 	}
-	// data := utf.getRange(start+numberOfHMetrics*4, numSymbols*2)
-	// arr = unpackUint16Array(data)
 	diff := numSymbols - numberOfHMetrics
 	for pos := 0; pos < diff; pos++ {
 		symbol := pos + numberOfHMetrics
@@ -949,7 +947,7 @@ func (utf *utf8FontFile) generateSCCSDictionaries(runeCmapPosition int, symbolCh
 	for i := 0; i < segmentSize; i++ {
 		positions = append(positions, utf.readUint16())
 	}
-	symbol := 0
+	var symbol int
 	for n := 0; n < segmentSize; n++ {
 		completePosition := completers[n] + 1
 		for char := beginners[n]; char < completePosition; char++ {
