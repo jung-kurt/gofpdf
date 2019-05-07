@@ -33,7 +33,10 @@ text, drawing and images.
 gofpdf has no dependencies other than the Go standard library. All tests pass
 on Linux, Mac and Windows platforms.
 
-gofpdf supports UTF-8 fonts and "right-to-left" languages.
+gofpdf supports UTF-8 TrueType fonts and "right-to-left" languages. Note that
+Chinese, Japanese, and Korean characters may not be included in many general
+purpose fonts. For these languages, a specialized font (for example,
+[NotoSansSC][noto] for simplified Chinese) can be used.
 
 Also, support is provided to automatically translate UTF-8 runes to code page
 encodings for languages that have fewer than 256 glyphs.
@@ -250,6 +253,7 @@ UTF-8 fonts.
 [license]: https://raw.githubusercontent.com/jung-kurt/gofpdf/master/LICENSE
 [lint]: https://github.com/golang/lint
 [logo]: https://github.com/jung-kurt/gofpdf/raw/master/image/logo_gofpdf.jpg?raw=true
+[noto]: https://github.com/jsntn/webfonts/blob/master/NotoSansSC-Regular.ttf
 [pr]: https://help.github.com/articles/using-pull-requests/
 [report]: https://goreportcard.com/report/github.com/jung-kurt/gofpdf
 [status]: https://travis-ci.org/jung-kurt/gofpdf

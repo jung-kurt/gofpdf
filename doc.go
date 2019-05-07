@@ -45,7 +45,10 @@ Features
 gofpdf has no dependencies other than the Go standard library. All tests
 pass on Linux, Mac and Windows platforms.
 
-gofpdf supports UTF-8 fonts and “right-to-left” languages.
+gofpdf supports UTF-8 TrueType fonts and “right-to-left” languages. Note
+that Chinese, Japanese, and Korean characters may not be included in
+many general purpose fonts. For these languages, a specialized font (for
+example, NotoSansSC for simplified Chinese) can be used.
 
 Also, support is provided to automatically translate UTF-8 runes to code
 page encodings for languages that have fewer than 256 glyphs.
