@@ -1,7 +1,7 @@
 Prior to module release
 -----------------------
-./cov
-./check
+make cov
+make check
 git diff v2...master
 git merge 6b7...563
 git commit -am "Commit message here"
