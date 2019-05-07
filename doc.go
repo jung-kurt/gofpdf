@@ -6,6 +6,8 @@ support for text, drawing and images.
 Features
 
 
+-   UTF-8 support
+
 -   Choice of measurement unit, page format and margins
 
 -   Page header and footer management
@@ -43,12 +45,13 @@ Features
 gofpdf has no dependencies other than the Go standard library. All tests
 pass on Linux, Mac and Windows platforms.
 
-Like FPDF version 1.7, from which gofpdf is derived, this package does
-not yet support UTF-8 fonts. In particular, languages that require more
-than one code page such as Chinese, Japanese, and Arabic are not
-currently supported. This is explained in issue 109. However, support is
-provided to automatically translate UTF-8 runes to code page encodings
-for languages that have fewer than 256 glyphs.
+gofpdf supports UTF-8 TrueType fonts and “right-to-left” languages. Note
+that Chinese, Japanese, and Korean characters may not be included in
+many general purpose fonts. For these languages, a specialized font (for
+example, NotoSansSC for simplified Chinese) can be used.
+
+Also, support is provided to automatically translate UTF-8 runes to code
+page encodings for languages that have fewer than 256 glyphs.
 
 
 Installation
@@ -157,14 +160,18 @@ Nothing special is required to use the standard PDF fonts (courier,
 helvetica, times, zapfdingbats) in your documents other than calling
 SetFont().
 
-In order to use a different TrueType or Type1 font, you will need to
-generate a font definition file and, if the font will be embedded into
-PDFs, a compressed version of the font file. This is done by calling the
-MakeFont() function or using the included makefont command line utility.
-To create the utility, cd into the makefont subdirectory and run
-go build. This will produce a standalone executable named makefont.
-Select the appropriate encoding file from the font subdirectory and run
-the command as in the following example.
+You should use AddUTF8Font() or AddUTF8FontFromBytes() to add a TrueType
+UTF-8 encoded font. Use RTL() and LTR() methods switch between
+“right-to-left” and “left-to-right” mode.
+
+In order to use a different non-UTF-8 TrueType or Type1 font, you will
+need to generate a font definition file and, if the font will be
+embedded into PDFs, a compressed version of the font file. This is done
+by calling the MakeFont function or using the included makefont command
+line utility. To create the utility, cd into the makefont subdirectory
+and run “go build”. This will produce a standalone executable named
+makefont. Select the appropriate encoding file from the font
+subdirectory and run the command as in the following example.
 
     ./makefont --embed --enc=../font/cp1252.map --dst=../font ../font/calligra.ttf
 
@@ -256,14 +263,11 @@ encoding and decoding functionality for templates, including images that
 are embedded in templates; this allows templates to be stored
 independently of gofpdf. Paul also added support for page boxes used in
 printing PDF documents. Wojciech Matusiak added supported for word
-spacing.
+spacing. Artem Korotkiy added support of UTF-8 fonts.
 
 
 Roadmap
 
-
--   Handle UTF-8 source text natively. Until then, automatic translation
-of UTF-8 runes to code page bytes is provided.
 
 -   Improve test coverage as reported by the coverage tool.
 */
