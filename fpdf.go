@@ -1599,17 +1599,26 @@ func (f *Fpdf) addFont(familyStr, styleStr, fileStr string, isUTF8 bool) {
 		if ok {
 			return
 		}
-		ttfStat, _ := os.Stat(fileStr)
+		var ttfStat os.FileInfo
+		var err error
+		ttfStat, err = os.Stat(fileStr)
+		if err != nil {
+			f.SetError(err)
+			return
+		}
 		originalSize := ttfStat.Size()
 		Type := "UTF8"
-
-		utf8Bytes, _ := ioutil.ReadFile(fileStr)
+		var utf8Bytes []byte
+		utf8Bytes, err = ioutil.ReadFile(fileStr)
+		if err != nil {
+			f.SetError(err)
+			return
+		}
 		reader := fileReader{readerPosition: 0, array: utf8Bytes}
 		utf8File := newUTF8Font(&reader)
-
-		err := utf8File.parseFile()
+		err = utf8File.parseFile()
 		if err != nil {
-			fmt.Printf("get metrics Error: %e\n", err)
+			f.SetError(err)
 			return
 		}
 
