@@ -3953,8 +3953,6 @@ func (f *Fpdf) generateCIDFontMap(font *fontDefType, LastRune int) {
 				}
 				interval = true
 				cidArray[rangeID].put("interval", 1)
-				ui := 0
-				ui = ui + 1
 			} else {
 				if interval {
 					// new range

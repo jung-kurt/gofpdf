@@ -344,7 +344,7 @@ func (pa *untypedKeyMap) getIndex(key interface{}) int {
 //Put key=>value in PHP Array
 func (pa *untypedKeyMap) put(key interface{}, value int) {
 	if key == nil {
-		i := 0
+		var i int
 		for n := 0; ; n++ {
 			i = pa.getIndex(n)
 			if i < 0 {
@@ -419,14 +419,8 @@ func arrayMerge(arr1, arr2 *untypedKeyMap) *untypedKeyMap {
 		answer.valueSet = arr1.valueSet[:]
 		for i := 0; i < len(arr2.keySet); i++ {
 			if arr2.keySet[i] == "interval" {
-				u := 0
-				u = u + 1
 				if arr1.getIndex("interval") < 0 {
 					answer.put("interval", arr2.valueSet[i])
-				} else {
-
-					u := 0
-					u = u + 1
 				}
 			} else {
 				answer.put(nil, arr2.valueSet[i])
