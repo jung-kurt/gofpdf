@@ -9,7 +9,7 @@ check :
 	golint .
 	go vet -all .
 	gofmt -s -l .
-	goreportcard-cli -v
+	goreportcard-cli -v | grep -v cyclomatic
 
 README.md : doc/document.md
 	pandoc --read=markdown --write=gfm < $< > $@
