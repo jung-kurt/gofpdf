@@ -2407,6 +2407,9 @@ func (f *Fpdf) Cellf(w, h float64, fmtStr string, args ...interface{}) {
 // used to determine the total height of wrapped text for vertical placement
 // purposes.
 //
+// This method is useful for codepage-based fonts only. For UTF-8 encoded text,
+// use SplitText().
+//
 // You can use MultiCell if you want to print a text on several lines in a
 // simple way.
 func (f *Fpdf) SplitLines(txt []byte, w float64) [][]byte {
