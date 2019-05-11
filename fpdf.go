@@ -40,6 +40,8 @@ import (
 	"strconv"
 	"strings"
 	"time"
+
+//	"github.com/davecgh/go-spew/spew"
 )
 
 var gl struct {
@@ -85,6 +87,9 @@ func fpdfNew(orientationStr, unitStr, sizeStr, fontDirStr string, size SizeType)
 	f.diffs = make([]string, 0, 8)
 	f.templates = make(map[string]Template)
 	f.templateObjects = make(map[string]int)
+	f.importedObjs = make(map[string]string, 0)
+	f.importedTplObjs = make(map[string]string)
+	f.importedTplIds = make(map[string]int, 0)
 	f.images = make(map[string]*ImageInfoType)
 	f.pageLinks = make([][]linkType, 0, 8)
 	f.pageLinks = append(f.pageLinks, make([]linkType, 0, 0)) // pageLinks[0] is unused (1-based)
@@ -545,6 +550,7 @@ func (f *Fpdf) SetDisplayMode(zoomStr, layoutStr string) {
 // by default.
 func SetDefaultCompression(compress bool) {
 	gl.noCompress = !compress
+	gl.noCompress = false
 }
 
 // SetCompression activates or deactivates page compression with zlib. When
@@ -3098,6 +3104,70 @@ func (f *Fpdf) GetImageInfo(imageStr string) (info *ImageInfoType) {
 	return f.images[imageStr]
 }
 
+// Get the next object ID so that gofpdi knows where to start the object IDs
+func (f *Fpdf) GetNextObjectID() int {
+	return f.n + 2
+}
+
+// Import objects from gofpdi into current document
+func (f *Fpdf) ImportObjects(objs map[string]string) {
+	for k, v := range objs {
+		f.importedObjs[k] = v
+	}
+}
+
+// putImportedTemplates writes the imported template objects to the PDF
+func (f *Fpdf) putImportedTemplates() {
+	nOffset := f.n + 1
+
+	// keep track of list of sha1 hashes (to be replaced with integers)
+	objsIdHash := make([]string, len(f.importedObjs))
+
+	// actual object data with new id
+	objsIdData := make([]string, len(f.importedObjs))
+
+	// Populate hash slice and data slice
+	i := 0
+	for k, v := range f.importedObjs {
+		objsIdHash[i] = k
+		objsIdData[i] = v
+
+		i++
+	}
+
+	// Now, replace hashes inside data with %040d object id
+	for i = 0; i < len(objsIdData); i++ {
+		// loop through all hashes and replace data (FIXME: SLOW!)
+		for j := 0; j < len(objsIdHash); j++ {
+			hash := objsIdHash[j]
+
+			// Replace hash with object id (j)
+			objsIdData[i] = strings.ReplaceAll(objsIdData[i], hash, fmt.Sprintf("%d", j + nOffset))
+
+			// Save objsIdHash so that procset dictionary has the correct object ids
+			f.importedTplIds[hash] = j + nOffset
+		}
+	}
+
+	// Now, put objects
+    for i = 0; i < len(objsIdData); i++ {
+		f.newobj()
+		f.out(objsIdData[i])
+	}
+}
+
+// Use imported template from gofpdi - draws imported PDF page onto page
+func (f *Fpdf) UseImportedTemplate(tplName string, scaleX float64, scaleY float64, tX float64, tY float64) {
+    f.outf("q 0 J 1 w 0 j 0 G 0 g q %.4F 0 0 %.4F %.4F %.4F cm %s Do Q Q\n", scaleX*f.k, scaleY*f.k, tX*f.k, (tY+f.h)*f.k, tplName)
+}
+
+// Import gofpdi template names into importedTplObjs - to be included in the procset dictionary
+func (f *Fpdf) ImportTemplates(tpls map[string]string) {
+	for tplName, tplId := range tpls {
+		f.importedTplObjs[tplName] = tplId
+	}
+}
+
 // GetConversionRatio returns the conversion ratio based on the unit given when
 // creating the PDF.
 func (f *Fpdf) GetConversionRatio() float64 {
@@ -3663,7 +3733,7 @@ func (f *Fpdf) putpages() {
 		f.out("endobj")
 		// Page content
 		f.newobj()
-		if f.compress {
+		if f.compress && false {
 			data := sliceCompress(f.pages[n].Bytes())
 			f.outf("<</Filter /FlateDecode /Length %d>>", len(data))
 			f.putstream(data)
@@ -4170,10 +4240,16 @@ func (f *Fpdf) putxobjectdict() {
 			}
 		}
 	}
+	{
+		for tplName, objID := range f.importedTplObjs {
+			// here replace obj id hash with n
+			f.outf("%s %d 0 R", tplName, f.importedTplIds[objID])
+		}
+	}
 }
 
 func (f *Fpdf) putresourcedict() {
-	f.out("/ProcSet [/PDF /Text /ImageB /ImageC /ImageI]")
+	f.out("/ProcSet [/PDF /Text /Image /ImageC /ImageI]")
 	f.out("/Font <<")
 	{
 		var keyList []string
@@ -4285,6 +4361,7 @@ func (f *Fpdf) putresources() {
 	}
 	f.putimages()
 	f.putTemplates()
+	f.putImportedTemplates() // gofpdi
 	// 	Resource dictionary
 	f.offsets[2] = f.buffer.Len()
 	f.out("2 0 obj")

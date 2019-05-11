@@ -504,6 +504,9 @@ type Fpdf struct {
 	offsets          []int                      // array of object offsets
 	templates        map[string]Template        // templates used in this document
 	templateObjects  map[string]int             // template object IDs within this document
+	importedObjs     map[string]string          // imported template objects (gofpdi)
+	importedTplObjs  map[string]string          // imported template names and IDs (hashed) (gofpdi)
+	importedTplIds   map[string]int             // imported template ids hash to object id int (gofpdi)
 	buffer           fmtBuffer                  // buffer holding in-memory PDF
 	pages            []*bytes.Buffer            // slice[page] of page content; 1-based
 	state            int                        // current document state
