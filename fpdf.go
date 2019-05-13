@@ -40,8 +40,6 @@ import (
 	"strconv"
 	"strings"
 	"time"
-
-//	"github.com/davecgh/go-spew/spew"
 )
 
 var gl struct {
@@ -87,7 +85,8 @@ func fpdfNew(orientationStr, unitStr, sizeStr, fontDirStr string, size SizeType)
 	f.diffs = make([]string, 0, 8)
 	f.templates = make(map[string]Template)
 	f.templateObjects = make(map[string]int)
-	f.importedObjs = make(map[string]string, 0)
+	f.importedObjs = make(map[string][]byte, 0)
+	f.importedObjPos = make(map[string]map[int]string, 0)
 	f.importedTplObjs = make(map[string]string)
 	f.importedTplIds = make(map[string]int, 0)
 	f.images = make(map[string]*ImageInfoType)
@@ -3110,9 +3109,16 @@ func (f *Fpdf) GetNextObjectID() int {
 }
 
 // Import objects from gofpdi into current document
-func (f *Fpdf) ImportObjects(objs map[string]string) {
+func (f *Fpdf) ImportObjects(objs map[string][]byte) {
 	for k, v := range objs {
 		f.importedObjs[k] = v
+	}
+}
+
+// Import object hash positions from gofpdi
+func (f *Fpdf) ImportObjPos(objPos map[string]map[int]string) {
+	for k, v := range objPos {
+		f.importedObjPos[k] = v
 	}
 }
 
@@ -3124,7 +3130,7 @@ func (f *Fpdf) putImportedTemplates() {
 	objsIdHash := make([]string, len(f.importedObjs))
 
 	// actual object data with new id
-	objsIdData := make([]string, len(f.importedObjs))
+	objsIdData := make([][]byte, len(f.importedObjs))
 
 	// Populate hash slice and data slice
 	i := 0
@@ -3135,30 +3141,44 @@ func (f *Fpdf) putImportedTemplates() {
 		i++
 	}
 
+	// Populate a lookup table to get an object id from a hash
+	hashToObjId := make(map[string]int, len(f.importedObjs))
+	for i = 0; i < len(objsIdHash); i++ {
+		hashToObjId[objsIdHash[i]] = i + nOffset
+	}
+
 	// Now, replace hashes inside data with %040d object id
 	for i = 0; i < len(objsIdData); i++ {
-		// loop through all hashes and replace data (FIXME: SLOW!)
-		for j := 0; j < len(objsIdHash); j++ {
-			hash := objsIdHash[j]
+		// get hash
+		hash := objsIdHash[i]
 
-			// Replace hash with object id (j)
-			objsIdData[i] = strings.ReplaceAll(objsIdData[i], hash, fmt.Sprintf("%d", j + nOffset))
+		for pos, h := range f.importedObjPos[hash] {
+			// Convert object id into a 40 character string padded with spaces
+			objIdPadded := fmt.Sprintf("%40s", fmt.Sprintf("%d", hashToObjId[h]))
 
-			// Save objsIdHash so that procset dictionary has the correct object ids
-			f.importedTplIds[hash] = j + nOffset
+			// Convert objIdPadded into []byte
+			objIdBytes := []byte(objIdPadded)
+
+			// Replace sha1 hash with object id padded
+			for j := pos; j < pos+40; j++ {
+				objsIdData[i][j] = objIdBytes[j-pos]
+			}
 		}
+
+		// Save objsIdHash so that procset dictionary has the correct object ids
+		f.importedTplIds[hash] = i + nOffset
 	}
 
 	// Now, put objects
-    for i = 0; i < len(objsIdData); i++ {
+	for i = 0; i < len(objsIdData); i++ {
 		f.newobj()
-		f.out(objsIdData[i])
+		f.out(string(objsIdData[i]))
 	}
 }
 
 // Use imported template from gofpdi - draws imported PDF page onto page
 func (f *Fpdf) UseImportedTemplate(tplName string, scaleX float64, scaleY float64, tX float64, tY float64) {
-    f.outf("q 0 J 1 w 0 j 0 G 0 g q %.4F 0 0 %.4F %.4F %.4F cm %s Do Q Q\n", scaleX*f.k, scaleY*f.k, tX*f.k, (tY+f.h)*f.k, tplName)
+	f.outf("q 0 J 1 w 0 j 0 G 0 g q %.4F 0 0 %.4F %.4F %.4F cm %s Do Q Q\n", scaleX*f.k, scaleY*f.k, tX*f.k, (tY+f.h)*f.k, tplName)
 }
 
 // Import gofpdi template names into importedTplObjs - to be included in the procset dictionary
