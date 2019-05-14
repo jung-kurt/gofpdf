@@ -4268,7 +4268,7 @@ func (f *Fpdf) putxobjectdict() {
 }
 
 func (f *Fpdf) putresourcedict() {
-	f.out("/ProcSet [/PDF /Text /Image /ImageC /ImageI]")
+	f.out("/ProcSet [/PDF /Text /ImageB /ImageC /ImageI]")
 	f.out("/Font <<")
 	{
 		var keyList []string
