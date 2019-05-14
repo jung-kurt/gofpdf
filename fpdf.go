@@ -3102,11 +3102,6 @@ func (f *Fpdf) GetImageInfo(imageStr string) (info *ImageInfoType) {
 	return f.images[imageStr]
 }
 
-// Get the next object ID so that gofpdi knows where to start the object IDs
-func (f *Fpdf) GetNextObjectID() int {
-	return f.n + 2
-}
-
 // Import objects from gofpdi into current document
 func (f *Fpdf) ImportObjects(objs map[string][]byte) {
 	for k, v := range objs {
