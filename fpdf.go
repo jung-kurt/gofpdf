@@ -549,7 +549,6 @@ func (f *Fpdf) SetDisplayMode(zoomStr, layoutStr string) {
 // by default.
 func SetDefaultCompression(compress bool) {
 	gl.noCompress = !compress
-	gl.noCompress = false
 }
 
 // SetCompression activates or deactivates page compression with zlib. When
@@ -3753,7 +3752,7 @@ func (f *Fpdf) putpages() {
 		f.out("endobj")
 		// Page content
 		f.newobj()
-		if f.compress && false {
+		if f.compress {
 			data := sliceCompress(f.pages[n].Bytes())
 			f.outf("<</Filter /FlateDecode /Length %d>>", len(data))
 			f.putstream(data)
