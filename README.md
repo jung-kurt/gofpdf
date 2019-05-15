@@ -30,6 +30,7 @@ support for text, drawing and images.
   - Templates
   - Barcodes
   - Charting facility
+  - Import PDFs as templates
 
 gofpdf has no dependencies other than the Go standard library. All tests
 pass on Linux, Mac and Windows platforms.
