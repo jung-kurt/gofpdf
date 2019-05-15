@@ -85,6 +85,10 @@ func fpdfNew(orientationStr, unitStr, sizeStr, fontDirStr string, size SizeType)
 	f.diffs = make([]string, 0, 8)
 	f.templates = make(map[string]Template)
 	f.templateObjects = make(map[string]int)
+	f.importedObjs = make(map[string][]byte, 0)
+	f.importedObjPos = make(map[string]map[int]string, 0)
+	f.importedTplObjs = make(map[string]string)
+	f.importedTplIDs = make(map[string]int, 0)
 	f.images = make(map[string]*ImageInfoType)
 	f.pageLinks = make([][]linkType, 0, 8)
 	f.pageLinks = append(f.pageLinks, make([]linkType, 0, 0)) // pageLinks[0] is unused (1-based)
@@ -3101,6 +3105,88 @@ func (f *Fpdf) GetImageInfo(imageStr string) (info *ImageInfoType) {
 	return f.images[imageStr]
 }
 
+// ImportObjects imporits objects from gofpdi into current document
+func (f *Fpdf) ImportObjects(objs map[string][]byte) {
+	for k, v := range objs {
+		f.importedObjs[k] = v
+	}
+}
+
+// ImportObjPos Imports object hash positions from gofpdi
+func (f *Fpdf) ImportObjPos(objPos map[string]map[int]string) {
+	for k, v := range objPos {
+		f.importedObjPos[k] = v
+	}
+}
+
+// putImportedTemplates writes the imported template objects to the PDF
+func (f *Fpdf) putImportedTemplates() {
+	nOffset := f.n + 1
+
+	// keep track of list of sha1 hashes (to be replaced with integers)
+	objsIDHash := make([]string, len(f.importedObjs))
+
+	// actual object data with new id
+	objsIDData := make([][]byte, len(f.importedObjs))
+
+	// Populate hash slice and data slice
+	i := 0
+	for k, v := range f.importedObjs {
+		objsIDHash[i] = k
+		objsIDData[i] = v
+
+		i++
+	}
+
+	// Populate a lookup table to get an object id from a hash
+	hashToObjID := make(map[string]int, len(f.importedObjs))
+	for i = 0; i < len(objsIDHash); i++ {
+		hashToObjID[objsIDHash[i]] = i + nOffset
+	}
+
+	// Now, replace hashes inside data with %040d object id
+	for i = 0; i < len(objsIDData); i++ {
+		// get hash
+		hash := objsIDHash[i]
+
+		for pos, h := range f.importedObjPos[hash] {
+			// Convert object id into a 40 character string padded with spaces
+			objIDPadded := fmt.Sprintf("%40s", fmt.Sprintf("%d", hashToObjID[h]))
+
+			// Convert objIDPadded into []byte
+			objIDBytes := []byte(objIDPadded)
+
+			// Replace sha1 hash with object id padded
+			for j := pos; j < pos+40; j++ {
+				objsIDData[i][j] = objIDBytes[j-pos]
+			}
+		}
+
+		// Save objsIDHash so that procset dictionary has the correct object ids
+		f.importedTplIDs[hash] = i + nOffset
+	}
+
+	// Now, put objects
+	for i = 0; i < len(objsIDData); i++ {
+		f.newobj()
+		f.out(string(objsIDData[i]))
+	}
+}
+
+// UseImportedTemplate uses imported template from gofpdi - draws imported PDF
+// page onto page
+func (f *Fpdf) UseImportedTemplate(tplName string, scaleX float64, scaleY float64, tX float64, tY float64) {
+	f.outf("q 0 J 1 w 0 j 0 G 0 g q %.4F 0 0 %.4F %.4F %.4F cm %s Do Q Q\n", scaleX*f.k, scaleY*f.k, tX*f.k, (tY+f.h)*f.k, tplName)
+}
+
+// ImportTemplates imports gofpdi template names into importedTplObjs - to be
+// included in the procset dictionary
+func (f *Fpdf) ImportTemplates(tpls map[string]string) {
+	for tplName, tplID := range tpls {
+		f.importedTplObjs[tplName] = tplID
+	}
+}
+
 // GetConversionRatio returns the conversion ratio based on the unit given when
 // creating the PDF.
 func (f *Fpdf) GetConversionRatio() float64 {
@@ -4173,6 +4259,12 @@ func (f *Fpdf) putxobjectdict() {
 			}
 		}
 	}
+	{
+		for tplName, objID := range f.importedTplObjs {
+			// here replace obj id hash with n
+			f.outf("%s %d 0 R", tplName, f.importedTplIDs[objID])
+		}
+	}
 }
 
 func (f *Fpdf) putresourcedict() {
@@ -4288,6 +4380,7 @@ func (f *Fpdf) putresources() {
 	}
 	f.putimages()
 	f.putTemplates()
+	f.putImportedTemplates() // gofpdi
 	// 	Resource dictionary
 	f.offsets[2] = f.buffer.Len()
 	f.out("2 0 obj")
