@@ -42,6 +42,8 @@ Features
 
 -   Charting facility
 
+-   Import PDFs as templates
+
 gofpdf has no dependencies other than the Go standard library. All tests
 pass on Linux, Mac and Windows platforms.
 
@@ -253,7 +255,8 @@ encoding and decoding functionality for templates, including images that
 are embedded in templates; this allows templates to be stored
 independently of gofpdf. Paul also added support for page boxes used in
 printing PDF documents. Wojciech Matusiak added supported for word
-spacing. Artem Korotkiy added support of UTF-8 fonts.
+spacing. Artem Korotkiy added support of UTF-8 fonts. Dave Barnes added
+support for imported objects and templates.
 
 
 Roadmap
