@@ -29,10 +29,10 @@ func ImportPage(f gofpdiPdf, sourceFile string, pageno int, box string) int {
 	// Import objects into current pdf document
 	// Unordered means that the objects will be returned with a sha1 hash instead of an integer
 	// The objects themselves may have references to other hashes which will be replaced in ImportObjects()
-	tplObjIds := fpdi.PutFormXobjectsUnordered()
+	tplObjIDs := fpdi.PutFormXobjectsUnordered()
 
 	// Set template names and ids (hashes) in gofpdf
-	f.ImportTemplates(tplObjIds)
+	f.ImportTemplates(tplObjIDs)
 
 	// Get a map[string]string of the imported objects.
 	// The map keys will be the ID of each object.
@@ -41,7 +41,7 @@ func ImportPage(f gofpdiPdf, sourceFile string, pageno int, box string) int {
 	// Import gofpdi objects into gofpdf
 	f.ImportObjects(imported)
 
-	// Get a map[string]map[int]string of the object hashes and their positions within each object, 
+	// Get a map[string]map[int]string of the object hashes and their positions within each object,
 	// to be replaced with object ids (integers).
 	importedObjPos := fpdi.GetImportedObjHashPos()
 
