@@ -1605,6 +1605,7 @@ func (f *Fpdf) addFont(familyStr, styleStr, fileStr string, isUTF8 bool) {
 		}
 		var ttfStat os.FileInfo
 		var err error
+		fileStr = path.Join(f.fontpath, fileStr)
 		ttfStat, err = os.Stat(fileStr)
 		if err != nil {
 			f.SetError(err)
