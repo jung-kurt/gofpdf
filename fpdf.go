@@ -1605,6 +1605,7 @@ func (f *Fpdf) addFont(familyStr, styleStr, fileStr string, isUTF8 bool) {
 		}
 		var ttfStat os.FileInfo
 		var err error
+		fileStr = path.Join(f.fontpath, fileStr)
 		ttfStat, err = os.Stat(fileStr)
 		if err != nil {
 			f.SetError(err)
@@ -3105,14 +3106,14 @@ func (f *Fpdf) GetImageInfo(imageStr string) (info *ImageInfoType) {
 	return f.images[imageStr]
 }
 
-// ImportObjects imporits objects from gofpdi into current document
+// ImportObjects imports objects from gofpdi into current document
 func (f *Fpdf) ImportObjects(objs map[string][]byte) {
 	for k, v := range objs {
 		f.importedObjs[k] = v
 	}
 }
 
-// ImportObjPos Imports object hash positions from gofpdi
+// ImportObjPos imports object hash positions from gofpdi
 func (f *Fpdf) ImportObjPos(objPos map[string]map[int]string) {
 	for k, v := range objPos {
 		f.importedObjPos[k] = v
