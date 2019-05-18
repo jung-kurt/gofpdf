@@ -19,7 +19,7 @@ doc/index.html : doc/document.md doc/html.txt
 		--metadata pagetitle="GoFPDF Document Generator" < $< > $@
 
 doc.go : doc/document.md doc/go.awk
-	pandoc --read=markdown --write=plain $< | awk -f doc/go.awk > $@
+	pandoc --read=markdown --write=plain $< | awk --assign=package_name=gofpdf --file=doc/go.awk > $@
 	gofmt -s -w $@
 
 build :

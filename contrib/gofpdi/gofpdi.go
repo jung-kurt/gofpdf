@@ -17,8 +17,9 @@ type gofpdiPdf interface {
 	SetError(err error)
 }
 
-// Imports a page of a PDF file with the specified box (/MediaBox, /TrimBox, /ArtBox, /CropBox, or /BleedBox).
-// Returns a template id that can be used with UseImportedTemplate to draw the template onto the page.
+// ImportPage imports a page of a PDF file with the specified box (/MediaBox,
+// /TrimBox, /ArtBox, /CropBox, or /BleedBox). Returns a template id that can
+// be used with UseImportedTemplate to draw the template onto the page.
 func ImportPage(f gofpdiPdf, sourceFile string, pageno int, box string) int {
 	// Set source file for fpdi
 	fpdi.SetSourceFile(sourceFile)
@@ -51,9 +52,9 @@ func ImportPage(f gofpdiPdf, sourceFile string, pageno int, box string) int {
 	return tpl
 }
 
-// Draw the template onto the page at x,y
-// If w is 0, the template will be scaled to fit based on h
-// If h is 0, the template will be scaled to fit based on w
+// UseImportedTemplate draws the template onto the page at x,y. If w is 0, the
+// template will be scaled to fit based on h. If h is 0, the template will be
+// scaled to fit based on w.
 func UseImportedTemplate(f gofpdiPdf, tplid int, x float64, y float64, w float64, h float64) {
 	// Get values from fpdi
 	tplName, scaleX, scaleY, tX, tY := fpdi.UseTemplate(tplid, x, y, w, h)
