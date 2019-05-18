@@ -1,12 +1,6 @@
-BEGIN { 
-	show = 0
-	print "/*" 
-}
+BEGIN { show = 0 ; print "/*" }
 
-/^\-/ { 
-	trim = 1 
-	print ""
-}
+/^\-/ { trim = 1 ; print "" }
 
 /^Package/ { show = 1 }
 
@@ -16,4 +10,4 @@ trim { sub("^ +", "", $0) }
 
 show { print $0 }
 
-END { print "*/\npackage gofpdf" }
+END { print "*/\npackage " package_name }
