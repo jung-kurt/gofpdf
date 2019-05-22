@@ -93,13 +93,17 @@ func printBarcode(pdf barcodePdf, code string, x, y float64, w, h *float64, flow
 		}
 	}
 
+	scaleToWidthF := float64(scaleToWidth)
+	scaleToHeightF := float64(scaleToHeight)
+
 	if w != nil {
-		scaleToWidth = int(*w)
+		scaleToWidthF = *w
 	}
 	if h != nil {
-		scaleToHeight = int(*h)
+		scaleToHeightF = *h
 	}
-	pdf.Image(bname, x, y, float64(scaleToWidth), float64(scaleToHeight), flow, "jpg", 0, "")
+
+	pdf.Image(bname, x, y, scaleToWidthF, scaleToHeightF, flow, "jpg", 0, "")
 
 }
 
