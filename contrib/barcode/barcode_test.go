@@ -199,3 +199,24 @@ func TestGetUnscaledBarcodeDimensions(t *testing.T) {
 	// Output:
 	// Successfully generated ../../pdf/contrib_barcode_GetBarcodeDimensions.pdf
 }
+
+// TestBarcodeNonIntegerScalingFactors shows that the barcode may be scaled to non-integer sizes
+func TestBarcodeNonIntegerScalingFactors(t *testing.T) {
+	pdf := gofpdf.New("L", "in", "A4", "")
+	pdf.SetFont("Helvetica", "", 12)
+	pdf.SetFillColor(200, 200, 220)
+	pdf.AddPage()
+
+	key := barcode.RegisterQR(pdf, "qrcode", qr.H, qr.Unicode)
+	var scale float64 = 1.5
+	barcode.BarcodeUnscalable(pdf, key, 0.5, 0.5, &scale, &scale, false)
+
+	pdf.SetDrawColor(255, 0, 0)
+	pdf.Line(0.5, 0.5, 0.5+scale, 0.5+scale)
+
+	fileStr := example.Filename("contrib_barcode_BarcodeScaling")
+	err := pdf.OutputFileAndClose(fileStr)
+	example.Summary(err, fileStr)
+	// Output:
+	// Successfully generated ../../pdf/contrib_barcode_BarcodeScaling.pdf
+}
