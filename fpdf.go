@@ -3919,3 +3919,11 @@ func (f *Fpdf) arc(x, y, rx, ry, degRotate, degStart, degEnd float64,
 		f.out("Q")
 	}
 }
+
+// SetPage sets the current page to that of a valid page in the PDF document.
+// pageNum is one-based. The SetPage() example demonstrates this method.
+func (f *Fpdf) SetPage(pageNum int) {
+	if (pageNum > 0) && (pageNum < len(f.pages)) {
+		f.page = pageNum
+	}
+}
