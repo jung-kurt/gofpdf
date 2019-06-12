@@ -1138,3 +1138,19 @@ func keySortArrayRangeMap(s map[int][]int) []int {
 	sort.Ints(keys)
 	return keys
 }
+
+// UTF8CutFont cuts a set in cutset and returns the customized font bytes
+// Parameters:
+// in - the ttf bytes in,
+// cutset - the cutset runes in string,
+// Returns:
+// out - the ttf bytes out,
+func UTF8CutFont(in []byte, cutset string) (out []byte) {
+	f := newUTF8Font(&fileReader{readerPosition: 0, array: in})
+	runes := map[int]int{}
+	for i, r := range cutset {
+		runes[i] = int(r)
+	}
+	out = f.GenerateСutFont(runes)
+	return
+}
