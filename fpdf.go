@@ -2802,7 +2802,15 @@ func (f *Fpdf) WriteAligned(width, lineHeight float64, textStr, alignStr string)
 		width = pageWidth - (lMargin + rMargin)
 	}
 
-	lines := f.SplitLines([]byte(textStr), width)
+	var lines []string
+
+	if f.isCurrentUTF8 {
+		lines = f.SplitText(textStr, width)
+	} else {
+		for _, line := range f.SplitLines([]byte(textStr), width) {
+			lines = append(lines, string(line))
+		}
+	}
 
 	for _, lineBt := range lines {
 		lineStr := string(lineBt)
