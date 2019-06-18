@@ -2561,3 +2561,51 @@ func ExampleFpdf_AddUTF8Font() {
 	// Output:
 	// Successfully generated pdf/Fpdf_AddUTF8Font.pdf
 }
+
+// ExampleUTF8CutFont demonstrates how generate a TrueType font subset.
+func ExampleUTF8CutFont() {
+	var pdfFileStr, fullFontFileStr, subFontFileStr string
+	var subFont, fullFont []byte
+	var err error
+
+	pdfFileStr = example.Filename("Fpdf_UTF8CutFont")
+	fullFontFileStr = example.FontFile("calligra.ttf")
+	fullFont, err = ioutil.ReadFile(fullFontFileStr)
+	if err == nil {
+		subFontFileStr = "calligra_abcde.ttf"
+		subFont = gofpdf.UTF8CutFont(fullFont, "abcde")
+		err = ioutil.WriteFile(subFontFileStr, subFont, 0600)
+		if err == nil {
+			y := 24.0
+			pdf := gofpdf.New("P", "mm", "A4", "")
+			fontHt := 17.0
+			lineHt := pdf.PointConvert(fontHt)
+			write := func(format string, args ...interface{}) {
+				pdf.SetXY(24.0, y)
+				pdf.Cell(200.0, lineHt, fmt.Sprintf(format, args...))
+				y += lineHt
+			}
+			writeSize := func(fileStr string) {
+				var info os.FileInfo
+				var err error
+				info, err = os.Stat(fileStr)
+				if err == nil {
+					write("%6d: size of %s", info.Size(), fileStr)
+				}
+			}
+			pdf.AddPage()
+			pdf.AddUTF8Font("calligra", "", subFontFileStr)
+			pdf.SetFont("calligra", "", fontHt)
+			write("cabbed")
+			write("vwxyz")
+			pdf.SetFont("courier", "", fontHt)
+			writeSize(fullFontFileStr)
+			writeSize(subFontFileStr)
+			err = pdf.OutputFileAndClose(pdfFileStr)
+			os.Remove(subFontFileStr)
+		}
+	}
+	example.Summary(err, pdfFileStr)
+	// Output:
+	// Successfully generated pdf/Fpdf_UTF8CutFont.pdf
+}
