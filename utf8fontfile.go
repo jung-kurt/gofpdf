@@ -1138,3 +1138,16 @@ func keySortArrayRangeMap(s map[int][]int) []int {
 	sort.Ints(keys)
 	return keys
 }
+
+// UTF8CutFont is a utility function that generates a TrueType font composed
+// only of the runes included in cutset. The rune glyphs are copied from This
+// function is demonstrated in ExampleUTF8CutFont().
+func UTF8CutFont(inBuf []byte, cutset string) (outBuf []byte) {
+	f := newUTF8Font(&fileReader{readerPosition: 0, array: inBuf})
+	runes := map[int]int{}
+	for i, r := range cutset {
+		runes[i] = int(r)
+	}
+	outBuf = f.GenerateСutFont(runes)
+	return
+}
