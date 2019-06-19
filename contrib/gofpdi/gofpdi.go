@@ -74,12 +74,15 @@ func UseImportedTemplate(f gofpdiPdf, tplid int, x float64, y float64, w float64
 	f.UseImportedTemplate(tplName, scaleX, scaleY, tX, tY)
 }
 
+func (i *FpdiImporter) SetSourceFile(sourceFile string) {
+	// Set source file for fpdi
+	i.fpdi.SetSourceFile(sourceFile)
+}
+
 // ImportPage imports a page of a PDF file with the specified box (/MediaBox,
 // /TrimBox, /ArtBox, /CropBox, or /BleedBox). Returns a template id that can
 // be used with UseImportedTemplate to draw the template onto the page.
-func (i *FpdiImporter) ImportPage(sourceFile string, pageno int, box string) int {
-	// Set source file for fpdi
-	i.fpdi.SetSourceFile(sourceFile)
+func (i *FpdiImporter) ImportPage(pageno int, box string) int {
 
 	// Import page
 	tpl := i.fpdi.ImportPage(pageno, box)
