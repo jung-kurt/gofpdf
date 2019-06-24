@@ -2537,7 +2537,7 @@ func (f *Fpdf) MultiCell(w, h float64, txtStr, borderStr, alignStr string, fill 
 		if f.isCurrentUTF8 {
 			c = []rune(s)[i]
 		} else {
-			c = rune([]byte(s)[i])
+			c = rune(byte(s[i]))
 		}
 		if c == '\n' {
 			// Explicit line break
@@ -2674,7 +2674,7 @@ func (f *Fpdf) write(h float64, txtStr string, link int, linkStr string) {
 		if f.isCurrentUTF8 {
 			c = []rune(s)[i]
 		} else {
-			c = rune([]byte(s)[i])
+			c = rune(byte(s[i]))
 		}
 		if c == '\n' {
 			// Explicit line break
