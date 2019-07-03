@@ -2476,6 +2476,9 @@ func (f *Fpdf) SplitLines(txt []byte, w float64) [][]byte {
 //
 // h indicates the line height of each cell in the unit of measure specified in New().
 func (f *Fpdf) MultiCell(w, h float64, txtStr, borderStr, alignStr string, fill bool) {
+	if f.err != nil {
+		return
+	}
 	// dbg("MultiCell")
 	if alignStr == "" {
 		alignStr = "J"
