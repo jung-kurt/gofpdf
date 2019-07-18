@@ -2819,7 +2819,6 @@ func (f *Fpdf) WriteAligned(width, lineHeight float64, textStr, alignStr string)
 		lineStr := string(lineBt)
 		lineWidth := f.GetStringWidth(lineStr)
 
-		f.SetLeftMargin(lMargin + (width - lineWidth) - 2.01*f.cMargin)
 		switch alignStr {
 		case "C":
 			f.SetLeftMargin(lMargin + ((width - lineWidth) / 2))
@@ -2830,9 +2829,10 @@ func (f *Fpdf) WriteAligned(width, lineHeight float64, textStr, alignStr string)
 			f.Write(lineHeight, lineStr)
 			f.SetLeftMargin(lMargin)
 		default:
+			f.SetRightMargin(pageWidth - lMargin - width)
 			f.Write(lineHeight, lineStr)
+			f.SetRightMargin(rMargin)
 		}
-		f.SetRightMargin(rMargin)
 	}
 }
 
