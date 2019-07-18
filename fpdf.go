@@ -2984,6 +2984,73 @@ func (f *Fpdf) ImageOptions(imageNameStr string, x, y, w, h float64, flow bool, 
 	return
 }
 
+// ImageOptionsReader registers an image, reading it from Reader r, and puts a
+// JPEG, PNG or GIF image in the current page. The size it will take on the
+// page can be specified in different ways. If both w and h are 0, the image
+// is rendered at 96 dpi. If either w or h is zero, it will be calculated from
+// the other dimension so that the aspect ratio is maintained. If w and/or h are -1,
+// the dpi for that dimension will be read from the ImageInfoType object. PNG
+// files can contain dpi information, and if present, this information will be
+// populated in the ImageInfoType object and used in Width, Height, and Extent
+// calculations. Otherwise, the SetDpi function can be used to change the dpi
+// from the default of 72.
+//
+// If w and h are any other negative value, their absolute values
+// indicate their dpi extents.
+//
+// Supported JPEG formats are 24 bit, 32 bit and gray scale. Supported PNG
+// formats are 24 bit, indexed color, and 8 bit indexed gray scale. If a GIF
+// image is animated, only the first frame is rendered. Transparency is
+// supported. It is possible to put a link on the image.
+//
+// imageNameStr may be the name of an image as registered with a call to either
+// RegisterImageReader() or RegisterImage(). In the first case, the image is
+// loaded using an io.Reader. This is generally useful when the image is
+// obtained from some other means than as a disk-based file. In the second
+// case, the image is loaded as a file. Alternatively, imageNameStr may
+// directly specify a sufficiently qualified filename.
+//
+// r is an io.Reader that implements the Read() function
+//
+// However the image is loaded, if it is used more than once only one copy is
+// embedded in the file.
+//
+// If x is negative, the current abscissa is used.
+//
+// If flow is true, the current y value is advanced after placing the image and
+// a page break may be made if necessary.
+//
+// If link refers to an internal page anchor (that is, it is non-zero; see
+// AddLink()), the image will be a clickable internal link. Otherwise, if
+// linkStr specifies a URL, the image will be a clickable external link.
+func (f *Fpdf) ImageOptionsReader(imageNameStr string, r io.Reader, x, y, w, h float64, flow bool, options ImageOptions, link int, linkStr string) {
+	if f.err != nil {
+		return
+	}
+
+	var info *ImageInfoType
+
+	i, ok := f.images[imageNameStr]
+	if ok {
+		info = i
+	} else {
+		if options.ImageType == "" {
+			pos := strings.LastIndex(imageNameStr, ".")
+			if pos < 0 {
+				f.err = fmt.Errorf("image file has no extension and no type was specified: %s", imageNameStr)
+				return
+			}
+			options.ImageType = imageNameStr[pos+1:]
+		}
+		info = f.RegisterImageOptionsReader(imageNameStr, options, r)
+		if f.err != nil {
+			return
+		}
+	}
+	f.imageOut(info, x, y, w, h, options.AllowNegativePosition, flow, link, linkStr)
+	return
+}
+
 // RegisterImageReader registers an image, reading it from Reader r, adding it
 // to the PDF file but not adding it to the page.
 //
