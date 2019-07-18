@@ -2800,8 +2800,8 @@ func (f *Fpdf) WriteLinkID(h float64, displayStr string, linkID int) {
 func (f *Fpdf) WriteAligned(width, lineHeight float64, textStr, alignStr string) {
 	lMargin, _, rMargin, _ := f.GetMargins()
 
-	pageWidth, _ := f.GetPageSize()
 	if width == 0 {
+		pageWidth, _ := f.GetPageSize()
 		width = pageWidth - (lMargin + rMargin)
 	}
 
@@ -2819,7 +2819,6 @@ func (f *Fpdf) WriteAligned(width, lineHeight float64, textStr, alignStr string)
 		lineStr := string(lineBt)
 		lineWidth := f.GetStringWidth(lineStr)
 
-		f.SetLeftMargin(lMargin + (width - lineWidth) - 2.01*f.cMargin)
 		switch alignStr {
 		case "C":
 			f.SetLeftMargin(lMargin + ((width - lineWidth) / 2))
@@ -2832,7 +2831,6 @@ func (f *Fpdf) WriteAligned(width, lineHeight float64, textStr, alignStr string)
 		default:
 			f.Write(lineHeight, lineStr)
 		}
-		f.SetRightMargin(rMargin)
 	}
 }
 
