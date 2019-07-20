@@ -858,6 +858,29 @@ func ExampleFpdf_ImageOptions() {
 	// Successfully generated pdf/Fpdf_ImageOptions.pdf
 }
 
+// ImageOption struct can be used to affect horizontal image placement.
+func ExampleFpdf_ImageOptionsReader() {
+	var opt gofpdf.ImageOptions
+
+	pdf := gofpdf.New("P", "mm", "A4", "")
+	pdf.AddPage()
+	pdf.SetFont("Arial", "", 11)
+	pdf.SetX(60)
+	opt.ImageType = "png"
+	bytes, err := ioutil.ReadAll(example.ImageFile("logo.png"))
+	if err!=nil{
+		t.Fatal(err)
+	}
+	pdf.ImageOptionsReader(example.ImageFile("logo.png"), bytes.NewReader(bytes),-10, 10, 30, 0, false, opt, 0, "")
+	opt.AllowNegativePosition = true
+	pdf.ImageOptionsReader(example.ImageFile("logo.png"),bytes.NewReader(bytes), -10, 50, 30, 0, false, opt, 0, "")
+	fileStr := example.Filename("Fpdf_ImageOptionsReader")
+	err := pdf.OutputFileAndClose(fileStr)
+	example.Summary(err, fileStr)
+	// Output:
+	// Successfully generated pdf/Fpdf_ImageOptionsReader.pdf
+}
+
 // This examples demonstrates Landscape mode with images.
 func ExampleFpdf_SetAcceptPageBreakFunc() {
 	var y0 float64
