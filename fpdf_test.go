@@ -861,22 +861,29 @@ func ExampleFpdf_ImageOptions() {
 // ImageOption struct can be used to affect horizontal image placement.
 func ExampleFpdf_ImageOptionsReader() {
 	var opt gofpdf.ImageOptions
+	var pdfStr, imgStr string
+	var fl *os.File
+	var err error
 
+	pdfStr = example.Filename("Fpdf_ImageOptionsReader")
 	pdf := gofpdf.New("P", "mm", "A4", "")
 	pdf.AddPage()
 	pdf.SetFont("Arial", "", 11)
 	pdf.SetX(60)
 	opt.ImageType = "png"
-	bytes, err := ioutil.ReadAll(example.ImageFile("logo.png"))
-	if err!=nil{
-		t.Fatal(err)
+	imgStr = example.ImageFile("logo.png")
+	fl, err = os.Open(imgStr)
+	if err == nil {
+		pdf.ImageOptionsReader(imgStr, fl, -10, 10, 30, 0, false, opt, 0, "")
+		opt.AllowNegativePosition = true
+		_, err = fl.Seek(0, 0)
+		if err == nil {
+			pdf.ImageOptionsReader(imgStr, fl, -10, 50, 30, 0, false, opt, 0, "")
+			err = pdf.OutputFileAndClose(pdfStr)
+		}
+		fl.Close()
 	}
-	pdf.ImageOptionsReader(example.ImageFile("logo.png"), bytes.NewReader(bytes),-10, 10, 30, 0, false, opt, 0, "")
-	opt.AllowNegativePosition = true
-	pdf.ImageOptionsReader(example.ImageFile("logo.png"),bytes.NewReader(bytes), -10, 50, 30, 0, false, opt, 0, "")
-	fileStr := example.Filename("Fpdf_ImageOptionsReader")
-	err := pdf.OutputFileAndClose(fileStr)
-	example.Summary(err, fileStr)
+	example.Summary(err, pdfStr)
 	// Output:
 	// Successfully generated pdf/Fpdf_ImageOptionsReader.pdf
 }
