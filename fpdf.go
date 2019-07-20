@@ -3187,14 +3187,14 @@ func (f *Fpdf) putImportedTemplates() {
 	}
 }
 
-// UseImportedTemplate uses imported template from gofpdi - draws imported PDF
-// page onto page
+// UseImportedTemplate uses imported template from gofpdi. It draws imported
+// PDF page onto page.
 func (f *Fpdf) UseImportedTemplate(tplName string, scaleX float64, scaleY float64, tX float64, tY float64) {
 	f.outf("q 0 J 1 w 0 j 0 G 0 g q %.4F 0 0 %.4F %.4F %.4F cm %s Do Q Q\n", scaleX*f.k, scaleY*f.k, tX*f.k, (tY+f.h)*f.k, tplName)
 }
 
-// ImportTemplates imports gofpdi template names into importedTplObjs - to be
-// included in the procset dictionary
+// ImportTemplates imports gofpdi template names into importedTplObjs for
+// inclusion in the procset dictionary
 func (f *Fpdf) ImportTemplates(tpls map[string]string) {
 	for tplName, tplID := range tpls {
 		f.importedTplObjs[tplName] = tplID
