@@ -858,7 +858,37 @@ func ExampleFpdf_ImageOptions() {
 	// Successfully generated pdf/Fpdf_ImageOptions.pdf
 }
 
-// This examples demonstrates Landscape mode with images.
+// ExampleFpdf_RegisterImageOptionsReader demonstrates how to load an image
+// from a io.Reader (in this case, a file) and register it with options.
+func ExampleFpdf_RegisterImageOptionsReader() {
+	var (
+		opt    gofpdf.ImageOptions
+		pdfStr string
+		fl     *os.File
+		err    error
+	)
+
+	pdfStr = example.Filename("Fpdf_RegisterImageOptionsReader")
+	pdf := gofpdf.New("P", "mm", "A4", "")
+	pdf.AddPage()
+	pdf.SetFont("Arial", "", 11)
+	fl, err = os.Open(example.ImageFile("logo.png"))
+	if err == nil {
+		opt.ImageType = "png"
+		opt.AllowNegativePosition = true
+		_ = pdf.RegisterImageOptionsReader("logo", opt, fl)
+		fl.Close()
+		for x := -20.0; x <= 40.0; x += 5 {
+			pdf.ImageOptions("logo", x, x+30, 0, 0, false, opt, 0, "")
+		}
+		err = pdf.OutputFileAndClose(pdfStr)
+	}
+	example.Summary(err, pdfStr)
+	// Output:
+	// Successfully generated pdf/Fpdf_RegisterImageOptionsReader.pdf
+}
+
+// This example demonstrates Landscape mode with images.
 func ExampleFpdf_SetAcceptPageBreakFunc() {
 	var y0 float64
 	var crrntCol int
@@ -918,7 +948,7 @@ func ExampleFpdf_SetAcceptPageBreakFunc() {
 	// Successfully generated pdf/Fpdf_SetAcceptPageBreakFunc_landscape.pdf
 }
 
-// This examples tests corner cases as reported by the gocov tool.
+// This example tests corner cases as reported by the gocov tool.
 func ExampleFpdf_SetKeywords() {
 	var err error
 	fileStr := example.Filename("Fpdf_SetKeywords")
