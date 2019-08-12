@@ -2,6 +2,7 @@ package gofpdi
 
 import (
 	realgofpdi "github.com/phpdave11/gofpdi"
+	"io"
 )
 
 // Create new gofpdi instance
@@ -23,7 +24,22 @@ type gofpdiPdf interface {
 func ImportPage(f gofpdiPdf, sourceFile string, pageno int, box string) int {
 	// Set source file for fpdi
 	fpdi.SetSourceFile(sourceFile)
+	// return template id
+	return getTemplateID(f, pageno, box)
+}
 
+// ImportPageFromStream imports a page of a PDF with the specified box
+// (/MediaBox, TrimBox, /ArtBox, /CropBox, or /BleedBox). Returns a template id
+// that can be used with UseImportedTemplate to draw the template onto the
+// page.
+func ImportPageFromStream(f gofpdiPdf, rs *io.ReadSeeker, pageno int, box string) int {
+	// Set source stream for fpdi
+	fpdi.SetSourceStream(rs)
+	// return template id
+	return getTemplateID(f, pageno, box)
+}
+
+func getTemplateID(f gofpdiPdf, pageno int, box string) int {
 	// Import page
 	tpl := fpdi.ImportPage(pageno, box)
 
@@ -60,4 +76,13 @@ func UseImportedTemplate(f gofpdiPdf, tplid int, x float64, y float64, w float64
 	tplName, scaleX, scaleY, tX, tY := fpdi.UseTemplate(tplid, x, y, w, h)
 
 	f.UseImportedTemplate(tplName, scaleX, scaleY, tX, tY)
+}
+
+// GetPageSizes returns page dimensions for all pages of the imported pdf.
+// Result consists of map[<page number>]map[<box>]map[<dimension>]<value>.
+// <page number>: page number, note that page numbers start at 1
+// <box>: box identifier, e.g. "/MediaBox"
+// <dimension>: dimension string, either "w" or "h"
+func GetPageSizes() map[int]map[string]map[string]float64 {
+	return fpdi.GetPageSizes()
 }
