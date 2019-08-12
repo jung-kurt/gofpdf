@@ -2639,3 +2639,52 @@ func ExampleUTF8CutFont() {
 	// Output:
 	// Successfully generated pdf/Fpdf_UTF8CutFont.pdf
 }
+
+func ExampleFpdf_RoundedRect() {
+	const (
+		wd     = 40.0
+		hgap   = 10.0
+		radius = 10.0
+		ht     = 60.0
+		vgap   = 10.0
+	)
+	corner := func(b1, b2, b3, b4 bool) (cstr string) {
+		if b1 {
+			cstr = "1"
+		}
+		if b2 {
+			cstr += "2"
+		}
+		if b3 {
+			cstr += "3"
+		}
+		if b4 {
+			cstr += "4"
+		}
+		return
+	}
+	pdf := gofpdf.New("P", "mm", "A4", "") // 210 x 297
+	pdf.AddPage()
+	pdf.SetLineWidth(0.5)
+	y := vgap
+	r := 40
+	g := 30
+	b := 20
+	for row := 0; row < 4; row++ {
+		x := hgap
+		for col := 0; col < 4; col++ {
+			pdf.SetFillColor(r, g, b)
+			pdf.RoundedRect(x, y, wd, ht, radius, corner(row&1 == 1, row&2 == 2, col&1 == 1, col&2 == 2), "FD")
+			r += 8
+			g += 10
+			b += 12
+			x += wd + hgap
+		}
+		y += ht + vgap
+	}
+	fileStr := example.Filename("Fpdf_RoundedRect")
+	err := pdf.OutputFileAndClose(fileStr)
+	example.Summary(err, fileStr)
+	// Output:
+	// Successfully generated pdf/Fpdf_RoundedRect.pdf
+}
