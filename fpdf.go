@@ -1103,6 +1103,55 @@ func (f *Fpdf) Rect(x, y, w, h float64, styleStr string) {
 	f.outf("%.2f %.2f %.2f %.2f re %s", x*f.k, (f.h-y)*f.k, w*f.k, -h*f.k, fillDrawOp(styleStr))
 }
 
+// RoundedRect outputs a rectangle of width w and height h with the upper left
+// corner positioned at point (x, y). It can be drawn (border only), filled
+// (with no border) or both. styleStr can be "F" for filled, "D" for outlined
+// only, or "DF" or "FD" for outlined and filled. An empty string will be replaced
+// with "D". Drawing uses the current draw color and line width centered on the
+// rectangle's perimeter. Filling uses the current fill color. The rounded corners
+// of the rectangle are specified by radius r. corners runs clockwise with 1 at the
+// top left corner.
+func (f *Fpdf) RoundedRect(x, y, w, h, r float64, corners string, stylestr string) {
+  k := f.k
+  hp := f.h
+  myArc := (4.0 / 3.0) * (math.Sqrt2 - 1.0)
+  f.outf("q %.5f %.5f m", (x+r)*k, (hp-y)*k)
+  xc := x + w - r
+	yc := y + r
+  f.outf("%.5f %.5f l", xc*k, (hp-y)*k)
+  if strings.Contains(corners, "2") == false {
+    f.outf("%.5f %.5f l", (x+w)*k, (hp-y)*k)
+  } else {
+    f.clipArc(xc+r*myArc, yc-r, xc+r, yc-r*myArc, xc+r, yc)
+  }
+  xc = x + w - r
+	yc = y + h - r
+  f.outf("%.5f %.5f l", (x+w)*k, (hp-yc)*k)
+  if strings.Contains(corners, "3") == false {
+    f.outf("%.5f %.5f l", (x+w)*k, (hp-(y + h))*k)
+  } else {
+    f.clipArc(xc+r, yc+r*myArc, xc+r*myArc, yc+r, xc, yc+r)
+  }
+  xc = x + r
+  yc = y + h - r
+  f.outf("%.5f %.5f l", xc*k, (hp-(y+h))*k)
+  if strings.Contains(corners, "4") == false {
+    f.outf("%.5f %.5f l", x*k, (hp-(y+h))*k)
+  } else {
+    f.clipArc(xc-r*myArc, yc+r, xc-r, yc+r*myArc, xc-r, yc)
+  }
+  xc = x + r
+	yc = y + r
+  f.outf("%.5f %.5f l", x*k, (hp-yc)*k)
+  if strings.Contains(corners, "1") == false {
+    f.outf("%.5f %.5f l", x*k, (hp-y)*k)
+    f.outf("%.5f %.5f l", (x+r)*k, (hp-y)*k)
+  } else {
+    f.clipArc(xc-r, yc-r*myArc, xc-r*myArc, yc-r, xc, yc-r)
+    f.outf(" re %s", fillDrawOp(stylestr))
+  }
+}
+
 // Circle draws a circle centered on point (x, y) with radius r.
 //
 // styleStr can be "F" for filled, "D" for outlined only, or "DF" or "FD" for

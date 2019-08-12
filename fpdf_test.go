@@ -2639,3 +2639,16 @@ func ExampleUTF8CutFont() {
 	// Output:
 	// Successfully generated pdf/Fpdf_UTF8CutFont.pdf
 }
+
+func ExampleFpdf_RoundedRect() {
+  pdf := gofpdf.New("P", "mm", "A4", "")
+  pdf.AddPage()
+  pdf.SetFillColor(160, 160, 160)
+  pdf.SetLineWidth(0.5)
+  pdf.RoundedRect(70, 30, 68, 46, 20, "1234", "FD")
+  fileStr := example.Filename("Fpdf_RoundedRect")
+  err := pdf.OutputFileAndClose(fileStr)
+  example.Summary(err, fileStr)
+  // Output:
+  // Successfully generated pdf/Fpdf_RoundedRect.pdf
+}
