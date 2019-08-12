@@ -28,9 +28,10 @@ func ImportPage(f gofpdiPdf, sourceFile string, pageno int, box string) int {
 	return getTemplateID(f, pageno, box)
 }
 
-// ImportPage imports a page of a PDF with the specified box (/MediaBox,
-// /TrimBox, /ArtBox, /CropBox, or /BleedBox). Returns a template id that can
-// be used with UseImportedTemplate to draw the template onto the page.
+// ImportPageFromStream imports a page of a PDF with the specified box
+// (/MediaBox, TrimBox, /ArtBox, /CropBox, or /BleedBox). Returns a template id
+// that can be used with UseImportedTemplate to draw the template onto the
+// page.
 func ImportPageFromStream(f gofpdiPdf, rs *io.ReadSeeker, pageno int, box string) int {
 	// Set source stream for fpdi
 	fpdi.SetSourceStream(rs)
