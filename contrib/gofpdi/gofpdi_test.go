@@ -5,6 +5,8 @@ import (
 	"github.com/jung-kurt/gofpdf"
 	"github.com/jung-kurt/gofpdf/internal/example"
 	"io"
+	"sync"
+	"testing"
 )
 
 func ExampleGofpdiImporter() {
@@ -37,6 +39,29 @@ func ExampleGofpdiImporter() {
 	example.Summary(err, fileStr)
 	// Output:
 	// Successfully generated ../../pdf/contrib_gofpdi_Importer.pdf
+}
+
+func TestGofpdiConcurrent(t *testing.T) {
+	wg := sync.WaitGroup{}
+	for i := 0; i < 100; i++ {
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			pdf := gofpdf.New("P", "mm", "A4", "")
+			rs, _ := getTemplatePdf()
+			imp := NewImporter()
+			tpl := imp.ImportPageFromStream(pdf, &rs, 1, "/MediaBox")
+			pdf.AddPage()
+			tpl = imp.ImportPageFromStream(pdf, &rs, 1, "/MediaBox")
+			imp.UseImportedTemplate(pdf, tpl, 0, 0, 210.0, 297.0)
+			// write to bytes buffer
+			buf := bytes.Buffer{}
+			if err := pdf.Output(&buf); err != nil {
+				t.Fail()
+			}
+		}()
+	}
+	wg.Wait()
 }
 
 func getTemplatePdf() (io.ReadSeeker, error) {
