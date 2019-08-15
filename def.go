@@ -563,6 +563,7 @@ type Fpdf struct {
 	zoomMode         string                     // zoom display mode
 	layoutMode       string                     // layout display mode
 	xmp              []byte                     // XMP metadata
+	producer         string                     // producer
 	title            string                     // title
 	subject          string                     // subject
 	author           string                     // author
