@@ -198,6 +198,7 @@ func fpdfNew(orientationStr, unitStr, sizeStr, fontDirStr string, size SizeType)
 	f.gradientList = append(f.gradientList, gradientType{}) // gradientList[0] is unused
 	// Set default PDF version number
 	f.pdfVersion = "1.3"
+	f.SetProducer("FPDF "+cnFpdfVersion, true)
 	f.layerInit()
 	f.catalogSort = gl.catalogSort
 	f.creationDate = gl.creationDate
@@ -557,6 +558,15 @@ func SetDefaultCompression(compress bool) {
 // Compression is on by default.
 func (f *Fpdf) SetCompression(compress bool) {
 	f.compress = compress
+}
+
+// SetProducer defines the producer of the document. isUTF8 indicates if the string
+// is encoded in ISO-8859-1 (false) or UTF-8 (true).
+func (f *Fpdf) SetProducer(producerStr string, isUTF8 bool) {
+	if isUTF8 {
+		producerStr = utf8toutf16(producerStr)
+	}
+	f.producer = producerStr
 }
 
 // SetTitle defines the title of the document. isUTF8 indicates if the string
@@ -4473,7 +4483,9 @@ func (f *Fpdf) putresources() {
 
 func (f *Fpdf) putinfo() {
 	var tm time.Time
-	f.outf("/Producer %s", f.textstring("FPDF "+cnFpdfVersion))
+	if len(f.producer) > 0 {
+		f.outf("/Producer %s", f.textstring(f.producer))
+	}
 	if len(f.title) > 0 {
 		f.outf("/Title %s", f.textstring(f.title))
 	}
