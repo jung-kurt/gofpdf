@@ -9,7 +9,7 @@ import (
 	"testing"
 )
 
-func ExampleGofpdiImporter() {
+func ExampleNewImporter() {
 	// create new pdf
 	pdf := gofpdf.New("P", "pt", "A4", "")
 
@@ -48,11 +48,10 @@ func TestGofpdiConcurrent(t *testing.T) {
 		go func() {
 			defer wg.Done()
 			pdf := gofpdf.New("P", "mm", "A4", "")
+			pdf.AddPage()
 			rs, _ := getTemplatePdf()
 			imp := NewImporter()
 			tpl := imp.ImportPageFromStream(pdf, &rs, 1, "/MediaBox")
-			pdf.AddPage()
-			tpl = imp.ImportPageFromStream(pdf, &rs, 1, "/MediaBox")
 			imp.UseImportedTemplate(pdf, tpl, 0, 0, 210.0, 297.0)
 			// write to bytes buffer
 			buf := bytes.Buffer{}
