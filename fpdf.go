@@ -2551,20 +2551,23 @@ func (f *Fpdf) MultiCell(w, h float64, txtStr, borderStr, alignStr string, fill 
 	}
 	wmax := int(math.Ceil((w - 2*f.cMargin) * 1000 / f.fontSize))
 	s := strings.Replace(txtStr, "\r", "", -1)
+	srune := []rune(s)
 
+	// remove extra line breaks
 	var nb int
 	if f.isCurrentUTF8 {
-		nb = len([]rune(s))
-		for nb > 0 && []rune(s)[nb-1] == '\n' {
+		nb = len(srune)
+		for nb > 0 && srune[nb-1] == '\n' {
 			nb--
-			s = string([]rune(s)[0:nb])
 		}
+		srune = srune[0:nb]
 	} else {
 		nb = len(s)
-		if nb > 0 && []byte(s)[nb-1] == '\n' {
+		bytes2 := []byte(s)
+		for nb > 0 && bytes2[nb-1] == '\n' {
 			nb--
-			s = s[0:nb]
 		}
+		s = s[0:nb]
 	}
 	// dbg("[%s]\n", s)
 	var b, b2 string
@@ -2603,7 +2606,7 @@ func (f *Fpdf) MultiCell(w, h float64, txtStr, borderStr, alignStr string, fill 
 		if f.isCurrentUTF8 {
 			c = srune[i]
 		} else {
-			c = rune(byte(s[i]))
+			c = rune(s[i])
 		}
 		if c == '\n' {
 			// Explicit line break
@@ -2636,7 +2639,7 @@ func (f *Fpdf) MultiCell(w, h float64, txtStr, borderStr, alignStr string, fill 
 			}
 			continue
 		}
-		if c == ' ' {
+		if c == ' ' || isChinese(c) {
 			sep = i
 			ls = l
 			ns++
