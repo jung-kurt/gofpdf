@@ -2596,11 +2596,12 @@ func (f *Fpdf) MultiCell(w, h float64, txtStr, borderStr, alignStr string, fill 
 	ls := 0
 	ns := 0
 	nl := 1
+	srune := []rune(s)
 	for i < nb {
 		// Get next character
 		var c rune
 		if f.isCurrentUTF8 {
-			c = []rune(s)[i]
+			c = srune[i]
 		} else {
 			c = rune(byte(s[i]))
 		}
@@ -2620,7 +2621,7 @@ func (f *Fpdf) MultiCell(w, h float64, txtStr, borderStr, alignStr string, fill 
 						newAlignStr = "L"
 					}
 				}
-				f.CellFormat(w, h, string([]rune(s)[j:i]), b, 2, newAlignStr, fill, 0, "")
+				f.CellFormat(w, h, string(srune[j:i]), b, 2, newAlignStr, fill, 0, "")
 			} else {
 				f.CellFormat(w, h, s[j:i], b, 2, alignStr, fill, 0, "")
 			}
@@ -2656,7 +2657,7 @@ func (f *Fpdf) MultiCell(w, h float64, txtStr, borderStr, alignStr string, fill 
 					f.out("0 Tw")
 				}
 				if f.isCurrentUTF8 {
-					f.CellFormat(w, h, string([]rune(s)[j:i]), b, 2, alignStr, fill, 0, "")
+					f.CellFormat(w, h, string(srune[j:i]), b, 2, alignStr, fill, 0, "")
 				} else {
 					f.CellFormat(w, h, s[j:i], b, 2, alignStr, fill, 0, "")
 				}
@@ -2670,7 +2671,7 @@ func (f *Fpdf) MultiCell(w, h float64, txtStr, borderStr, alignStr string, fill 
 					f.outf("%.3f Tw", f.ws*f.k)
 				}
 				if f.isCurrentUTF8 {
-					f.CellFormat(w, h, string([]rune(s)[j:sep]), b, 2, alignStr, fill, 0, "")
+					f.CellFormat(w, h, string(srune[j:sep]), b, 2, alignStr, fill, 0, "")
 				} else {
 					f.CellFormat(w, h, s[j:sep], b, 2, alignStr, fill, 0, "")
 				}
@@ -2704,7 +2705,7 @@ func (f *Fpdf) MultiCell(w, h float64, txtStr, borderStr, alignStr string, fill 
 				alignStr = ""
 			}
 		}
-		f.CellFormat(w, h, string([]rune(s)[j:i]), b, 2, alignStr, fill, 0, "")
+		f.CellFormat(w, h, string(srune[j:i]), b, 2, alignStr, fill, 0, "")
 	} else {
 		f.CellFormat(w, h, s[j:i], b, 2, alignStr, fill, 0, "")
 	}
