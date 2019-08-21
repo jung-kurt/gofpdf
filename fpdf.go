@@ -2599,7 +2599,6 @@ func (f *Fpdf) MultiCell(w, h float64, txtStr, borderStr, alignStr string, fill 
 	ls := 0
 	ns := 0
 	nl := 1
-	srune := []rune(s)
 	for i < nb {
 		// Get next character
 		var c rune
