@@ -20,3 +20,6 @@ doc/body.md
 doc/index.html
 doc/index.html.ok
 coverage.html
+
+# macOS
+.DS_Store
