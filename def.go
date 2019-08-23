@@ -452,6 +452,7 @@ type Pdf interface {
 	SetTextSpotColor(nameStr string, tint byte)
 	SetTitle(titleStr string, isUTF8 bool)
 	SetTopMargin(margin float64)
+	SetUnderlineThickness(thickness float64)
 	SetXmpMetadata(xmpStream []byte)
 	SetX(x float64)
 	SetXY(x, y float64)
@@ -595,7 +596,8 @@ type Fpdf struct {
 		// Composite values of colors
 		draw, fill, text colorType
 	}
-	spotColorMap map[string]spotColorType // Map of named ink-based colors
+	spotColorMap           map[string]spotColorType // Map of named ink-based colors
+	userUnderlineThickness float64                  // A custom user underline thickness multiplier.
 }
 
 type encType struct {
