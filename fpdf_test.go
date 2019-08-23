@@ -2688,3 +2688,26 @@ func ExampleFpdf_RoundedRect() {
 	// Output:
 	// Successfully generated pdf/Fpdf_RoundedRect.pdf
 }
+
+// ExampleFpdf_SetUnderlineThickness demonstrates how to adjust the text
+// underline thickness.
+func ExampleFpdf_SetUnderlineThickness() {
+	pdf := gofpdf.New("P", "mm", "A4", "") // 210mm x 297mm
+	pdf.AddPage()
+	pdf.SetFont("Arial", "U", 12)
+
+	pdf.SetUnderlineThickness(0.5)
+	pdf.CellFormat(0, 10, "Thin underline", "", 1, "", false, 0, "")
+
+	pdf.SetUnderlineThickness(1)
+	pdf.CellFormat(0, 10, "Normal underline", "", 1, "", false, 0, "")
+
+	pdf.SetUnderlineThickness(2)
+	pdf.CellFormat(0, 10, "Thicker underline", "", 1, "", false, 0, "")
+
+	fileStr := example.Filename("Fpdf_UnderlineThickness")
+	err := pdf.OutputFileAndClose(fileStr)
+	example.Summary(err, fileStr)
+	// Output:
+	// Successfully generated pdf/Fpdf_UnderlineThickness.pdf
+}

@@ -202,6 +202,7 @@ func fpdfNew(orientationStr, unitStr, sizeStr, fontDirStr string, size SizeType)
 	f.layerInit()
 	f.catalogSort = gl.catalogSort
 	f.creationDate = gl.creationDate
+	f.userUnderlineThickness = 1
 	return
 }
 
@@ -3538,10 +3539,16 @@ func blankCount(str string) (count int) {
 	return
 }
 
+// SetUnderlineThickness accepts a multiplier for adjusting the text underline
+// thickness, defaulting to 1. See SetUnderlineThickness example.
+func (f *Fpdf) SetUnderlineThickness(thickness float64) {
+	f.userUnderlineThickness = thickness
+}
+
 // Underline text
 func (f *Fpdf) dounderline(x, y float64, txt string) string {
 	up := float64(f.currentFont.Up)
-	ut := float64(f.currentFont.Ut)
+	ut := float64(f.currentFont.Ut) * f.userUnderlineThickness
 	w := f.GetStringWidth(txt) + f.ws*float64(blankCount(txt))
 	return sprintf("%.2f %.2f %.2f %.2f re f", x*f.k,
 		(f.h-(y-up/1000*f.fontSize))*f.k, w*f.k, -ut/1000*f.fontSizePt)
