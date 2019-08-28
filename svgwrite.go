@@ -76,6 +76,7 @@ func (f *Fpdf) SVGBasicWrite(sb *SVGBasicType, scale float64) {
 				y = newY
 			case 'Z':
 				f.Line(x, y, startX, startY)
+				x, y = startX, startY
 			default:
 				f.SetErrorf("Unexpected path command '%c'", seg.Cmd)
 			}
