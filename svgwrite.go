@@ -59,6 +59,11 @@ func (f *Fpdf) SVGBasicWrite(sb *SVGBasicType, scale float64) {
 				newX, newY = val(4)
 				f.CurveCubic(x, y, cx0, cy0, newX, newY, cx1, cy1, "D")
 				x, y = newX, newY
+			case 'Q':
+				cx0, cy0 = val(0)
+				newX, newY = val(2)
+				f.Curve(x, y, cx0, cy0, newX, newY, "D")
+				x, y = newX, newY
 			case 'H':
 				newX = xval(0)
 				f.Line(x, y, newX, y)

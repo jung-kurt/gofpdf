@@ -33,7 +33,8 @@ func init() {
 		"C", " C ", "c", " c ",
 		"M", " M ", "m", " m ",
 		"H", " H ", "h", " h ",
-		"V", " V ", "v", " v ")
+		"V", " V ", "v", " v ",
+		"Q", " Q ", "q", " q ", )
 }
 
 // SVGBasicSegmentType describes a single curve or position segment
@@ -81,6 +82,15 @@ func absolutizePath(segs []SVGBasicSegmentType) {
 			segPtr.Cmd = 'C'
 			x = segPtr.Arg[4]
 			y = segPtr.Arg[5]
+		case 'Q':
+			x = seg.Arg[2]
+			y = seg.Arg[3]
+		case 'q':
+			adjust(0, x, y)
+			adjust(2, x, y)
+			segPtr.Cmd = 'Q'
+			x = segPtr.Arg[2]
+			y = segPtr.Arg[3]
 		case 'H':
 			x = seg.Arg[0]
 		case 'h':
@@ -146,6 +156,8 @@ func pathParse(pathStr string) (segs []SVGBasicSegmentType, err error) {
 					setup(1)
 				case 'L', 'l': // Absolute/relative lineto: x, y
 					setup(2)
+				case 'Q', 'q': // Absolute/relative quadratic curve: x0, y0, x1, y1
+					setup(4)
 				case 'V', 'v': // Absolute/relative vertical line to: x
 					setup(1)
 				case 'Z', 'z': // closepath instruction (takes no arguments)
