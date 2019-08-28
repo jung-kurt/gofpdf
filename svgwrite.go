@@ -29,6 +29,7 @@ func (f *Fpdf) SVGBasicWrite(sb *SVGBasicType, scale float64) {
 	var cx0, cy0, cx1, cy1 float64
 	var path []SVGBasicSegmentType
 	var seg SVGBasicSegmentType
+	var startX, startY float64
 	sval := func(origin float64, arg int) float64 {
 		return origin + scale*seg.Arg[arg]
 	}
@@ -48,6 +49,7 @@ func (f *Fpdf) SVGBasicWrite(sb *SVGBasicType, scale float64) {
 			switch seg.Cmd {
 			case 'M':
 				x, y = val(0)
+				startX, startY = x, y
 				f.SetXY(x, y)
 			case 'L':
 				newX, newY = val(0)
@@ -73,7 +75,7 @@ func (f *Fpdf) SVGBasicWrite(sb *SVGBasicType, scale float64) {
 				f.Line(x, y, x, newY)
 				y = newY
 			case 'Z':
-				f.Line(x, y, originX, originY)
+				f.Line(x, y, startX, startY)
 			default:
 				f.SetErrorf("Unexpected path command '%c'", seg.Cmd)
 			}

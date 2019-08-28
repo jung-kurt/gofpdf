@@ -34,7 +34,8 @@ func init() {
 		"M", " M ", "m", " m ",
 		"H", " H ", "h", " h ",
 		"V", " V ", "v", " v ",
-		"Q", " Q ", "q", " q ", )
+		"Q", " Q ", "q", " q ",
+		"Z", " Z ", "z", " z ")
 }
 
 // SVGBasicSegmentType describes a single curve or position segment
@@ -103,7 +104,8 @@ func absolutizePath(segs []SVGBasicSegmentType) {
 			segPtr.Arg[0] += y
 			segPtr.Cmd = 'V'
 			y += seg.Arg[0]
-
+		case 'z':
+			segPtr.Cmd = 'Z'
 		}
 	}
 }
@@ -161,7 +163,7 @@ func pathParse(pathStr string) (segs []SVGBasicSegmentType, err error) {
 				case 'V', 'v': // Absolute/relative vertical line to: x
 					setup(1)
 				case 'Z', 'z': // closepath instruction (takes no arguments)
-					break
+					segs = append(segs, seg)
 				default:
 					err = fmt.Errorf("expecting SVG path command at position %d, got %s", j, str)
 				}
