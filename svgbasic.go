@@ -31,7 +31,9 @@ func init() {
 	pathCmdSub = strings.NewReplacer(",", " ",
 		"L", " L ", "l", " l ",
 		"C", " C ", "c", " c ",
-		"M", " M ", "m", " m ")
+		"M", " M ", "m", " m ",
+		"H", " H ", "h", " h ",
+		"V", " V ", "v", " v ")
 }
 
 // SVGBasicSegmentType describes a single curve or position segment
@@ -79,6 +81,19 @@ func absolutizePath(segs []SVGBasicSegmentType) {
 			segPtr.Cmd = 'C'
 			x = segPtr.Arg[4]
 			y = segPtr.Arg[5]
+		case 'H':
+			x = seg.Arg[0]
+		case 'h':
+			segPtr.Arg[0] += x
+			segPtr.Cmd = 'H'
+			x += seg.Arg[0]
+		case 'V':
+			y = seg.Arg[0]
+		case 'v':
+			segPtr.Arg[0] += y
+			segPtr.Cmd = 'V'
+			y += seg.Arg[0]
+
 		}
 	}
 }
@@ -127,8 +142,12 @@ func pathParse(pathStr string) (segs []SVGBasicSegmentType, err error) {
 					setup(2)
 				case 'C', 'c': // Absolute/relative Bézier curve: cx0, cy0, cx1, cy1, x1, y1
 					setup(6)
+				case 'H', 'h': // Absolute/relative horizontal line to: x
+					setup(1)
 				case 'L', 'l': // Absolute/relative lineto: x, y
 					setup(2)
+				case 'V', 'v': // Absolute/relative vertical line to: x
+					setup(1)
 				case 'Z', 'z': // closepath instruction (takes no arguments)
 					break
 				default:
