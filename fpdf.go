@@ -4215,6 +4215,7 @@ func implode(sep string, arr []int) string {
 	return s.String()
 }
 
+// arrayCountValues counts the occurrences of each item in the $mp array.
 func arrayCountValues(mp []int) map[int]int {
 	answer := make(map[int]int)
 	for _, v := range mp {
