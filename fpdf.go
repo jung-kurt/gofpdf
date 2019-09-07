@@ -2472,7 +2472,7 @@ func reverseText(text string) string {
 }
 
 // Cell is a simpler version of CellFormat with no fill, border, links or
-// special alignment.
+// special alignment. The Cell_strikeout() example demonstrates this method.
 func (f *Fpdf) Cell(w, h float64, txtStr string) {
 	f.CellFormat(w, h, txtStr, "", 0, "L", false, 0, "")
 }
