@@ -165,20 +165,20 @@ func (p PointType) XY() (float64, float64) {
 // Changes to this structure should be reflected in its GobEncode and GobDecode
 // methods.
 type ImageInfoType struct {
-	data  []byte
-	smask []byte
-	n     int
-	w     float64
-	h     float64
-	cs    string
-	pal   []byte
-	bpc   int
-	f     string
-	dp    string
-	trns  []int
-	scale float64 // document scaling factor
-	dpi   float64
-	i     string
+	data  []byte  // Raw image data
+	smask []byte  // Soft Mask, an 8bit per-pixel transparency mask
+	n     int     // Image object number
+	w     float64 // Width
+	h     float64 // Height
+	cs    string  // Color space
+	pal   []byte  // Image color palette
+	bpc   int     // Bits Per Component
+	f     string  // Image filter
+	dp    string  // DecodeParms
+	trns  []int   // Transparency mask
+	scale float64 // Document scale factor
+	dpi   float64 // Dots-per-inch found from image file (png only)
+	i     string  // SHA-1 checksum of the above values.
 }
 
 func generateImageID(info *ImageInfoType) (string, error) {

@@ -4215,6 +4215,7 @@ func implode(sep string, arr []int) string {
 	return s.String()
 }
 
+// arrayCountValues counts the occurrences of each item in the $mp array.
 func arrayCountValues(mp []int) map[int]int {
 	answer := make(map[int]int)
 	for _, v := range mp {
@@ -4243,11 +4244,31 @@ func (f *Fpdf) putimages() {
 	for key = range f.images {
 		keyList = append(keyList, key)
 	}
+
+	// Sort the keyList []string by the corresponding image's width.
 	if f.catalogSort {
 		sort.SliceStable(keyList, func(i, j int) bool { return f.images[keyList[i]].w < f.images[keyList[j]].w })
 	}
+
+	// Maintain a list of inserted image SHA-1 hashes, with their
+	// corresponding object ID number.
+	insertedImages := map[string]int{}
+
 	for _, key = range keyList {
-		f.putimage(f.images[key])
+		image := f.images[key]
+
+		// Check if this image has already been inserted using it's SHA-1 hash.
+		insertedImageObjN, isFound := insertedImages[image.i]
+
+		// If found, skip inserting the image as a new object, and
+		// use the object ID from the insertedImages map.
+		// If not, insert the image into the PDF and store the object ID.
+		if isFound {
+			image.n = insertedImageObjN
+		} else {
+			f.putimage(image)
+			insertedImages[image.i] = image.n
+		}
 	}
 }
 
