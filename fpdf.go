@@ -4245,7 +4245,7 @@ func (f *Fpdf) putimages() {
 		keyList = append(keyList, key)
 	}
 
-	// Sort the keyList []string by the corrosponding image's width.
+	// Sort the keyList []string by the corresponding image's width.
 	if f.catalogSort {
 		sort.SliceStable(keyList, func(i, j int) bool { return f.images[keyList[i]].w < f.images[keyList[j]].w })
 	}
