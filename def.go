@@ -542,6 +542,7 @@ type Fpdf struct {
 	fontFamily       string                     // current font family
 	fontStyle        string                     // current font style
 	underline        bool                       // underlining flag
+	strikeout        bool                       // strike out flag
 	currentFont      fontDefType                // current font info
 	fontSizePt       float64                    // current font size in points
 	fontSize         float64                    // current font size in user unit

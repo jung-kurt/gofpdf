@@ -19,12 +19,11 @@ package example
 
 import (
 	"fmt"
+	"gofpdf"
 	"os"
 	"path/filepath"
 	"strings"
 	"time"
-
-	"github.com/jung-kurt/gofpdf"
 )
 
 var gofpdfDir string

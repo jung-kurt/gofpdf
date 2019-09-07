@@ -19,9 +19,8 @@ package gofpdf_test
 import (
 	"bytes"
 	"fmt"
-
-	"github.com/jung-kurt/gofpdf"
-	"github.com/jung-kurt/gofpdf/internal/example"
+	"gofpdf"
+	"gofpdf/internal/example"
 )
 
 func ExampleTtfParse() {

@@ -20,6 +20,9 @@ import (
 	"bufio"
 	"bytes"
 	"fmt"
+	"gofpdf"
+	"gofpdf/internal/example"
+	"gofpdf/internal/files"
 	"io"
 	"io/ioutil"
 	"math"
@@ -31,10 +34,6 @@ import (
 	"strings"
 	"testing"
 	"time"
-
-	"github.com/jung-kurt/gofpdf"
-	"github.com/jung-kurt/gofpdf/internal/example"
-	"github.com/jung-kurt/gofpdf/internal/files"
 )
 
 func init() {
@@ -2710,4 +2709,23 @@ func ExampleFpdf_SetUnderlineThickness() {
 	example.Summary(err, fileStr)
 	// Output:
 	// Successfully generated pdf/Fpdf_UnderlineThickness.pdf
+}
+
+// ExampleFpdf_strikeout demonstrates striked-out text
+func ExampleFpdf_strikeout() {
+
+	pdf := gofpdf.New("P", "mm", "A4", "") // 210mm x 297mm
+	pdf.AddPage()
+
+	for fontSize := 4; fontSize < 40; fontSize += 10 {
+		pdf.SetFont("Arial", "S", float64(fontSize))
+		pdf.SetXY(0, float64(fontSize))
+		pdf.Cell(40, 10, "Hello World\n")
+	}
+
+	fileStr := example.Filename("Fpdf_strikeout")
+	err := pdf.OutputFileAndClose(fileStr)
+	example.Summary(err, fileStr)
+	// Output:
+	// Successfully generated pdf/Fpdf_strikeout.pdf
 }
