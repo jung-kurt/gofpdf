@@ -261,7 +261,8 @@ independently of gofpdf. Paul also added support for page boxes used in
 printing PDF documents. Wojciech Matusiak added supported for word
 spacing. Artem Korotkiy added support of UTF-8 fonts. Dave Barnes added
 support for imported objects and templates. Brigham Thompson added
-support for rounded rectangles.
+support for rounded rectangles. Joe Westcott added underline
+functionality and optimized image storage.
 
 ## Roadmap
 
