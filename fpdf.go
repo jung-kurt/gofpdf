@@ -102,6 +102,7 @@ func fpdfNew(orientationStr, unitStr, sizeStr, fontDirStr string, size SizeType)
 	f.fontStyle = ""
 	f.SetFontSize(12)
 	f.underline = false
+	f.strikeout = false
 	f.setDrawColor(0, 0, 0)
 	f.setFillColor(0, 0, 0)
 	f.setTextColor(0, 0, 0)
@@ -725,6 +726,9 @@ func (f *Fpdf) AddPageFormat(orientationStr string, size SizeType) {
 	style := f.fontStyle
 	if f.underline {
 		style += "U"
+	}
+	if f.strikeout {
+		style += "S"
 	}
 	fontsize := f.fontSizePt
 	lw := f.lineWidth
@@ -2004,9 +2008,9 @@ func (f *Fpdf) GetFontDesc(familyStr, styleStr string) FontDescType {
 // insensitive): "Courier" for fixed-width, "Helvetica" or "Arial" for sans
 // serif, "Times" for serif, "Symbol" or "ZapfDingbats" for symbolic.
 //
-// styleStr can be "B" (bold), "I" (italic), "U" (underscore) or any
-// combination. The default value (specified with an empty string) is regular.
-// Bold and italic styles do not apply to Symbol and ZapfDingbats.
+// styleStr can be "B" (bold), "I" (italic), "U" (underscore), "S" (strike-out)
+// or any combination. The default value (specified with an empty string) is
+// regular. Bold and italic styles do not apply to Symbol and ZapfDingbats.
 //
 // size is the font size measured in points. The default value is the current
 // size. If no size has been specified since the beginning of the document, the
@@ -2028,6 +2032,10 @@ func (f *Fpdf) SetFont(familyStr, styleStr string, size float64) {
 	f.underline = strings.Contains(styleStr, "U")
 	if f.underline {
 		styleStr = strings.Replace(styleStr, "U", "", -1)
+	}
+	f.strikeout = strings.Contains(styleStr, "S")
+	if f.strikeout {
+		styleStr = strings.Replace(styleStr, "S", "", -1)
 	}
 	if styleStr == "IB" {
 		styleStr = "BI"
@@ -2197,6 +2205,9 @@ func (f *Fpdf) Text(x, y float64, txtStr string) {
 	s := sprintf("BT %.2f %.2f Td (%s) Tj ET", x*f.k, (f.h-y)*f.k, txt2)
 	if f.underline && txtStr != "" {
 		s += " " + f.dounderline(x, y, txtStr)
+	}
+	if f.strikeout && txtStr != "" {
+		s += " " + f.dostrikeout(x, y, txtStr)
 	}
 	if f.colorFlag {
 		s = sprintf("q %s %s Q", f.color.text.str, s)
@@ -2422,6 +2433,9 @@ func (f *Fpdf) CellFormat(w, h float64, txtStr, borderStr string, ln int,
 		if f.underline {
 			s.printf(" %s", f.dounderline(f.x+dx, f.y+dy+.5*h+.3*f.fontSize, txtStr))
 		}
+		if f.strikeout {
+			s.printf(" %s", f.dostrikeout(f.x+dx, f.y+dy+.5*h+.3*f.fontSize, txtStr))
+		}
 		if f.colorFlag {
 			s.printf(" Q")
 		}
@@ -2458,7 +2472,7 @@ func reverseText(text string) string {
 }
 
 // Cell is a simpler version of CellFormat with no fill, border, links or
-// special alignment.
+// special alignment. The Cell_strikeout() example demonstrates this method.
 func (f *Fpdf) Cell(w, h float64, txtStr string) {
 	f.CellFormat(w, h, txtStr, "", 0, "L", false, 0, "")
 }
@@ -3552,6 +3566,14 @@ func (f *Fpdf) dounderline(x, y float64, txt string) string {
 	w := f.GetStringWidth(txt) + f.ws*float64(blankCount(txt))
 	return sprintf("%.2f %.2f %.2f %.2f re f", x*f.k,
 		(f.h-(y-up/1000*f.fontSize))*f.k, w*f.k, -ut/1000*f.fontSizePt)
+}
+
+func (f *Fpdf) dostrikeout(x, y float64, txt string) string {
+	up := float64(f.currentFont.Up)
+	ut := float64(f.currentFont.Ut)
+	w := f.GetStringWidth(txt) + f.ws*float64(blankCount(txt))
+	return sprintf("%.2f %.2f %.2f %.2f re f", x*f.k,
+		(f.h-(y+4*up/1000*f.fontSize))*f.k, w*f.k, -ut/1000*f.fontSizePt)
 }
 
 func bufEqual(buf []byte, str string) bool {
