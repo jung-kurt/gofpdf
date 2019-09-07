@@ -2711,3 +2711,22 @@ func ExampleFpdf_SetUnderlineThickness() {
 	// Output:
 	// Successfully generated pdf/Fpdf_UnderlineThickness.pdf
 }
+
+// ExampleFpdf_Cell_strikeout demonstrates striked-out text
+func ExampleFpdf_Cell_strikeout() {
+
+	pdf := gofpdf.New("P", "mm", "A4", "") // 210mm x 297mm
+	pdf.AddPage()
+
+	for fontSize := 4; fontSize < 40; fontSize += 10 {
+		pdf.SetFont("Arial", "S", float64(fontSize))
+		pdf.SetXY(0, float64(fontSize))
+		pdf.Cell(40, 10, "Hello World")
+	}
+
+	fileStr := example.Filename("Fpdf_Cell_strikeout")
+	err := pdf.OutputFileAndClose(fileStr)
+	example.Summary(err, fileStr)
+	// Output:
+	// Successfully generated pdf/Fpdf_Cell_strikeout.pdf
+}
