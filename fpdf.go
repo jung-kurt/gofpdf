@@ -1629,7 +1629,7 @@ func (f *Fpdf) ClipEnd() {
 // definition file to be added. The file will be loaded from the font directory
 // specified in the call to New() or SetFontLocation().
 func (f *Fpdf) AddFont(familyStr, styleStr, fileStr string) {
-	f.addFont(familyStr, styleStr, fileStr, false)
+	f.addFont(fontFamilyEscape(familyStr), styleStr, fileStr, false)
 }
 
 // AddUTF8Font imports a TrueType font with utf-8 symbols and makes it available.
@@ -1653,7 +1653,7 @@ func (f *Fpdf) AddFont(familyStr, styleStr, fileStr string) {
 // definition file to be added. The file will be loaded from the font directory
 // specified in the call to New() or SetFontLocation().
 func (f *Fpdf) AddUTF8Font(familyStr, styleStr, fileStr string) {
-	f.addFont(familyStr, styleStr, fileStr, true)
+	f.addFont(fontFamilyEscape(familyStr), styleStr, fileStr, true)
 }
 
 func (f *Fpdf) addFont(familyStr, styleStr, fileStr string, isUTF8 bool) {
@@ -1779,7 +1779,7 @@ func makeSubsetRange(end int) map[int]int {
 //
 // zFileBytes contain all bytes of Z file.
 func (f *Fpdf) AddFontFromBytes(familyStr, styleStr string, jsonFileBytes, zFileBytes []byte) {
-	f.addFontFromBytes(familyStr, styleStr, jsonFileBytes, zFileBytes, nil)
+	f.addFontFromBytes(fontFamilyEscape(familyStr), styleStr, jsonFileBytes, zFileBytes, nil)
 }
 
 // AddUTF8FontFromBytes  imports a TrueType font with utf-8 symbols from static
@@ -1798,7 +1798,7 @@ func (f *Fpdf) AddFontFromBytes(familyStr, styleStr string, jsonFileBytes, zFile
 //
 // zFileBytes contain all bytes of Z file.
 func (f *Fpdf) AddUTF8FontFromBytes(familyStr, styleStr string, utf8Bytes []byte) {
-	f.addFontFromBytes(familyStr, styleStr, nil, nil, utf8Bytes)
+	f.addFontFromBytes(fontFamilyEscape(familyStr), styleStr, nil, nil, utf8Bytes)
 }
 
 func (f *Fpdf) addFontFromBytes(familyStr, styleStr string, jsonFileBytes, zFileBytes, utf8Bytes []byte) {
@@ -1937,6 +1937,7 @@ func (f *Fpdf) AddFontFromReader(familyStr, styleStr string, r io.Reader) {
 		return
 	}
 	// dbg("Adding family [%s], style [%s]", familyStr, styleStr)
+	familyStr = fontFamilyEscape(familyStr)
 	var ok bool
 	fontkey := getFontKey(familyStr, styleStr)
 	_, ok = f.fonts[fontkey]
@@ -1985,7 +1986,7 @@ func (f *Fpdf) GetFontDesc(familyStr, styleStr string) FontDescType {
 	if familyStr == "" {
 		return f.currentFont.Desc
 	}
-	return f.fonts[getFontKey(familyStr, styleStr)].Desc
+	return f.fonts[getFontKey(fontFamilyEscape(familyStr), styleStr)].Desc
 }
 
 // SetFont sets the font used to print character strings. It is mandatory to
@@ -2022,6 +2023,7 @@ func (f *Fpdf) SetFont(familyStr, styleStr string, size float64) {
 		return
 	}
 	// dbg("SetFont")
+	familyStr = fontFamilyEscape(familyStr)
 	var ok bool
 	if familyStr == "" {
 		familyStr = f.fontFamily
