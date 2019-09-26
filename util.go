@@ -456,7 +456,7 @@ func isChinese(rune2 rune) bool {
 // Condition font family string to PDF name compliance. See section 5.3 (Names)
 // in https://resources.infosecinstitute.com/pdf-file-format-basic-structure/
 func fontFamilyEscape(familyStr string) (escStr string) {
-	escStr = strings.ReplaceAll(familyStr, " ", "#20")
+	escStr = strings.Replace(familyStr, " ", "#20", -1)
 	// Additional replacements can take place here
 	return
 }
