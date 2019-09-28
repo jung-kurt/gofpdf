@@ -3780,6 +3780,10 @@ func (f *Fpdf) SetJavascript(script string) {
 // document is closed.
 func (f *Fpdf) RegisterAlias(alias, replacement string) {
 	f.aliasMap[alias] = replacement
+	// Add a UTF16 mapping
+	aliasUtf16 := utf8toutf16(f.aliasNbPagesStr, false)
+	replacementUtf16 := utf8toutf16(replacement, false)
+	f.aliasMap[aliasUtf16] = replacementUtf16
 }
 
 func (f *Fpdf) replaceAliases() {
@@ -3803,9 +3807,6 @@ func (f *Fpdf) putpages() {
 	nb := f.page
 	if len(f.aliasNbPagesStr) > 0 {
 		// Replace number of pages
-		alias := utf8toutf16(f.aliasNbPagesStr, false)
-		r := utf8toutf16(sprintf("%d", nb), false)
-		f.RegisterAlias(alias, r)
 		f.RegisterAlias(f.aliasNbPagesStr, sprintf("%d", nb))
 	}
 	f.replaceAliases()
