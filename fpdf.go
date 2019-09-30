@@ -3781,7 +3781,7 @@ func (f *Fpdf) SetJavascript(script string) {
 func (f *Fpdf) RegisterAlias(alias, replacement string) {
 	f.aliasMap[alias] = replacement
 	// Add a UTF16 mapping
-	aliasUtf16 := utf8toutf16(f.aliasNbPagesStr, false)
+	aliasUtf16 := utf8toutf16(alias, false)
 	replacementUtf16 := utf8toutf16(replacement, false)
 	f.aliasMap[aliasUtf16] = replacementUtf16
 }
