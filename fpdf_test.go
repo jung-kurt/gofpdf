@@ -2245,7 +2245,8 @@ func ExampleFpdf_AddSpotColor() {
 // contents.
 func ExampleFpdf_RegisterAlias() {
 	pdf := gofpdf.New("P", "mm", "A4", "")
-	pdf.SetFont("Arial", "", 12)
+	pdf.AddUTF8Font("dejavu", "BI", example.FontFile("DejaVuSansCondensed-BoldOblique.ttf"))
+	pdf.SetFont("dejavu", "BI", 12)
 	pdf.AddPage()
 
 	// Write the table of contents. We use aliases instead of the page number
