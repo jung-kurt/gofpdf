@@ -4033,7 +4033,7 @@ func (f *Fpdf) putfonts() {
 				fontName := "utf8" + font.Name
 				usedRunes := font.usedRunes
 				delete(usedRunes, 0)
-				utf8FontStream := font.utf8File.GenerateCutFont(usedRunes)
+				utf8FontStream := font.utf8File.GenerateСutFont(usedRunes)
 				utf8FontSize := len(utf8FontStream)
 				compressedFontStream := sliceCompress(utf8FontStream)
 				CodeSignDictionary := font.utf8File.CodeSymbolDictionary
