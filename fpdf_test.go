@@ -858,7 +858,37 @@ func ExampleFpdf_ImageOptions() {
 	// Successfully generated pdf/Fpdf_ImageOptions.pdf
 }
 
-// This examples demonstrates Landscape mode with images.
+// ExampleFpdf_RegisterImageOptionsReader demonstrates how to load an image
+// from a io.Reader (in this case, a file) and register it with options.
+func ExampleFpdf_RegisterImageOptionsReader() {
+	var (
+		opt    gofpdf.ImageOptions
+		pdfStr string
+		fl     *os.File
+		err    error
+	)
+
+	pdfStr = example.Filename("Fpdf_RegisterImageOptionsReader")
+	pdf := gofpdf.New("P", "mm", "A4", "")
+	pdf.AddPage()
+	pdf.SetFont("Arial", "", 11)
+	fl, err = os.Open(example.ImageFile("logo.png"))
+	if err == nil {
+		opt.ImageType = "png"
+		opt.AllowNegativePosition = true
+		_ = pdf.RegisterImageOptionsReader("logo", opt, fl)
+		fl.Close()
+		for x := -20.0; x <= 40.0; x += 5 {
+			pdf.ImageOptions("logo", x, x+30, 0, 0, false, opt, 0, "")
+		}
+		err = pdf.OutputFileAndClose(pdfStr)
+	}
+	example.Summary(err, pdfStr)
+	// Output:
+	// Successfully generated pdf/Fpdf_RegisterImageOptionsReader.pdf
+}
+
+// This example demonstrates Landscape mode with images.
 func ExampleFpdf_SetAcceptPageBreakFunc() {
 	var y0 float64
 	var crrntCol int
@@ -918,7 +948,7 @@ func ExampleFpdf_SetAcceptPageBreakFunc() {
 	// Successfully generated pdf/Fpdf_SetAcceptPageBreakFunc_landscape.pdf
 }
 
-// This examples tests corner cases as reported by the gocov tool.
+// This example tests corner cases as reported by the gocov tool.
 func ExampleFpdf_SetKeywords() {
 	var err error
 	fileStr := example.Filename("Fpdf_SetKeywords")
@@ -2389,7 +2419,7 @@ func ExampleFpdf_SubWrite() {
 // ExampleFpdf_SetPage demomstrates the SetPage() method, allowing content
 // generation to be deferred until all pages have been added.
 func ExampleFpdf_SetPage() {
-	rnd := rand.New(rand.NewSource(0)) // Make reproducable documents
+	rnd := rand.New(rand.NewSource(0)) // Make reproducible documents
 	pdf := gofpdf.New("L", "cm", "A4", "")
 	pdf.SetFont("Times", "", 12)
 
@@ -2523,6 +2553,10 @@ func ExampleFpdf_TransformRotate() {
 // ExampleFpdf_AddUTF8Font demonstrates how use the font
 // with utf-8 mode
 func ExampleFpdf_AddUTF8Font() {
+	var fileStr string
+	var txtStr []byte
+	var err error
+
 	pdf := gofpdf.New("P", "mm", "A4", "")
 
 	pdf.AddPage()
@@ -2532,23 +2566,167 @@ func ExampleFpdf_AddUTF8Font() {
 	pdf.AddUTF8Font("dejavu", "I", example.FontFile("DejaVuSansCondensed-Oblique.ttf"))
 	pdf.AddUTF8Font("dejavu", "BI", example.FontFile("DejaVuSansCondensed-BoldOblique.ttf"))
 
-	txtStr, _ := ioutil.ReadFile(example.TextFile("utf-8test.txt"))
+	fileStr = example.Filename("Fpdf_AddUTF8Font")
+	txtStr, err = ioutil.ReadFile(example.TextFile("utf-8test.txt"))
+	if err == nil {
 
-	pdf.SetFont("dejavu", "B", 17)
-	pdf.MultiCell(100, 8, "Text in different languages :", "", "C", false)
-	pdf.SetFont("dejavu", "", 14)
-	pdf.MultiCell(100, 5, string(txtStr), "", "C", false)
-	pdf.Ln(15)
+		pdf.SetFont("dejavu", "B", 17)
+		pdf.MultiCell(100, 8, "Text in different languages :", "", "C", false)
+		pdf.SetFont("dejavu", "", 14)
+		pdf.MultiCell(100, 5, string(txtStr), "", "C", false)
+		pdf.Ln(15)
 
-	txtStr, _ = ioutil.ReadFile(example.TextFile("utf-8test2.txt"))
-	pdf.SetFont("dejavu", "BI", 17)
-	pdf.MultiCell(100, 8, "Greek text with alignStr = \"J\":", "", "C", false)
-	pdf.SetFont("dejavu", "I", 14)
-	pdf.MultiCell(100, 5, string(txtStr), "", "J", false)
+		txtStr, err = ioutil.ReadFile(example.TextFile("utf-8test2.txt"))
+		if err == nil {
 
-	fileStr := example.Filename("Fpdf_AddUTF8Font")
-	err := pdf.OutputFileAndClose(fileStr)
+			pdf.SetFont("dejavu", "BI", 17)
+			pdf.MultiCell(100, 8, "Greek text with alignStr = \"J\":", "", "C", false)
+			pdf.SetFont("dejavu", "I", 14)
+			pdf.MultiCell(100, 5, string(txtStr), "", "J", false)
+			err = pdf.OutputFileAndClose(fileStr)
+
+		}
+	}
 	example.Summary(err, fileStr)
 	// Output:
 	// Successfully generated pdf/Fpdf_AddUTF8Font.pdf
+}
+
+// ExampleUTF8CutFont demonstrates how generate a TrueType font subset.
+func ExampleUTF8CutFont() {
+	var pdfFileStr, fullFontFileStr, subFontFileStr string
+	var subFont, fullFont []byte
+	var err error
+
+	pdfFileStr = example.Filename("Fpdf_UTF8CutFont")
+	fullFontFileStr = example.FontFile("calligra.ttf")
+	fullFont, err = ioutil.ReadFile(fullFontFileStr)
+	if err == nil {
+		subFontFileStr = "calligra_abcde.ttf"
+		subFont = gofpdf.UTF8CutFont(fullFont, "abcde")
+		err = ioutil.WriteFile(subFontFileStr, subFont, 0600)
+		if err == nil {
+			y := 24.0
+			pdf := gofpdf.New("P", "mm", "A4", "")
+			fontHt := 17.0
+			lineHt := pdf.PointConvert(fontHt)
+			write := func(format string, args ...interface{}) {
+				pdf.SetXY(24.0, y)
+				pdf.Cell(200.0, lineHt, fmt.Sprintf(format, args...))
+				y += lineHt
+			}
+			writeSize := func(fileStr string) {
+				var info os.FileInfo
+				var err error
+				info, err = os.Stat(fileStr)
+				if err == nil {
+					write("%6d: size of %s", info.Size(), fileStr)
+				}
+			}
+			pdf.AddPage()
+			pdf.AddUTF8Font("calligra", "", subFontFileStr)
+			pdf.SetFont("calligra", "", fontHt)
+			write("cabbed")
+			write("vwxyz")
+			pdf.SetFont("courier", "", fontHt)
+			writeSize(fullFontFileStr)
+			writeSize(subFontFileStr)
+			err = pdf.OutputFileAndClose(pdfFileStr)
+			os.Remove(subFontFileStr)
+		}
+	}
+	example.Summary(err, pdfFileStr)
+	// Output:
+	// Successfully generated pdf/Fpdf_UTF8CutFont.pdf
+}
+
+func ExampleFpdf_RoundedRect() {
+	const (
+		wd     = 40.0
+		hgap   = 10.0
+		radius = 10.0
+		ht     = 60.0
+		vgap   = 10.0
+	)
+	corner := func(b1, b2, b3, b4 bool) (cstr string) {
+		if b1 {
+			cstr = "1"
+		}
+		if b2 {
+			cstr += "2"
+		}
+		if b3 {
+			cstr += "3"
+		}
+		if b4 {
+			cstr += "4"
+		}
+		return
+	}
+	pdf := gofpdf.New("P", "mm", "A4", "") // 210 x 297
+	pdf.AddPage()
+	pdf.SetLineWidth(0.5)
+	y := vgap
+	r := 40
+	g := 30
+	b := 20
+	for row := 0; row < 4; row++ {
+		x := hgap
+		for col := 0; col < 4; col++ {
+			pdf.SetFillColor(r, g, b)
+			pdf.RoundedRect(x, y, wd, ht, radius, corner(row&1 == 1, row&2 == 2, col&1 == 1, col&2 == 2), "FD")
+			r += 8
+			g += 10
+			b += 12
+			x += wd + hgap
+		}
+		y += ht + vgap
+	}
+	fileStr := example.Filename("Fpdf_RoundedRect")
+	err := pdf.OutputFileAndClose(fileStr)
+	example.Summary(err, fileStr)
+	// Output:
+	// Successfully generated pdf/Fpdf_RoundedRect.pdf
+}
+
+// ExampleFpdf_SetUnderlineThickness demonstrates how to adjust the text
+// underline thickness.
+func ExampleFpdf_SetUnderlineThickness() {
+	pdf := gofpdf.New("P", "mm", "A4", "") // 210mm x 297mm
+	pdf.AddPage()
+	pdf.SetFont("Arial", "U", 12)
+
+	pdf.SetUnderlineThickness(0.5)
+	pdf.CellFormat(0, 10, "Thin underline", "", 1, "", false, 0, "")
+
+	pdf.SetUnderlineThickness(1)
+	pdf.CellFormat(0, 10, "Normal underline", "", 1, "", false, 0, "")
+
+	pdf.SetUnderlineThickness(2)
+	pdf.CellFormat(0, 10, "Thicker underline", "", 1, "", false, 0, "")
+
+	fileStr := example.Filename("Fpdf_UnderlineThickness")
+	err := pdf.OutputFileAndClose(fileStr)
+	example.Summary(err, fileStr)
+	// Output:
+	// Successfully generated pdf/Fpdf_UnderlineThickness.pdf
+}
+
+// ExampleFpdf_Cell_strikeout demonstrates striked-out text
+func ExampleFpdf_Cell_strikeout() {
+
+	pdf := gofpdf.New("P", "mm", "A4", "") // 210mm x 297mm
+	pdf.AddPage()
+
+	for fontSize := 4; fontSize < 40; fontSize += 10 {
+		pdf.SetFont("Arial", "S", float64(fontSize))
+		pdf.SetXY(0, float64(fontSize))
+		pdf.Cell(40, 10, "Hello World")
+	}
+
+	fileStr := example.Filename("Fpdf_Cell_strikeout")
+	err := pdf.OutputFileAndClose(fileStr)
+	example.Summary(err, fileStr)
+	// Output:
+	// Successfully generated pdf/Fpdf_Cell_strikeout.pdf
 }

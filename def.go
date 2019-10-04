@@ -165,20 +165,20 @@ func (p PointType) XY() (float64, float64) {
 // Changes to this structure should be reflected in its GobEncode and GobDecode
 // methods.
 type ImageInfoType struct {
-	data  []byte
-	smask []byte
-	n     int
-	w     float64
-	h     float64
-	cs    string
-	pal   []byte
-	bpc   int
-	f     string
-	dp    string
-	trns  []int
-	scale float64 // document scaling factor
-	dpi   float64
-	i     string
+	data  []byte  // Raw image data
+	smask []byte  // Soft Mask, an 8bit per-pixel transparency mask
+	n     int     // Image object number
+	w     float64 // Width
+	h     float64 // Height
+	cs    string  // Color space
+	pal   []byte  // Image color palette
+	bpc   int     // Bits Per Component
+	f     string  // Image filter
+	dp    string  // DecodeParms
+	trns  []int   // Transparency mask
+	scale float64 // Document scale factor
+	dpi   float64 // Dots-per-inch found from image file (png only)
+	i     string  // SHA-1 checksum of the above values.
 }
 
 func generateImageID(info *ImageInfoType) (string, error) {
@@ -427,6 +427,7 @@ type Pdf interface {
 	SetFontLoader(loader FontLoader)
 	SetFontLocation(fontDirStr string)
 	SetFontSize(size float64)
+	SetFontStyle(styleStr string)
 	SetFontUnitSize(size float64)
 	SetFooterFunc(fnc func())
 	SetFooterFuncLpi(fnc func(lastPage bool))
@@ -451,6 +452,7 @@ type Pdf interface {
 	SetTextSpotColor(nameStr string, tint byte)
 	SetTitle(titleStr string, isUTF8 bool)
 	SetTopMargin(margin float64)
+	SetUnderlineThickness(thickness float64)
 	SetXmpMetadata(xmpStream []byte)
 	SetX(x float64)
 	SetXY(x, y float64)
@@ -503,6 +505,10 @@ type Fpdf struct {
 	offsets          []int                      // array of object offsets
 	templates        map[string]Template        // templates used in this document
 	templateObjects  map[string]int             // template object IDs within this document
+	importedObjs     map[string][]byte          // imported template objects (gofpdi)
+	importedObjPos   map[string]map[int]string  // imported template objects hashes and their positions (gofpdi)
+	importedTplObjs  map[string]string          // imported template names and IDs (hashed) (gofpdi)
+	importedTplIDs   map[string]int             // imported template ids hash to object id int (gofpdi)
 	buffer           fmtBuffer                  // buffer holding in-memory PDF
 	pages            []*bytes.Buffer            // slice[page] of page content; 1-based
 	state            int                        // current document state
@@ -536,6 +542,7 @@ type Fpdf struct {
 	fontFamily       string                     // current font family
 	fontStyle        string                     // current font style
 	underline        bool                       // underlining flag
+	strikeout        bool                       // strike out flag
 	currentFont      fontDefType                // current font info
 	fontSizePt       float64                    // current font size in points
 	fontSize         float64                    // current font size in user unit
@@ -558,6 +565,7 @@ type Fpdf struct {
 	zoomMode         string                     // zoom display mode
 	layoutMode       string                     // layout display mode
 	xmp              []byte                     // XMP metadata
+	producer         string                     // producer
 	title            string                     // title
 	subject          string                     // subject
 	author           string                     // author
@@ -589,7 +597,8 @@ type Fpdf struct {
 		// Composite values of colors
 		draw, fill, text colorType
 	}
-	spotColorMap map[string]spotColorType // Map of named ink-based colors
+	spotColorMap           map[string]spotColorType // Map of named ink-based colors
+	userUnderlineThickness float64                  // A custom user underline thickness multiplier.
 }
 
 type encType struct {

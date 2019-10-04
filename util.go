@@ -344,7 +344,7 @@ func (pa *untypedKeyMap) getIndex(key interface{}) int {
 //Put key=>value in PHP Array
 func (pa *untypedKeyMap) put(key interface{}, value int) {
 	if key == nil {
-		i := 0
+		var i int
 		for n := 0; ; n++ {
 			i = pa.getIndex(n)
 			if i < 0 {
@@ -419,14 +419,8 @@ func arrayMerge(arr1, arr2 *untypedKeyMap) *untypedKeyMap {
 		answer.valueSet = arr1.valueSet[:]
 		for i := 0; i < len(arr2.keySet); i++ {
 			if arr2.keySet[i] == "interval" {
-				u := 0
-				u = u + 1
 				if arr1.getIndex("interval") < 0 {
 					answer.put("interval", arr2.valueSet[i])
-				} else {
-
-					u := 0
-					u = u + 1
 				}
 			} else {
 				answer.put(nil, arr2.valueSet[i])
@@ -449,4 +443,20 @@ func remove(arr []int, key int) []int {
 		return arr[:len(arr)-1]
 	}
 	return append(arr[:n], arr[n+1:]...)
+}
+
+func isChinese(rune2 rune) bool {
+	// chinese unicode: 4e00-9fa5
+	if rune2 >= rune(0x4e00) && rune2 <= rune(0x9fa5) {
+		return true
+	}
+	return false
+}
+
+// Condition font family string to PDF name compliance. See section 5.3 (Names)
+// in https://resources.infosecinstitute.com/pdf-file-format-basic-structure/
+func fontFamilyEscape(familyStr string) (escStr string) {
+	escStr = strings.Replace(familyStr, " ", "#20", -1)
+	// Additional replacements can take place here
+	return
 }
