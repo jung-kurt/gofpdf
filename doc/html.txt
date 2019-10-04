@@ -1,0 +1,68 @@
+<!doctype html>
+
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width initial-scale=1 maximum-scale=1 minimum-scale=1 user-scalable=0" />
+  <title>GoFPDF Document Generator</title>
+  <style>
+    body {
+      max-width: 800px;
+      font-family: sans-serif;
+      padding: 1em;
+    }
+
+    img {
+      max-width: 800px;
+    }
+
+    h1,
+    h2,
+    h3 {
+      color: #345;
+    }
+
+    .syntax {
+      display: block;
+      white-space: pre;
+      font-family: monospace;
+      background-color: #efe;
+      border: 1px solid #474;
+      margin: 1em 0;
+      padding: 0.25em 1.5em;
+    }
+
+    .warning {
+      background-color: #ffd;
+      border: 1px solid #665;
+      margin: 1em 0;
+      padding: 0 1em;
+    }
+
+    .key {
+      color: #131;
+      font-weight: bold;
+    }
+
+    .subkey {
+      font-style: italic;
+    }
+
+    pre {
+      margin: 1.5em 0;
+      background-color: #eee;
+      padding: 1em;
+      overflow-x: scroll;
+    }
+$if(highlighting-css)$
+$highlighting-css$
+$endif$
+  </style>
+</head>
+
+<body>
+$body$
+</body>
+
+</html>
