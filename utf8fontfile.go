@@ -75,6 +75,13 @@ func (fr *fileReader) Read(s int) []byte {
 	return b
 }
 
+func (fr *fileReader) ReadLikeCopy(s int) []byte {
+	b := make([]byte, 0, s)
+	b = append(b, fr.array[fr.readerPosition:fr.readerPosition+int64(s)]...)
+	fr.readerPosition += int64(s)
+	return b
+}
+
 func (fr *fileReader) seek(shift int64, flag int) (int64, error) {
 	if flag == 0 {
 		fr.readerPosition = shift
@@ -225,7 +232,7 @@ func (utf *utf8FontFile) insertUint16(stream []byte, offset int, value int) []by
 }
 
 func (utf *utf8FontFile) getRange(pos, length int) []byte {
-	utf.fileReader.seek(int64(pos), 0)
+	_, _ = utf.fileReader.seek(int64(pos), 0)
 	if length < 1 {
 		return make([]byte, 0)
 	}
@@ -241,8 +248,8 @@ func (utf *utf8FontFile) getTableData(name string) []byte {
 	if desckrip.size == 0 {
 		return nil
 	}
-	utf.fileReader.seek(int64(desckrip.position), 0)
-	s := utf.fileReader.Read(desckrip.size)
+	_, _ = utf.fileReader.seek(int64(desckrip.position), 0)
+	s := utf.fileReader.ReadLikeCopy(desckrip.size)
 	return s
 }
 
@@ -634,8 +641,8 @@ func (utf *utf8FontFile) generateCMAPTable(cidSymbolPairCollection map[int]int, 
 	return cmapstr
 }
 
-//GenerateСutFont fill utf8FontFile from .utf file, only with runes from usedRunes
-func (utf *utf8FontFile) GenerateСutFont(usedRunes map[int]int) []byte {
+//GenerateCutFont fill utf8FontFile from .utf file, only with runes from usedRunes
+func (utf *utf8FontFile) GenerateCutFont(usedRunes map[int]int) []byte {
 	utf.fileReader.readerPosition = 0
 	utf.symbolPosition = make([]int, 0)
 	utf.charSymbolDictionary = make(map[int]int)
@@ -889,10 +896,10 @@ func (utf *utf8FontFile) getMetrics(metricCount, gid int) []byte {
 	var metrics []byte
 	if gid < metricCount {
 		utf.seek(start + (gid * 4))
-		metrics = utf.fileReader.Read(4)
+		metrics = utf.fileReader.ReadLikeCopy(4)
 	} else {
 		utf.seek(start + ((metricCount - 1) * 4))
-		metrics = utf.fileReader.Read(2)
+		metrics = utf.fileReader.ReadLikeCopy(2)
 		utf.seek(start + (metricCount * 2) + (gid * 2))
 		metrics = append(metrics, utf.fileReader.Read(2)...)
 	}
@@ -1148,6 +1155,6 @@ func UTF8CutFont(inBuf []byte, cutset string) (outBuf []byte) {
 	for i, r := range cutset {
 		runes[i] = int(r)
 	}
-	outBuf = f.GenerateСutFont(runes)
+	outBuf = f.GenerateCutFont(runes)
 	return
 }
