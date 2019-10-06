@@ -2273,10 +2273,10 @@ func ExampleFpdf_RegisterAlias() {
 	// Successfully generated pdf/Fpdf_RegisterAlias.pdf
 }
 
-// ExampleFpdf_RegisterAliasUTF8 demonstrates how to use `RegisterAlias` to
+// ExampleFpdf_RegisterAlias_utf8 demonstrates how to use `RegisterAlias` to
 // create a table of contents. This particular example demonstrates the use of
 // UTF-8 aliases.
-func ExampleFpdf_RegisterAliasUTF8() {
+func ExampleFpdf_RegisterAlias_utf8() {
 	pdf := gofpdf.New("P", "mm", "A4", "")
 	pdf.AddUTF8Font("dejavu", "", example.FontFile("DejaVuSansCondensed.ttf"))
 	pdf.SetFont("dejavu", "", 12)

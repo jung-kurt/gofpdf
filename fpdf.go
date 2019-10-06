@@ -3779,8 +3779,9 @@ func (f *Fpdf) SetJavascript(script string) {
 }
 
 // RegisterAlias adds an (alias, replacement) pair to the document so we can
-// replace all occurrences of that alias after writing but before the
-// document is closed.
+// replace all occurrences of that alias after writing but before the document
+// is closed. Functions ExampleFpdf_RegisterAlias() and
+// ExampleFpdf_RegisterAlias_utf8() in fpdf_test.go demonstrate this method.
 func (f *Fpdf) RegisterAlias(alias, replacement string) {
 	// Note: map[string]string assignments embed literal escape ("\00") sequences
 	// into utf16 key and value strings. Consequently, subsequent search/replace
