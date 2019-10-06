@@ -2246,13 +2246,14 @@ func ExampleFpdf_AddSpotColor() {
 func ExampleFpdf_RegisterAlias() {
 	pdf := gofpdf.New("P", "mm", "A4", "")
 	pdf.SetFont("Arial", "", 12)
+	pdf.AliasNbPages("")
 	pdf.AddPage()
 
 	// Write the table of contents. We use aliases instead of the page number
 	// because we don't know which page the section will begin on.
 	numSections := 3
 	for i := 1; i <= numSections; i++ {
-		pdf.Cell(0, 10, fmt.Sprintf("Section %d begins on page {%d}", i, i))
+		pdf.Cell(0, 10, fmt.Sprintf("Section %d begins on page {mark %d}", i, i))
 		pdf.Ln(10)
 	}
 
@@ -2261,8 +2262,8 @@ func ExampleFpdf_RegisterAlias() {
 	// by the current page number.
 	for i := 1; i <= numSections; i++ {
 		pdf.AddPage()
-		pdf.RegisterAlias(fmt.Sprintf("{%d}", i), fmt.Sprintf("%d", pdf.PageNo()))
-		pdf.Write(10, fmt.Sprintf("Section %d", i))
+		pdf.RegisterAlias(fmt.Sprintf("{mark %d}", i), fmt.Sprintf("%d", pdf.PageNo()))
+		pdf.Write(10, fmt.Sprintf("Section %d, page %d of {nb}", i, pdf.PageNo()))
 	}
 
 	fileStr := example.Filename("Fpdf_RegisterAlias")
@@ -2270,6 +2271,40 @@ func ExampleFpdf_RegisterAlias() {
 	example.Summary(err, fileStr)
 	// Output:
 	// Successfully generated pdf/Fpdf_RegisterAlias.pdf
+}
+
+// ExampleFpdf_RegisterAliasUTF8 demonstrates how to use `RegisterAlias` to
+// create a table of contents. This particular example demonstrates the use of
+// UTF-8 aliases.
+func ExampleFpdf_RegisterAliasUTF8() {
+	pdf := gofpdf.New("P", "mm", "A4", "")
+	pdf.AddUTF8Font("dejavu", "", example.FontFile("DejaVuSansCondensed.ttf"))
+	pdf.SetFont("dejavu", "", 12)
+	pdf.AliasNbPages("{entute}")
+	pdf.AddPage()
+
+	// Write the table of contents. We use aliases instead of the page number
+	// because we don't know which page the section will begin on.
+	numSections := 3
+	for i := 1; i <= numSections; i++ {
+		pdf.Cell(0, 10, fmt.Sprintf("Sekcio %d komenciĝas ĉe paĝo {ĉi tiu marko %d}", i, i))
+		pdf.Ln(10)
+	}
+
+	// Write the sections. Before we start writing, we use `RegisterAlias` to
+	// ensure that the alias written in the table of contents will be replaced
+	// by the current page number.
+	for i := 1; i <= numSections; i++ {
+		pdf.AddPage()
+		pdf.RegisterAlias(fmt.Sprintf("{ĉi tiu marko %d}", i), fmt.Sprintf("%d", pdf.PageNo()))
+		pdf.Write(10, fmt.Sprintf("Sekcio %d, paĝo %d de {entute}", i, pdf.PageNo()))
+	}
+
+	fileStr := example.Filename("Fpdf_RegisterAliasUTF8")
+	err := pdf.OutputFileAndClose(fileStr)
+	example.Summary(err, fileStr)
+	// Output:
+	// Successfully generated pdf/Fpdf_RegisterAliasUTF8.pdf
 }
 
 // ExampleNewGrid demonstrates the generation of graph grids.

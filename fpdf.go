@@ -3782,17 +3782,28 @@ func (f *Fpdf) SetJavascript(script string) {
 // replace all occurrences of that alias after writing but before the
 // document is closed.
 func (f *Fpdf) RegisterAlias(alias, replacement string) {
+	// Note: map[string]string assignments embed literal escape ("\00") sequences
+	// into utf16 key and value strings. Consequently, subsequent search/replace
+	// operations will fail unexpectedly if utf8toutf16() conversions take place
+	// here. Instead, conversions are deferred until the actual search/replace
+	// operation takes place when the PDF output is generated.
 	f.aliasMap[alias] = replacement
 }
 
 func (f *Fpdf) replaceAliases() {
-	for alias, replacement := range f.aliasMap {
-		for n := 1; n <= f.page; n++ {
-			s := f.pages[n].String()
-			if strings.Contains(s, alias) {
-				s = strings.Replace(s, alias, replacement, -1)
-				f.pages[n].Truncate(0)
-				f.pages[n].WriteString(s)
+	for mode := 0; mode < 2; mode++ {
+		for alias, replacement := range f.aliasMap {
+			if mode == 1 {
+				alias = utf8toutf16(alias, false)
+				replacement = utf8toutf16(replacement, false)
+			}
+			for n := 1; n <= f.page; n++ {
+				s := f.pages[n].String()
+				if strings.Contains(s, alias) {
+					s = strings.Replace(s, alias, replacement, -1)
+					f.pages[n].Truncate(0)
+					f.pages[n].WriteString(s)
+				}
 			}
 		}
 	}
@@ -3801,14 +3812,10 @@ func (f *Fpdf) replaceAliases() {
 func (f *Fpdf) putpages() {
 	var wPt, hPt float64
 	var pageSize SizeType
-	// var linkList []linkType
 	var ok bool
 	nb := f.page
 	if len(f.aliasNbPagesStr) > 0 {
 		// Replace number of pages
-		alias := utf8toutf16(f.aliasNbPagesStr, false)
-		r := utf8toutf16(sprintf("%d", nb), false)
-		f.RegisterAlias(alias, r)
 		f.RegisterAlias(f.aliasNbPagesStr, sprintf("%d", nb))
 	}
 	f.replaceAliases()
