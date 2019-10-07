@@ -686,7 +686,39 @@ func (f *Fpdf) Close() {
 	f.endpage()
 	// Close document
 	f.enddoc()
+
+	// Clear memory sources
+	f.clean()
+
 	return
+}
+
+func (f *Fpdf) clean() {
+	f.templates = nil
+	f.templateObjects = nil
+	f.importedObjs = nil
+	f.importedObjPos = nil
+	f.importedTplObjs = nil
+	f.importedTplIDs = nil
+	f.pages = nil
+	f.stdPageSizes = nil
+	f.defPageBoxes = nil
+	f.pageSizes = nil
+	f.pageBoxes = nil
+	f.coreFonts = nil
+	f.fonts = nil
+	f.fontFiles = nil
+	f.diffs = nil
+	f.images = nil
+	f.aliasMap = nil
+	f.pageLinks = nil
+	f.links = nil
+	f.outlines = nil
+	f.xmp = nil
+	f.dashArray = nil
+	f.blendList = nil
+	f.blendMap = nil
+	f.javascript = nil
 }
 
 // PageSize returns the width and height of the specified page in the units
