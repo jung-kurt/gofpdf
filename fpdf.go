@@ -2236,8 +2236,11 @@ func (f *Fpdf) SetWordSpacing(space float64) {
 // 5: Stroke text and add to path for clipping
 // 6: Fills then stroke text and add to path for clipping
 // 7: Add text to path for clipping
+// This method is demonstrated in the SetTextRenderingMode example.
 func (f *Fpdf) SetTextRenderingMode(mode int) {
-	f.out(sprintf("%d Tr", mode))
+	if mode >= 0 && mode <= 7 {
+		f.out(sprintf("%d Tr", mode))
+	}
 }
 
 // SetAcceptPageBreakFunc allows the application to control where page breaks

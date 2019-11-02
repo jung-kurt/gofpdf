@@ -2765,3 +2765,38 @@ func ExampleFpdf_Cell_strikeout() {
 	// Output:
 	// Successfully generated pdf/Fpdf_Cell_strikeout.pdf
 }
+
+// ExampleFpdf_SetTextRenderingMode demonstrates rendering modes in PDFs.
+func ExampleFpdf_SetTextRenderingMode() {
+
+	pdf := gofpdf.New("P", "mm", "A4", "") // 210mm x 297mm
+	pdf.AddPage()
+	fontSz := float64(16)
+	lineSz := pdf.PointToUnitConvert(fontSz)
+	pdf.SetFont("Times", "", fontSz)
+	pdf.Write(lineSz, "This document demonstrates various modes of text rendering. Search for \"Mode 3\" "+
+		"to locate text that has been rendered invisibly. This selection can be copied "+
+		"into the clipboard as usual and is useful for overlaying onto non-textual elements such "+
+		"as images to make them searchable.\n\n")
+	fontSz = float64(125)
+	lineSz = pdf.PointToUnitConvert(fontSz)
+	pdf.SetFontSize(fontSz)
+	pdf.SetTextColor(170, 170, 190)
+	pdf.SetDrawColor(50, 60, 90)
+
+	write := func(mode int) {
+		pdf.SetTextRenderingMode(mode)
+		pdf.CellFormat(210, lineSz, fmt.Sprintf("Mode %d", mode), "", 1, "", false, 0, "")
+	}
+
+	for mode := 0; mode < 4; mode++ {
+		write(mode)
+	}
+	write(0)
+
+	fileStr := example.Filename("Fpdf_TextRenderingMode")
+	err := pdf.OutputFileAndClose(fileStr)
+	example.Summary(err, fileStr)
+	// Output:
+	// Successfully generated pdf/Fpdf_TextRenderingMode.pdf
+}
