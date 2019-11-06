@@ -75,13 +75,6 @@ func (fr *fileReader) Read(s int) []byte {
 	return b
 }
 
-func (fr *fileReader) ReadLikeCopy(s int) []byte {
-	b := make([]byte, 0, s)
-	b = append(b, fr.array[fr.readerPosition:fr.readerPosition+int64(s)]...)
-	fr.readerPosition += int64(s)
-	return b
-}
-
 func (fr *fileReader) seek(shift int64, flag int) (int64, error) {
 	if flag == 0 {
 		fr.readerPosition = shift
@@ -222,6 +215,7 @@ func (utf *utf8FontFile) getUint16(pos int) int {
 }
 
 func (utf *utf8FontFile) splice(stream []byte, offset int, value []byte) []byte {
+	stream = append([]byte{}, stream...)
 	return append(append(stream[:offset], value...), stream[offset+len(value):]...)
 }
 
@@ -249,7 +243,7 @@ func (utf *utf8FontFile) getTableData(name string) []byte {
 		return nil
 	}
 	_, _ = utf.fileReader.seek(int64(desckrip.position), 0)
-	s := utf.fileReader.ReadLikeCopy(desckrip.size)
+	s := utf.fileReader.Read(desckrip.size)
 	return s
 }
 
@@ -896,10 +890,10 @@ func (utf *utf8FontFile) getMetrics(metricCount, gid int) []byte {
 	var metrics []byte
 	if gid < metricCount {
 		utf.seek(start + (gid * 4))
-		metrics = utf.fileReader.ReadLikeCopy(4)
+		metrics = utf.fileReader.Read(4)
 	} else {
 		utf.seek(start + ((metricCount - 1) * 4))
-		metrics = utf.fileReader.ReadLikeCopy(2)
+		metrics = utf.fileReader.Read(2)
 		utf.seek(start + (metricCount * 2) + (gid * 2))
 		metrics = append(metrics, utf.fileReader.Read(2)...)
 	}
@@ -1021,7 +1015,7 @@ func (utf *utf8FontFile) assembleTables() []byte {
 	}
 
 	for _, key := range tablesNames {
-		data := tables[key]
+		data := append([]byte{}, tables[key]...)
 		data = append(data, []byte{0, 0, 0}...)
 		answer = append(answer, data[:(len(data)&^3)]...)
 	}
