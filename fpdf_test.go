@@ -1194,6 +1194,16 @@ func ExampleFpdf_ClipText() {
 	pdf.MultiCell(130, 5, lorem(), "", "", false)
 	pdf.ClipEnd()
 
+	y += 30
+	pdf.SetDrawColor(180, 100, 180)
+	pdf.ClipRoundedRectExt(10, y, 120, 20, 5, 10, 5, 10, true)
+	pdf.RadialGradient(10, y, 120, 20, 255, 255, 255, 240, 240, 220,
+		0.25, 0.75, 0.25, 0.75, 0.5)
+	pdf.SetXY(5, y-5)
+	pdf.SetFont("Times", "", 12)
+	pdf.MultiCell(130, 5, lorem(), "", "", false)
+	pdf.ClipEnd()
+
 	fileStr := example.Filename("Fpdf_ClipText")
 	err := pdf.OutputFileAndClose(fileStr)
 	example.Summary(err, fileStr)
@@ -2717,6 +2727,9 @@ func ExampleFpdf_RoundedRect() {
 		}
 		y += ht + vgap
 	}
+	pdf.AddPage()
+	pdf.RoundedRectExt(10, 20, 40, 80, 4., 0., 20, 0., "FD")
+
 	fileStr := example.Filename("Fpdf_RoundedRect")
 	err := pdf.OutputFileAndClose(fileStr)
 	example.Summary(err, fileStr)

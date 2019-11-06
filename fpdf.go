@@ -1130,43 +1130,28 @@ func (f *Fpdf) Rect(x, y, w, h float64, styleStr string) {
 // the lower left corner. The RoundedRect example demonstrates this method.
 func (f *Fpdf) RoundedRect(x, y, w, h, r float64, corners string, stylestr string) {
 	// This routine was adapted by Brigham Thompson from a script by Christophe Prugnaud
-	k := f.k
-	hp := f.h
-	myArc := r * (4.0 / 3.0) * (math.Sqrt2 - 1.0)
-	f.outf("q %.5f %.5f m", (x+r)*k, (hp-y)*k)
-	xc := x + w - r
-	yc := y + r
-	f.outf("%.5f %.5f l", xc*k, (hp-y)*k)
-	if strings.Contains(corners, "2") == false {
-		f.outf("%.5f %.5f l", (x+w)*k, (hp-y)*k)
-	} else {
-		f.clipArc(xc+myArc, yc-r, xc+r, yc-myArc, xc+r, yc)
+	var rTL, rTR, rBR, rBL float64 // zero means no rounded corner
+	if strings.Contains(corners, "1") {
+		rTL = r
 	}
-	xc = x + w - r
-	yc = y + h - r
-	f.outf("%.5f %.5f l", (x+w)*k, (hp-yc)*k)
-	if strings.Contains(corners, "3") == false {
-		f.outf("%.5f %.5f l", (x+w)*k, (hp-(y+h))*k)
-	} else {
-		f.clipArc(xc+r, yc+myArc, xc+myArc, yc+r, xc, yc+r)
+	if strings.Contains(corners, "2") {
+		rTR = r
 	}
-	xc = x + r
-	yc = y + h - r
-	f.outf("%.5f %.5f l", xc*k, (hp-(y+h))*k)
-	if strings.Contains(corners, "4") == false {
-		f.outf("%.5f %.5f l", x*k, (hp-(y+h))*k)
-	} else {
-		f.clipArc(xc-myArc, yc+r, xc-r, yc+myArc, xc-r, yc)
+	if strings.Contains(corners, "3") {
+		rBR = r
 	}
-	xc = x + r
-	yc = y + r
-	f.outf("%.5f %.5f l", x*k, (hp-yc)*k)
-	if strings.Contains(corners, "1") == false {
-		f.outf("%.5f %.5f l", x*k, (hp-y)*k)
-		f.outf("%.5f %.5f l", (x+r)*k, (hp-y)*k)
-	} else {
-		f.clipArc(xc-r, yc-myArc, xc-myArc, yc-r, xc, yc-r)
+	if strings.Contains(corners, "4") {
+		rBL = r
 	}
+	f.RoundedRectExt(x, y, w, h, rTL, rTR, rBR, rBL, stylestr)
+}
+
+// RoundedRectExt behaves the same as RoundedRect() but supports a different
+// radius for each corner. A zero radius means squared corner. See
+// RoundedRect() for more details. This method is demonstrated in the
+// RoundedRect() example.
+func (f *Fpdf) RoundedRectExt(x, y, w, h, rTL, rTR, rBR, rBL float64, stylestr string) {
+	f.roundedRectPath(x, y, w, h, rTL, rTR, rBR, rBL)
 	f.out(fillDrawOp(stylestr))
 }
 
@@ -1496,28 +1481,51 @@ func (f *Fpdf) clipArc(x1, y1, x2, y2, x3, y3 float64) {
 //
 // This ClipText() example demonstrates this method.
 func (f *Fpdf) ClipRoundedRect(x, y, w, h, r float64, outline bool) {
+	f.ClipRoundedRectExt(x, y, w, h, r, r, r, r, outline)
+}
+
+// ClipRoundedRectExt behaves the same as ClipRoundedRect() but supports a
+// different radius for each corner, given by rTL (top-left), rTR (top-right)
+// rBR (bottom-right), rBL (bottom-left). See ClipRoundedRect() for more
+// details. This method is demonstrated in the ClipText() example.
+func (f *Fpdf) ClipRoundedRectExt(x, y, w, h, rTL, rTR, rBR, rBL float64, outline bool) {
 	f.clipNest++
+	f.roundedRectPath(x, y, w, h, rTL, rTR, rBR, rBL)
+	f.outf(" W %s", strIf(outline, "S", "n"))
+}
+
+// add a rectangle path with rounded corners.
+// routine shared by RoundedRect() and ClipRoundedRect(), which add the
+// drawing operation
+func (f *Fpdf) roundedRectPath(x, y, w, h, rTL, rTR, rBR, rBL float64) {
 	k := f.k
 	hp := f.h
 	myArc := (4.0 / 3.0) * (math.Sqrt2 - 1.0)
-	f.outf("q %.5f %.5f m", (x+r)*k, (hp-y)*k)
-	xc := x + w - r
-	yc := y + r
+	f.outf("q %.5f %.5f m", (x+rTL)*k, (hp-y)*k)
+	xc := x + w - rTR
+	yc := y + rTR
 	f.outf("%.5f %.5f l", xc*k, (hp-y)*k)
-	f.clipArc(xc+r*myArc, yc-r, xc+r, yc-r*myArc, xc+r, yc)
-	xc = x + w - r
-	yc = y + h - r
+	if rTR != 0 {
+		f.clipArc(xc+rTR*myArc, yc-rTR, xc+rTR, yc-rTR*myArc, xc+rTR, yc)
+	}
+	xc = x + w - rBR
+	yc = y + h - rBR
 	f.outf("%.5f %.5f l", (x+w)*k, (hp-yc)*k)
-	f.clipArc(xc+r, yc+r*myArc, xc+r*myArc, yc+r, xc, yc+r)
-	xc = x + r
-	yc = y + h - r
+	if rBR != 0 {
+		f.clipArc(xc+rBR, yc+rBR*myArc, xc+rBR*myArc, yc+rBR, xc, yc+rBR)
+	}
+	xc = x + rBL
+	yc = y + h - rBL
 	f.outf("%.5f %.5f l", xc*k, (hp-(y+h))*k)
-	f.clipArc(xc-r*myArc, yc+r, xc-r, yc+r*myArc, xc-r, yc)
-	xc = x + r
-	yc = y + r
+	if rBL != 0 {
+		f.clipArc(xc-rBL*myArc, yc+rBL, xc-rBL, yc+rBL*myArc, xc-rBL, yc)
+	}
+	xc = x + rTL
+	yc = y + rTL
 	f.outf("%.5f %.5f l", x*k, (hp-yc)*k)
-	f.clipArc(xc-r, yc-r*myArc, xc-r*myArc, yc-r, xc, yc-r)
-	f.outf(" W %s", strIf(outline, "S", "n"))
+	if rTL != 0 {
+		f.clipArc(xc-rTL, yc-rTL*myArc, xc-rTL*myArc, yc-rTL, xc, yc-rTL)
+	}
 }
 
 // ClipEllipse begins an elliptical clipping operation. The ellipse is centered
