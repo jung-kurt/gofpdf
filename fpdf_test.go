@@ -1196,7 +1196,7 @@ func ExampleFpdf_ClipText() {
 
 	y += 30
 	pdf.SetDrawColor(180, 100, 180)
-	pdf.ClipRoundedRect2(10, y, 120, 20, 5, 10, 5, 10, true)
+	pdf.ClipRoundedRectExt(10, y, 120, 20, 5, 10, 5, 10, true)
 	pdf.RadialGradient(10, y, 120, 20, 255, 255, 255, 240, 240, 220,
 		0.25, 0.75, 0.25, 0.75, 0.5)
 	pdf.SetXY(5, y-5)
@@ -2728,7 +2728,7 @@ func ExampleFpdf_RoundedRect() {
 		y += ht + vgap
 	}
 	pdf.AddPage()
-	pdf.RoundedRect2(10, 20, 40, 80, 4., 0., 20, 0., "FD")
+	pdf.RoundedRectExt(10, 20, 40, 80, 4., 0., 20, 0., "FD")
 
 	fileStr := example.Filename("Fpdf_RoundedRect")
 	err := pdf.OutputFileAndClose(fileStr)
