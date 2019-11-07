@@ -2813,3 +2813,22 @@ func ExampleFpdf_SetTextRenderingMode() {
 	// Output:
 	// Successfully generated pdf/Fpdf_TextRenderingMode.pdf
 }
+
+// TestIssue0316 addresses issue 316 in which AddUTF8FromBytes modifies its argument
+// utf8bytes resulting in a panic if you generate two PDFs with the "same" font bytes.
+func TestIssue0316(t *testing.T) {
+	pdf := gofpdf.New(gofpdf.OrientationPortrait, "mm", "A4", "")
+	pdf.AddPage()
+	fontBytes, _ := ioutil.ReadFile(example.FontFile("DejaVuSansCondensed.ttf"))
+	ofontBytes := append([]byte{}, fontBytes...)
+	pdf.AddUTF8FontFromBytes("dejavu", "", fontBytes)
+	pdf.SetFont("dejavu", "", 16)
+	pdf.Cell(40, 10, "Hello World!")
+	fileStr := example.Filename("TestIssue0316")
+	err := pdf.OutputFileAndClose(fileStr)
+	example.Summary(err, fileStr)
+	pdf.AddPage()
+	if !bytes.Equal(fontBytes, ofontBytes) {
+		t.Fatal("Font data changed during pdf generation")
+	}
+}
