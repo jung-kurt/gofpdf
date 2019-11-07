@@ -3920,7 +3920,7 @@ func (f *Fpdf) putpages() {
 	f.out("<</Type /Pages")
 	var kids fmtBuffer
 	kids.printf("/Kids [")
-	for i := 0; i < nb; i++ {
+	for i := 1; i <= nb; i++ {
 		kids.printf("%d 0 R ", pagesObjectNumbers[i])
 	}
 	kids.printf("]")
