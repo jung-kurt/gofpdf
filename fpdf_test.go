@@ -2828,12 +2828,7 @@ func TestIssue0316(t *testing.T) {
 	err := pdf.OutputFileAndClose(fileStr)
 	example.Summary(err, fileStr)
 	pdf.AddPage()
-	if len(fontBytes) != len(ofontBytes) {
-		t.Fatal("Font data length changed during pdf generation")
-	}
-	for i, v := range fontBytes {
-		if v != ofontBytes[i] {
-			t.Fatal("Font data changed during pdf generation")
-		}
+	if !bytes.Equal(fontBytes, ofontBytes) {
+		t.Fatal("Font data changed during pdf generation")
 	}
 }
