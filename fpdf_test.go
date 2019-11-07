@@ -2815,7 +2815,7 @@ func ExampleFpdf_SetTextRenderingMode() {
 }
 
 // TestIssue0316 addresses issue 316 in which AddUTF8FromBytes modifies its argument
-// utf8bytes resulting in a panic if you generate two PDFs wih the "same" font bytes.
+// utf8bytes resulting in a panic if you generate two PDFs with the "same" font bytes.
 func TestIssue0316(t *testing.T) {
 	pdf := gofpdf.New(gofpdf.OrientationPortrait, "mm", "A4", "")
 	pdf.AddPage()
