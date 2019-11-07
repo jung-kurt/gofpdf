@@ -94,6 +94,8 @@ func fpdfNew(orientationStr, unitStr, sizeStr, fontDirStr string, size SizeType)
 	f.pageLinks = append(f.pageLinks, make([]linkType, 0, 0)) // pageLinks[0] is unused (1-based)
 	f.links = make([]intLinkType, 0, 8)
 	f.links = append(f.links, intLinkType{}) // links[0] is unused (1-based)
+	f.pageAttachments = make([][]annotationAttach, 0, 8)
+	f.pageAttachments = append(f.pageAttachments, []annotationAttach{}) //
 	f.aliasMap = make(map[string]string)
 	f.inHeader = false
 	f.inFooter = false
@@ -3493,6 +3495,7 @@ func (f *Fpdf) beginpage(orientationStr string, size SizeType) {
 	}
 	f.pages = append(f.pages, bytes.NewBufferString(""))
 	f.pageLinks = append(f.pageLinks, make([]linkType, 0, 0))
+	f.pageAttachments = append(f.pageAttachments, []annotationAttach{})
 	f.state = 2
 	f.x = f.lMargin
 	f.y = f.tMargin
@@ -3852,9 +3855,11 @@ func (f *Fpdf) putpages() {
 		wPt = f.defPageSize.Ht * f.k
 		hPt = f.defPageSize.Wd * f.k
 	}
+	pagesObjectNumbers := make([]int, nb+1) // 1-based
 	for n := 1; n <= nb; n++ {
 		// Page
 		f.newobj()
+		pagesObjectNumbers[n] = f.n // save for /Kids
 		f.out("<</Type /Page")
 		f.out("/Parent 1 0 R")
 		pageSize, ok = f.pageSizes[n]
@@ -3866,7 +3871,7 @@ func (f *Fpdf) putpages() {
 		}
 		f.out("/Resources 2 0 R")
 		// Links
-		if len(f.pageLinks[n]) > 0 {
+		if len(f.pageLinks[n])+len(f.pageAttachments[n]) > 0 {
 			var annots fmtBuffer
 			annots.printf("/Annots [")
 			for _, pl := range f.pageLinks[n] {
@@ -3888,6 +3893,7 @@ func (f *Fpdf) putpages() {
 					annots.printf("/Dest [%d 0 R /XYZ 0 %.2f null]>>", 1+2*l.page, h-l.y*f.k)
 				}
 			}
+			f.putAttachmentAnnotationLinks(&annots, n)
 			annots.printf("]")
 			f.out(annots.String())
 		}
@@ -3915,7 +3921,7 @@ func (f *Fpdf) putpages() {
 	var kids fmtBuffer
 	kids.printf("/Kids [")
 	for i := 0; i < nb; i++ {
-		kids.printf("%d 0 R ", 3+2*i)
+		kids.printf("%d 0 R ", pagesObjectNumbers[i])
 	}
 	kids.printf("]")
 	f.out(kids.String())
@@ -4635,10 +4641,17 @@ func (f *Fpdf) putcatalog() {
 	}
 	// Layers
 	f.layerPutCatalog()
+	// Name dictionnary :
+	//	-> Javascript
+	//	-> Embedded files
+	f.out("/Names <<")
 	// JavaScript
 	if f.javascript != nil {
-		f.outf("/Names <</JavaScript %d 0 R>>", f.nJs)
+		f.outf("/JavaScript %d 0 R", f.nJs)
 	}
+	// Embedded files
+	f.outf("/EmbeddedFiles %s", f.getEmbeddedFiles())
+	f.out(">>")
 }
 
 func (f *Fpdf) putheader() {
@@ -4727,6 +4740,9 @@ func (f *Fpdf) enddoc() {
 	}
 	f.layerEndDoc()
 	f.putheader()
+	// Embeded files
+	f.putAttachments()
+	f.putAnnotationsAttachments()
 	f.putpages()
 	f.putresources()
 	if f.err != nil {
