@@ -50,19 +50,12 @@ func (f *Fpdf) writeCompressedFileObject(content []byte) {
 
 // Embed includes the content of `a`,
 // and update its internal reference.
-// You only need to call `Embed` explicitly
-// if you want to put multiple links towards the same content, using AddAttachmentAnnotation().
-// To avoid useless copies in the resulting pdf, call `Embded` once.
-// After the call, `a` can now be used in several annotations
-// without duplicating its content .
-func (a *Attachment) Embed(f *Fpdf) {
+func (f *Fpdf) embed(a *Attachment) {
 	if a.objectNumber != 0 { // already embeded (objectNumber start at 2)
 		return
 	}
 	oldState := f.state
-	if f.state == 2 { // page mode
-		f.state = 1 // we write file content in the main buffer
-	}
+	f.state = 1 // we write file content in the main buffer
 	f.writeCompressedFileObject(a.Content)
 	streamId := f.n
 	f.newobj()
@@ -86,7 +79,7 @@ func (f *Fpdf) SetAttachments(as []Attachment) {
 // for later use by getEmbeddedFiles()
 func (f *Fpdf) putAttachments() {
 	for i, a := range f.attachments {
-		a.Embed(f)
+		f.embed(&a)
 		f.attachments[i] = a
 	}
 }
@@ -104,7 +97,7 @@ func (f Fpdf) getEmbeddedFiles() string {
 // ---------------------------------- Annotations ----------------------------------
 
 type annotationAttach struct {
-	Attachment
+	*Attachment
 
 	x, y, w, h float64 // fpdf coordinates (y diff and scaling done)
 }
@@ -113,8 +106,13 @@ type annotationAttach struct {
 // by `x`, `y`, `w`, `h`. This link points towards the content defined in `a`, which is embedded
 // in the document.
 // No drawing is done.
-// See Attachment.Embed() to avoid unwanted data duplication.
-func (f *Fpdf) AddAttachmentAnnotation(a Attachment, x, y, w, h float64) {
+// Requiring a pointer to an Attachment avoids useless copies in the resulting pdf:
+// attachment pointing to the same data will have their content only be included once,
+// and be shared amongst all links.
+func (f *Fpdf) AddAttachmentAnnotation(a *Attachment, x, y, w, h float64) {
+	if a == nil {
+		return
+	}
 	f.pageAttachments[f.page] = append(f.pageAttachments[f.page], annotationAttach{
 		Attachment: a,
 		x:          x * f.k, y: f.hPt - y*f.k, w: w * f.k, h: h * f.k,
@@ -125,10 +123,14 @@ func (f *Fpdf) AddAttachmentAnnotation(a Attachment, x, y, w, h float64) {
 // for later use by putAttachmentAnnotationLinks(), which is
 // called for each page.
 func (f *Fpdf) putAnnotationsAttachments() {
+	// avoid duplication
+	m := map[*Attachment]bool{}
 	for _, l := range f.pageAttachments {
-		for i, an := range l {
-			an.Attachment.Embed(f)
-			l[i] = an
+		for _, an := range l {
+			if m[an.Attachment] { // already embedded
+				continue
+			}
+			f.embed(an.Attachment)
 		}
 	}
 }
@@ -145,6 +147,6 @@ func (f *Fpdf) putAttachmentAnnotationLinks(out *fmtBuffer, page int) {
 		out.printf("/Contents %s ", f.textstring(utf8toutf16(an.Description)))
 		out.printf("/T %s ", f.textstring(utf8toutf16(an.Filename)))
 		out.printf("/AP << /N %s>>", as)
-		out.printf("/FS %d 0 R >>", an.objectNumber)
+		out.printf("/FS %d 0 R >>\n", an.objectNumber)
 	}
 }

@@ -2869,16 +2869,16 @@ func ExampleFpdf_AddAttachmentAnnotation() {
 		pdf.SetError(err)
 	}
 	a := gofpdf.Attachment{Content: file, Filename: "grid.go", Description: "Some amazing code !"}
-	a.Embed(pdf) // copy data once for all
+
 	pdf.SetXY(5, 10)
 	pdf.Rect(2, 10, 50, 15, "D")
+	pdf.AddAttachmentAnnotation(&a, 2, 10, 50, 15)
 	pdf.Cell(50, 15, "A first link")
-	pdf.AddAttachmentAnnotation(a, 2, 10, 50, 15)
 
 	pdf.SetXY(5, 80)
 	pdf.Rect(2, 80, 50, 15, "D")
+	pdf.AddAttachmentAnnotation(&a, 2, 80, 50, 15)
 	pdf.Cell(50, 15, "A second link (no copy)")
-	pdf.AddAttachmentAnnotation(a, 2, 80, 50, 15)
 
 	fileStr := example.Filename("Fpdf_FileAnnotations")
 	err = pdf.OutputFileAndClose(fileStr)
