@@ -105,7 +105,8 @@ type annotationAttach struct {
 // AddAttachmentAnnotation puts a link on the current page, on the rectangle defined
 // by `x`, `y`, `w`, `h`. This link points towards the content defined in `a`, which is embedded
 // in the document.
-// No drawing is done.
+// Note than no drawing is done by this method : a method like `Cell()` or `Rect()`
+// should be called to indicate the reader there is a link here.
 // Requiring a pointer to an Attachment avoids useless copies in the resulting pdf:
 // attachment pointing to the same data will have their content only be included once,
 // and be shared amongst all links.
