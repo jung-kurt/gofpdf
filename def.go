@@ -551,7 +551,7 @@ type Fpdf struct {
 	aliasMap         map[string]string          // map of alias->replacement
 	pageLinks        [][]linkType               // pageLinks[page][link], both 1-based
 	links            []intLinkType              // array of internal links
-	attachments      []Attachment               // slice of content to embed globaly
+	attachments      []Attachment               // slice of content to embed globally
 	pageAttachments  [][]annotationAttach       // 1-based array of annotation for file attachments (per page)
 	outlines         []outlineType              // array of outlines
 	outlineRoot      int                        // root of outlines

@@ -4641,7 +4641,7 @@ func (f *Fpdf) putcatalog() {
 	}
 	// Layers
 	f.layerPutCatalog()
-	// Name dictionnary :
+	// Name dictionary :
 	//	-> Javascript
 	//	-> Embedded files
 	f.out("/Names <<")
@@ -4740,7 +4740,7 @@ func (f *Fpdf) enddoc() {
 	}
 	f.layerEndDoc()
 	f.putheader()
-	// Embeded files
+	// Embedded files
 	f.putAttachments()
 	f.putAnnotationsAttachments()
 	f.putpages()

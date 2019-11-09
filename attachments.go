@@ -34,8 +34,8 @@ func checksum(data []byte) string {
 	return hex.EncodeToString(sl)
 }
 
-// Writes a compressed file like object as ``/EmbeddedFile``.
-// Compressing is done with deflate. Includes length, compressed length and MD5 checksum.
+// Writes a compressed file like object as ``/EmbeddedFile``. Compressing is
+// done with deflate. Includes length, compressed length and MD5 checksum.
 func (f *Fpdf) writeCompressedFileObject(content []byte) {
 	lenUncompressed := len(content)
 	sum := checksum(content)
@@ -48,29 +48,31 @@ func (f *Fpdf) writeCompressedFileObject(content []byte) {
 	f.out("endobj")
 }
 
-// Embed includes the content of `a`,
-// and update its internal reference.
+// Embed includes the content of `a`, and update its internal reference.
 func (f *Fpdf) embed(a *Attachment) {
-	if a.objectNumber != 0 { // already embeded (objectNumber start at 2)
+	if a.objectNumber != 0 { // already embedded (objectNumber start at 2)
 		return
 	}
 	oldState := f.state
 	f.state = 1 // we write file content in the main buffer
 	f.writeCompressedFileObject(a.Content)
-	streamId := f.n
+	streamID := f.n
 	f.newobj()
 	f.outf("<< /Type /Filespec /F () /UF %s /EF << /F %d 0 R >> /Desc %s\n>>",
 		f.textstring(utf8toutf16(a.Filename)),
-		streamId,
+		streamID,
 		f.textstring(utf8toutf16(a.Description)))
 	f.out("endobj")
 	a.objectNumber = f.n
 	f.state = oldState
 }
 
-// Write attachments as embedded files (document attachment).
-// These attachments are global, see AddAttachmentAnnotation() for a link anchored in a page.
-// Note that only the last call of SetAttachments is usefull, previous calls are discarded.
+// SetAttachments writes attachments as embedded files (document attachment).
+// These attachments are global, see AddAttachmentAnnotation() for a link
+// anchored in a page. Note that only the last call of SetAttachments is
+// useful, previous calls are discarded. Be aware that not all PDF readers
+// support document attachments. See the SetAttachment example for a
+// demonstration of this method.
 func (f *Fpdf) SetAttachments(as []Attachment) {
 	f.attachments = as
 }
@@ -102,14 +104,16 @@ type annotationAttach struct {
 	x, y, w, h float64 // fpdf coordinates (y diff and scaling done)
 }
 
-// AddAttachmentAnnotation puts a link on the current page, on the rectangle defined
-// by `x`, `y`, `w`, `h`. This link points towards the content defined in `a`, which is embedded
-// in the document.
-// Note than no drawing is done by this method : a method like `Cell()` or `Rect()`
-// should be called to indicate the reader there is a link here.
-// Requiring a pointer to an Attachment avoids useless copies in the resulting pdf:
-// attachment pointing to the same data will have their content only be included once,
-// and be shared amongst all links.
+// AddAttachmentAnnotation puts a link on the current page, on the rectangle
+// defined by `x`, `y`, `w`, `h`. This link points towards the content defined
+// in `a`, which is embedded in the document. Note than no drawing is done by
+// this method : a method like `Cell()` or `Rect()` should be called to
+// indicate to the reader that there is a link here. Requiring a pointer to an
+// Attachment avoids useless copies in the resulting pdf: attachment pointing
+// to the same data will have their content only be included once, and be
+// shared amongst all links. Be aware that not all PDF readers support
+// annotated attachments. See the AddAttachmentAnnotation example for a
+// demonstration of this method.
 func (f *Fpdf) AddAttachmentAnnotation(a *Attachment, x, y, w, h float64) {
 	if a == nil {
 		return
