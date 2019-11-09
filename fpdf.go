@@ -2584,6 +2584,15 @@ func (f *Fpdf) SplitLines(txt []byte, w float64) [][]byte {
 // the right margin.
 //
 // h indicates the line height of each cell in the unit of measure specified in New().
+//
+// Note: this method has a known bug that treats UTF-8 fonts differently than
+// non-UTF-8 fonts. With UTF-8 fonts, all trailing newlines in txtStr are
+// removed. With a non-UTF-8 font, if txtStr has one or more trailing newlines,
+// only the last is removed. In the next major module version, the UTF-8 logic
+// will be changed to match the non-UTF-8 logic. To prepare for that change,
+// applications that use UTF-8 fonts and depend on having all trailing newlines
+// removed should call strings.TrimRight(txtStr, "\r\n") before calling this
+// method.
 func (f *Fpdf) MultiCell(w, h float64, txtStr, borderStr, alignStr string, fill bool) {
 	if f.err != nil {
 		return
@@ -2611,7 +2620,15 @@ func (f *Fpdf) MultiCell(w, h float64, txtStr, borderStr, alignStr string, fill 
 	} else {
 		nb = len(s)
 		bytes2 := []byte(s)
-		for nb > 0 && bytes2[nb-1] == '\n' {
+
+		// for nb > 0 && bytes2[nb-1] == '\n' {
+
+		// Prior to August 2019, if s ended with a newline, this code stripped it.
+		// After that date, to be compatible with the UTF-8 code above, *all*
+		// trailing newlines were removed. Because this regression caused at least
+		// one application to break (see issue #333), the original behavior has been
+		// reinstated with a caveat included in the documentation.
+		if nb > 0 && bytes2[nb-1] == '\n' {
 			nb--
 		}
 		s = s[0:nb]
