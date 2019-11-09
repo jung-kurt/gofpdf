@@ -2832,3 +2832,57 @@ func TestIssue0316(t *testing.T) {
 		t.Fatal("Font data changed during pdf generation")
 	}
 }
+
+// ExampleFpdf_SetTextRenderingMode demonstrates embedding files in PDFs,
+// at the top-level.
+func ExampleFpdf_SetAttachments() {
+	pdf := gofpdf.New("P", "mm", "A4", "")
+
+	// Global attachments
+	file, err := ioutil.ReadFile("grid.go")
+	if err != nil {
+		pdf.SetError(err)
+	}
+	a1 := gofpdf.Attachment{Content: file, Filename: "grid.go"}
+	file, err = ioutil.ReadFile("LICENSE")
+	if err != nil {
+		pdf.SetError(err)
+	}
+	a2 := gofpdf.Attachment{Content: file, Filename: "License"}
+	pdf.SetAttachments([]gofpdf.Attachment{a1, a2})
+
+	fileStr := example.Filename("Fpdf_EmbeddedFiles")
+	err = pdf.OutputFileAndClose(fileStr)
+	example.Summary(err, fileStr)
+	// Output:
+	// Successfully generated pdf/Fpdf_EmbeddedFiles.pdf
+}
+
+func ExampleFpdf_AddAttachmentAnnotation() {
+	pdf := gofpdf.New("P", "mm", "A4", "")
+	pdf.SetFont("Arial", "", 12)
+	pdf.AddPage()
+
+	// Per page attachment
+	file, err := ioutil.ReadFile("grid.go")
+	if err != nil {
+		pdf.SetError(err)
+	}
+	a := gofpdf.Attachment{Content: file, Filename: "grid.go", Description: "Some amazing code !"}
+
+	pdf.SetXY(5, 10)
+	pdf.Rect(2, 10, 50, 15, "D")
+	pdf.AddAttachmentAnnotation(&a, 2, 10, 50, 15)
+	pdf.Cell(50, 15, "A first link")
+
+	pdf.SetXY(5, 80)
+	pdf.Rect(2, 80, 50, 15, "D")
+	pdf.AddAttachmentAnnotation(&a, 2, 80, 50, 15)
+	pdf.Cell(50, 15, "A second link (no copy)")
+
+	fileStr := example.Filename("Fpdf_FileAnnotations")
+	err = pdf.OutputFileAndClose(fileStr)
+	example.Summary(err, fileStr)
+	// Output:
+	// Successfully generated pdf/Fpdf_FileAnnotations.pdf
+}
