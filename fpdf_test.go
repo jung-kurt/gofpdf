@@ -2834,6 +2834,25 @@ func TestIssue0316(t *testing.T) {
 	}
 }
 
+func TestMultiCellUnsupportedChar(t *testing.T) {
+	pdf := gofpdf.New("P", "mm", "A4", "")
+	pdf.AddPage()
+	fontBytes, _ := ioutil.ReadFile(example.FontFile("DejaVuSansCondensed.ttf"))
+	pdf.AddUTF8FontFromBytes("dejavu", "", fontBytes)
+	pdf.SetFont("dejavu", "", 16)
+
+	defer func() {
+		if r := recover(); r != nil {
+			t.Errorf("unexpected panic: %v", r)
+		}
+	}()
+
+	pdf.MultiCell(0, 5, "😀", "", "", false)
+
+	fileStr := example.Filename("TestMultiCellUnsupportedChar")
+	pdf.OutputFileAndClose(fileStr)
+}
+
 // ExampleFpdf_SetTextRenderingMode demonstrates embedding files in PDFs,
 // at the top-level.
 func ExampleFpdf_SetAttachments() {
