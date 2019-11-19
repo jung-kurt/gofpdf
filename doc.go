@@ -56,6 +56,24 @@ Also, support is provided to automatically translate UTF-8 runes to code
 page encodings for languages that have fewer than 256 glyphs.
 
 
+We Are Closed
+
+This repository will not be maintained, at least for some unknown
+duration. But it is hoped that gofpdf has a bright future in the open
+source world. Due to Go’s promise of compatibility, gofpdf should
+continue to function without modification for a longer time than would
+be the case with many other languages.
+
+Forks should be based on the last viable commit. Tools such as
+active-forks can be used to select a fork that looks promising for your
+needs. If a particular fork looks like it has taken the lead in
+attracting followers, this README will be updated to point people in
+that direction.
+
+The efforts of all contributors to this project have been deeply
+appreciated. Best wishes to all of you.
+
+
 Installation
 
 To install the package on your system, run
@@ -259,12 +277,14 @@ spacing. Artem Korotkiy added support of UTF-8 fonts. Dave Barnes added
 support for imported objects and templates. Brigham Thompson added
 support for rounded rectangles. Joe Westcott added underline
 functionality and optimized image storage. Benoit KUGLER contributed
-support for rectangles with corners of unequal radius, and for file
-attachments and annotations.
+support for rectangles with corners of unequal radius, modification
+times, and for file attachments and annotations.
 
 
 Roadmap
 
+
+-   Remove all legacy code page font support; use UTF-8 exclusively
 
 -   Improve test coverage as reported by the coverage tool.
 */
