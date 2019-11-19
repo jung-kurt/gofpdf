@@ -34,6 +34,7 @@ func init() {
 	gofpdf.SetDefaultCompression(false)
 	gofpdf.SetDefaultCatalogSort(true)
 	gofpdf.SetDefaultCreationDate(time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC))
+	gofpdf.SetDefaultModificationDate(time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC))
 }
 
 // setRoot assigns the relative path to the gofpdfDir directory based on current working

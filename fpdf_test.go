@@ -2377,6 +2377,7 @@ func ExampleFpdf_SetPageBox() {
 	// ~ pdfinfo -box pdf/Fpdf_PageBox.pdf
 	// Producer:       FPDF 1.7
 	// CreationDate:   Sat Jan  1 00:00:00 2000
+	// ModDate:   	   Sat Jan  1 00:00:00 2000
 	// Tagged:         no
 	// Form:           none
 	// Pages:          1
@@ -2885,4 +2886,20 @@ func ExampleFpdf_AddAttachmentAnnotation() {
 	example.Summary(err, fileStr)
 	// Output:
 	// Successfully generated pdf/Fpdf_FileAnnotations.pdf
+}
+
+func ExampleFpdf_SetModificationDate() {
+	// pdfinfo (from http://www.xpdfreader.com) reports the following for this example :
+	// ~ pdfinfo -box pdf/Fpdf_PageBox.pdf
+	// Producer:       FPDF 1.7
+	// CreationDate:   Sat Jan  1 00:00:00 2000
+	// ModDate:        Sun Jan  2 10:22:30 2000
+	pdf := gofpdf.New("", "", "", "")
+	pdf.AddPage()
+	pdf.SetModificationDate(time.Date(2000, 1, 2, 10, 22, 30, 0, time.UTC))
+	fileStr := example.Filename("Fpdf_SetModificationDate")
+	err := pdf.OutputFileAndClose(fileStr)
+	example.Summary(err, fileStr)
+	// Output:
+	// Successfully generated pdf/Fpdf_SetModificationDate.pdf
 }
