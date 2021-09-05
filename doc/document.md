@@ -2,7 +2,6 @@
 
 [![No Maintenance Intended][badge-no-maintain]][unmaintained]
 [![MIT licensed][badge-mit]][license]
-[![Report][badge-report]][report]
 [![GoDoc][badge-doc]][godoc]
 
 ![][logo]
@@ -261,8 +260,6 @@ for file attachments and annotations.
 [badge-github]: https://img.shields.io/badge/project-Git_Hub-blue.svg
 [badge-mit]: https://img.shields.io/badge/license-MIT-blue.svg
 [badge-no-maintain]: http://unmaintained.tech/badge.svg
-[badge-report]: https://goreportcard.com/badge/github.com/jung-kurt/gofpdf
-[badge-status]: https://travis-ci.org/jung-kurt/gofpdf.svg?branch=master
 [coverage]: https://blog.golang.org/cover
 [dfont]: http://dejavu-fonts.org/
 [draw2d-site]: https://github.com/llgcode/draw2d
@@ -271,7 +268,7 @@ for file attachments and annotations.
 [fpdf-test]: https://github.com/jung-kurt/gofpdf/blob/master/fpdf_test.go
 [gfont]: https://fonts.google.com/
 [github]: https://github.com/jung-kurt/gofpdf
-[godoc]: https://godoc.org/github.com/jung-kurt/gofpdf
+[godoc]: https://pkg.go.dev/github.com/jung-kurt/gofpdf
 [gofpdf-fork]: https://techgaun.github.io/active-forks/index.html#jung-kurt/gofpdf
 [issue109]: https://github.com/jung-kurt/gofpdf/issues/109
 [jung]: https://github.com/jung-kurt/
@@ -281,8 +278,6 @@ for file attachments and annotations.
 [logo]: https://github.com/jung-kurt/gofpdf/raw/master/image/logo_gofpdf.jpg?raw=true
 [noto]: https://github.com/jsntn/webfonts/blob/master/NotoSansSC-Regular.ttf
 [pr]: https://help.github.com/articles/using-pull-requests/
-[report]: https://goreportcard.com/report/github.com/jung-kurt/gofpdf
-[status]: https://travis-ci.org/jung-kurt/gofpdf
 [test]: https://github.com/jung-kurt/gofpdf/blob/master/fpdf_test.go
 [unmaintained]: http://unmaintained.tech/
 [vet]: https://golang.org/cmd/vet/

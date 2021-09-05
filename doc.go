@@ -2,7 +2,6 @@
 Package gofpdf implements a PDF document generator with high level
 support for text, drawing and images.
 
-
 Features
 
 
@@ -55,7 +54,6 @@ example, NotoSansSC for simplified Chinese) can be used.
 Also, support is provided to automatically translate UTF-8 runes to code
 page encodings for languages that have fewer than 256 glyphs.
 
-
 We Are Closed
 
 This repository will not be maintained, at least for some unknown
@@ -73,7 +71,6 @@ that direction.
 The efforts of all contributors to this project have been deeply
 appreciated. Best wishes to all of you.
 
-
 Installation
 
 To install the package on your system, run
@@ -83,7 +80,6 @@ To install the package on your system, run
 Later, to receive updates, run
 
     go get -u -v github.com/jung-kurt/gofpdf/...
-
 
 Quick Start
 
@@ -97,7 +93,6 @@ The following Go code generates a simple PDF file.
 
 See the functions in the fpdf_test.go file (shown as examples in this
 documentation) for more advanced PDF examples.
-
 
 Errors
 
@@ -113,7 +108,6 @@ calling the SetError() method or the SetErrorf() method. At any time
 during the life cycle of the Fpdf instance, the error state can be
 determined with a call to Ok() or Err(). The error itself can be
 retrieved with a call to Error().
-
 
 Conversion Notes
 
@@ -134,7 +128,6 @@ based on the type of the arguments that are passed to them; in these
 cases additional methods have been exported to provide similar
 functionality. Font definition files are produced in JSON rather than
 PHP.
-
 
 Example PDFs
 
@@ -163,7 +156,6 @@ timestamps must be the same. To do this, the methods SetCatalogSort()
 and SetCreationDate() need to be called for both files. This is done
 automatically for all examples.
 
-
 Nonstandard Fonts
 
 Nothing special is required to use the standard PDF fonts (courier,
@@ -190,13 +182,11 @@ with the standard fonts, SetFont() to begin using it. Most examples,
 including the package example, demonstrate this method. Good sources of
 free, open-source fonts include Google Fonts and DejaVu Fonts.
 
-
 Related Packages
 
 The draw2d package is a two dimensional vector graphics library that can
 generate output in different forms. It uses gofpdf for its document
 production mode.
-
 
 Contributing Changes
 
@@ -225,12 +215,10 @@ go vet . should not generate any warnings
 
 Pull requests are the preferred means of accepting your changes.
 
-
 License
 
 gofpdf is released under the MIT License. It is copyrighted by Kurt Jung
 and the contributors acknowledged below.
-
 
 Acknowledgments
 
@@ -279,7 +267,6 @@ support for rounded rectangles. Joe Westcott added underline
 functionality and optimized image storage. Benoit KUGLER contributed
 support for rectangles with corners of unequal radius, modification
 times, and for file attachments and annotations.
-
 
 Roadmap
 
