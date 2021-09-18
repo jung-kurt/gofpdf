@@ -275,7 +275,8 @@ for file attachments and annotations.
 [last-commit]: https://github.com/jung-kurt/gofpdf/commit/603f56990463f011cb1dbb64ef7f872c1adc009a
 [license]: https://raw.githubusercontent.com/jung-kurt/gofpdf/master/LICENSE
 [lint]: https://github.com/golang/lint
-[logo]: https://github.com/jung-kurt/gofpdf/raw/master/image/logo_gofpdf.jpg?raw=true
+[logo-old]: https://github.com/jung-kurt/gofpdf/raw/master/image/logo_gofpdf.jpg?raw=true
+[logo]: https://raw.githubusercontent.com/jung-kurt/gofpdf/master/image/logo_gofpdf.jpg
 [noto]: https://github.com/jsntn/webfonts/blob/master/NotoSansSC-Regular.ttf
 [pr]: https://help.github.com/articles/using-pull-requests/
 [test]: https://github.com/jung-kurt/gofpdf/blob/master/fpdf_test.go
