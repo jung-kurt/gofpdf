@@ -2,7 +2,6 @@
 
 [![No Maintenance Intended][badge-no-maintain]][unmaintained]
 [![MIT licensed][badge-mit]][license]
-[![Report][badge-report]][report]
 [![GoDoc][badge-doc]][godoc]
 
 ![][logo]
