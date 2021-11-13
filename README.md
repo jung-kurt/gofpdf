@@ -4,7 +4,7 @@
 Intended](http://unmaintained.tech/badge.svg)](http://unmaintained.tech/)
 [![MIT
 licensed](https://img.shields.io/badge/license-MIT-blue.svg)](https://raw.githubusercontent.com/jung-kurt/gofpdf/master/LICENSE)
-[![GoDoc](https://img.shields.io/badge/godoc-GoFPDF-blue.svg)](https://godoc.org/github.com/jung-kurt/gofpdf)
+[![GoDoc](https://img.shields.io/badge/godoc-GoFPDF-blue.svg)](https://pkg.go.dev/github.com/jung-kurt/gofpdf)
 
 ![](https://github.com/jung-kurt/gofpdf/raw/master/image/logo_gofpdf.jpg?raw=true)
 
